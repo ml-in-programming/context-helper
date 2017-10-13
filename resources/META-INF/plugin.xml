@@ -1,0 +1,38 @@
+<idea-plugin>
+
+  <id>ru.spb.se.contexthelper</id>
+  <name>Context Helper</name>
+  <version>1.0</version>
+  <vendor email="nikitasazanovich@gmail.com">Nikita Sazanovich</vendor>
+
+  <description>
+    Helps Java users to look up help based on the current context.
+  </description>
+
+  <change-notes>
+  </change-notes>
+
+  <idea-version since-build="145.0"/>
+
+  <depends>com.intellij.modules.java</depends>
+
+  <extensions defaultExtensionNs="com.intellij">
+  </extensions>
+
+  <actions>
+    <action id="PrintMethodAstAction"
+            class="ru.spb.se.contexthelper.MethodAstAction"
+            text="Print AST of the method"
+            icon="/icons/binary-tree-icon.png"
+            description="Prints AST of the current method"/>
+
+    <group id="ASTExplorerGroup">
+      <separator/>
+
+      <reference ref="PrintMethodAstAction"/>
+
+      <add-to-group group-id="MainToolBar" relative-to-action="SearchEverywhere" anchor="after"/>
+    </group>
+  </actions>
+
+</idea-plugin>

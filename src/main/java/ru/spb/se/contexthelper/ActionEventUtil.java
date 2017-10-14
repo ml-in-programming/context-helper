@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 
+/** Util methods for extracting IntelliJ API entities from {@link AnActionEvent}. */
 class ActionEventUtil {
 
   static Project getProjectFor(AnActionEvent event) {

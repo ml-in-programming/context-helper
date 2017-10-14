@@ -16,20 +16,28 @@
 
   <depends>com.intellij.modules.java</depends>
 
+  <project-components>
+    <component>
+      <implementation-class>ru.spb.se.contexthelper.component.ContextHelperProjectComponent</implementation-class>
+      <!-- TODO: Implement saving the plugin's state. -->
+      <!--option name="workspace" value="true"/-->
+    </component>
+  </project-components>
+
   <extensions defaultExtensionNs="com.intellij">
   </extensions>
 
   <actions>
-    <action id="PrintMethodAstAction"
-            class="ru.spb.se.contexthelper.MethodAstAction"
-            text="Print AST of the method"
+    <action id="ContextHelpAction"
+            class="ru.spb.se.contexthelper.ContextHelpAction"
+            text="Get help based on the context"
             icon="/icons/binary-tree-icon.png"
-            description="Prints AST of the current method"/>
+            description="Gets help based on the editor's caret"/>
 
-    <group id="ASTExplorerGroup">
+    <group id="ContextHelperGroup">
       <separator/>
 
-      <reference ref="PrintMethodAstAction"/>
+      <reference ref="ContextHelpAction"/>
 
       <add-to-group group-id="MainToolBar" relative-to-action="SearchEverywhere" anchor="after"/>
     </group>

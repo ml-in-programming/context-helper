@@ -10,13 +10,16 @@ import com.intellij.openapi.ui.WindowWrapperBuilder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.source.PsiMethodImpl;
+import com.intellij.ui.components.JBScrollPane;
 import org.jetbrains.annotations.Nullable;
+import ru.spb.se.contexthelper.lookup.StackOverflowClient;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MethodAstAction extends AnAction {
+/** An action for getting help based on the context around editor's caret. */
+public class ContextHelpAction extends AnAction {
 
   @Override
   public void actionPerformed(AnActionEvent event) {
@@ -44,10 +47,9 @@ public class MethodAstAction extends AnAction {
     List<PsiElement> psiElements = new ArrayList<>();
     traversePsiElement(methodPsiElement, psiElements);
     StackOverflowClient stackOverflowClient = new StackOverflowClient();
-    JComponent jComponent =
-        stackOverflowClient.jComponentForQuery(
-            ((PsiMethodImpl) psiElements.get(0)).getName());
-    showDialogWithComponent(project, jComponent);
+    String queryResponse =
+        stackOverflowClient.processQuery(((PsiMethodImpl) psiElements.get(0)).getName());
+    showDialogWithComponent(project, jComponentForText(queryResponse));
   }
 
   /** Finds a PSI element that represents a method by checking element's parents. */
@@ -84,11 +86,18 @@ public class MethodAstAction extends AnAction {
         Messages.getInformationIcon());
   }
 
+  private static JComponent jComponentForText(String text) {
+    JTextPane textPane = new JTextPane();
+    textPane.setText(text);
+    textPane.setCaretPosition(0);
+    return new JBScrollPane(textPane);
+  }
+
   private static void showDialogWithComponent(Project project, JComponent component) {
     WindowWrapper wrapperDialog =
         new WindowWrapperBuilder(WindowWrapper.Mode.MODAL, component)
             .setProject(project)
-            .setTitle("AST of the current method")
+            .setTitle("Relevant StackOverflow results")
             .build();
     wrapperDialog.show();
   }

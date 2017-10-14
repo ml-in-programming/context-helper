@@ -12,6 +12,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.source.PsiMethodImpl;
 import com.intellij.ui.components.JBScrollPane;
 import org.jetbrains.annotations.Nullable;
+import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.lookup.StackOverflowClient;
 
 import javax.swing.*;
@@ -49,6 +50,8 @@ public class ContextHelpAction extends AnAction {
     StackOverflowClient stackOverflowClient = new StackOverflowClient();
     String queryResponse =
         stackOverflowClient.processQuery(((PsiMethodImpl) psiElements.get(0)).getName());
+    ContextHelperProjectComponent helperProjectComponent =
+        ContextHelperProjectComponent.getInstance(project);
     showDialogWithComponent(project, jComponentForText(queryResponse));
   }
 

@@ -37,25 +37,42 @@ public class ContextHelperProjectComponent implements ProjectComponent {
 
   @Override
   public void projectOpened() {
+    initToolWindow();
+  }
+
+  private void initToolWindow() {
     viewerPanel = new ContextHelperPanel(this);
-    ToolWindow toolWindow = getToolWindow();
+    ToolWindow toolWindow = getOrRegisterToolWindow();
     toolWindow.setIcon(IconLoader.getIcon(ICON_PATH_TOOL_WINDOW));
   }
 
-  private ToolWindow getToolWindow() {
+  private ToolWindow getOrRegisterToolWindow() {
     ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-    ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(ID_TOOL_WINDOW);
-    if (toolWindow == null) {
-      toolWindow =
+    if (isToolWindowRegistered()) {
+      return ToolWindowManager.getInstance(project).getToolWindow(ID_TOOL_WINDOW);
+    } else {
+      ToolWindow toolWindow =
           toolWindowManager.registerToolWindow(ID_TOOL_WINDOW, true, ToolWindowAnchor.RIGHT);
       Content content = ContentFactory.SERVICE.getInstance().createContent(viewerPanel, "", false);
       toolWindow.getContentManager().addContent(content);
+      return toolWindow;
     }
-    return toolWindow;
+  }
+
+  private boolean isToolWindowRegistered() {
+    return ToolWindowManager.getInstance(project).getToolWindow(ID_TOOL_WINDOW) != null;
   }
 
   @Override
   public void projectClosed() {
+    disposeToolWindow();
+  }
+
+  private void disposeToolWindow() {
+    viewerPanel = null;
+    if (isToolWindowRegistered()) {
+      ToolWindowManager.getInstance(project).unregisterToolWindow(ID_TOOL_WINDOW);
+    }
   }
 
   @Override
@@ -70,5 +87,9 @@ public class ContextHelperProjectComponent implements ProjectComponent {
   @Override
   public String getComponentName() {
     return PLUGIN_NAME + "." + COMPONENT_NAME;
+  }
+
+  public static ContextHelperProjectComponent getInstance(Project project) {
+    return project.getComponent(ContextHelperProjectComponent.class);
   }
 }

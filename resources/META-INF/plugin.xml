@@ -19,7 +19,7 @@
   <project-components>
     <component>
       <implementation-class>ru.spb.se.contexthelper.component.ContextHelperProjectComponent</implementation-class>
-      <!-- TODO: Implement saving the plugin's state. -->
+      <!-- TODO(niksaz): Implement saving the plugin's state. -->
       <!--option name="workspace" value="true"/-->
     </component>
   </project-components>

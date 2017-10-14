@@ -5,18 +5,15 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.ui.WindowWrapper;
-import com.intellij.openapi.ui.WindowWrapperBuilder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.source.PsiMethodImpl;
-import com.intellij.ui.components.JBScrollPane;
 import org.jetbrains.annotations.Nullable;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
-import ru.spb.se.contexthelper.lookup.StackOverflowClient;
+import ru.spb.se.contexthelper.lookup.StackExchangeClient;
+import ru.spb.se.contexthelper.lookup.StackExchangeQueryResults;
 import ru.spb.se.contexthelper.ui.ContextHelperPanel;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,12 +46,12 @@ public class ContextHelpAction extends AnAction {
     List<PsiElement> psiElements = new ArrayList<>();
     traversePsiElement(methodPsiElement, psiElements);
     PsiMethodImpl parentMethod = (PsiMethodImpl) psiElements.get(0);
-    StackOverflowClient stackOverflowClient = new StackOverflowClient();
-    String queryResponse = stackOverflowClient.processQuery(parentMethod.getName());
+    StackExchangeClient stackExchangeClient = new StackExchangeClient();
+    StackExchangeQueryResults queryResults =
+        stackExchangeClient.processJavaQuery(parentMethod.getName());
     ContextHelperPanel contextHelperPanel =
         ContextHelperProjectComponent.getInstance(project).getViewerPanel();
-    contextHelperPanel.updatePanelForRootElement(parentMethod);
-    showDialogWithComponent(project, jComponentForText(queryResponse));
+    contextHelperPanel.updatePanelWithQueryResults(queryResults);
   }
 
   /** Finds a PSI element that represents a method by checking element's parents. */
@@ -89,21 +86,5 @@ public class ContextHelpAction extends AnAction {
         message,
         "Information",
         Messages.getInformationIcon());
-  }
-
-  private static JComponent jComponentForText(String text) {
-    JTextPane textPane = new JTextPane();
-    textPane.setText(text);
-    textPane.setCaretPosition(0);
-    return new JBScrollPane(textPane);
-  }
-
-  private static void showDialogWithComponent(Project project, JComponent component) {
-    WindowWrapper wrapperDialog =
-        new WindowWrapperBuilder(WindowWrapper.Mode.MODAL, component)
-            .setProject(project)
-            .setTitle("Relevant StackOverflow results")
-            .build();
-    wrapperDialog.show();
   }
 }

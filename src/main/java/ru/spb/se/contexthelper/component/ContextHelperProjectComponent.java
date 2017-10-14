@@ -31,10 +31,6 @@ public class ContextHelperProjectComponent implements ProjectComponent {
     this.project = project;
   }
 
-  public Project getProject() {
-    return project;
-  }
-
   public ContextHelperPanel getViewerPanel() {
     return viewerPanel;
   }
@@ -45,7 +41,7 @@ public class ContextHelperProjectComponent implements ProjectComponent {
   }
 
   private void initToolWindow() {
-    viewerPanel = new ContextHelperPanel(this);
+    viewerPanel = new ContextHelperPanel();
     ToolWindow toolWindow = getOrRegisterToolWindow();
     toolWindow.setIcon(IconLoader.getIcon(ICON_PATH_TOOL_WINDOW));
   }

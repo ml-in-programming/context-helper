@@ -1,45 +1,47 @@
 package ru.spb.se.contexthelper.model;
 
-import com.intellij.psi.PsiElement;
-import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
+import com.google.code.stackexchange.schema.Question;
 
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+import java.util.List;
 
 /** {@link TreeModel} for ContextHelper's side panel. */
 public class ContextHelperTreeModel implements TreeModel {
 
-  private final ContextHelperProjectComponent projectComponent;
+  private final List<Question> questions;
 
-  private PsiElement rootPsiElement;
-
-  public ContextHelperTreeModel(ContextHelperProjectComponent projectComponent) {
-    this.projectComponent = projectComponent;
-  }
-
-  public void setRootPsiElement(PsiElement rootPsiElement) {
-    this.rootPsiElement = rootPsiElement;
+  public ContextHelperTreeModel(List<Question> questions) {
+    this.questions = questions;
   }
 
   @Override
   public Object getRoot() {
-    return rootPsiElement;
+    return questions;
   }
 
   @Override
   public Object getChild(Object parent, int index) {
-    return null;
+    if (parent instanceof List) {
+      return questions.get(index);
+    } else {
+      return null;
+    }
   }
 
   @Override
   public int getChildCount(Object parent) {
-    return 0;
+    if (parent instanceof List) {
+      return questions.size();
+    } else {
+      return 0;
+    }
   }
 
   @Override
   public boolean isLeaf(Object node) {
-    return false;
+    return !(node instanceof List);
   }
 
   @Override

@@ -18,7 +18,7 @@ public class ContextHelperTreeCellRender implements TreeCellRenderer {
     JLabel label = new JLabel();
     if (value instanceof Question) {
       Question question = (Question) value;
-      label.setText(question.getTitle());
+      label.setText("<html>" + question.getTitle() + "</html>");
       label.setIcon(IconLoader.getIcon(QUESTION_ICON_PATH));
     }
     return label;

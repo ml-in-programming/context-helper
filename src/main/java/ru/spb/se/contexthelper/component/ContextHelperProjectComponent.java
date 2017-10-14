@@ -41,7 +41,7 @@ public class ContextHelperProjectComponent implements ProjectComponent {
   }
 
   private void initToolWindow() {
-    viewerPanel = new ContextHelperPanel();
+    viewerPanel = new ContextHelperPanel(project);
     ToolWindow toolWindow = getOrRegisterToolWindow();
     toolWindow.setIcon(IconLoader.getIcon(ICON_PATH_TOOL_WINDOW));
   }

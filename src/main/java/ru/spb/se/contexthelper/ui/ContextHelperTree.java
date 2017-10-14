@@ -9,6 +9,7 @@ class ContextHelperTree extends JTree {
 
   ContextHelperTree(ContextHelperTreeModel treeModel) {
     super(treeModel);
+    setCellRenderer(new ContextHelperTreeCellRender());
     setRootVisible(false);
   }
 }

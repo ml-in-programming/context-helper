@@ -21,7 +21,7 @@ public class ContextHelperProjectComponent implements ProjectComponent {
   /** Last part of the name for {@link NamedComponent}. */
   private static final String COMPONENT_NAME = "ContextHelperProjectComponent";
 
-  private static final String ICON_PATH_TOOL_WINDOW = "/icons/binary-tree-icon.png";
+  private static final String ICON_PATH_TOOL_WINDOW = "/icons/se-icon.png";
 
   private final Project project;
 

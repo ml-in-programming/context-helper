@@ -31,7 +31,7 @@
     <action id="ContextHelpAction"
             class="ru.spb.se.contexthelper.ContextHelpAction"
             text="Get help based on the context"
-            icon="/icons/binary-tree-icon.png"
+            icon="/icons/se-icon.png"
             description="Gets help based on the editor's caret"/>
 
     <group id="ContextHelperGroup">

@@ -17,6 +17,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
   private final Project project;
   private final JTextField queryJTextField;
   private final ContextHelperTree tree;
+  private final JBScrollPane treeScrollPane;
   private ContextHelperTreeModel treeModel;
 
   public ContextHelperPanel(Project project) {
@@ -24,6 +25,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     this.treeModel = new ContextHelperTreeModel(null);
     this.queryJTextField = new JTextField("_placeholder_");
     this.tree = new ContextHelperTree(treeModel);
+    this.treeScrollPane = new JBScrollPane(tree);
     buildGui();
   }
 
@@ -32,6 +34,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     queryJTextField.setText(queryResults.getQueryContent());
     treeModel = new ContextHelperTreeModel(queryResults.getQuestions());
     tree.setModel(treeModel);
+    treeScrollPane.getVerticalScrollBar().setValue(0);
     showPanel();
   }
 
@@ -39,7 +42,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
   private void buildGui() {
     setLayout(new BorderLayout());
     add(queryJTextField, BorderLayout.PAGE_START);
-    add(new JBScrollPane(tree), BorderLayout.CENTER);
+    add(treeScrollPane, BorderLayout.CENTER);
   }
 
   private void showPanel() {

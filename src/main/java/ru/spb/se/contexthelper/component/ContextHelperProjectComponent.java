@@ -35,6 +35,10 @@ public class ContextHelperProjectComponent implements ProjectComponent {
     return project;
   }
 
+  public ContextHelperPanel getViewerPanel() {
+    return viewerPanel;
+  }
+
   @Override
   public void projectOpened() {
     initToolWindow();

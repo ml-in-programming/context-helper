@@ -1,5 +1,6 @@
 package ru.spb.se.contexthelper.model;
 
+import com.intellij.psi.PsiElement;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 
 import javax.swing.event.TreeModelListener;
@@ -11,13 +12,19 @@ public class ContextHelperTreeModel implements TreeModel {
 
   private final ContextHelperProjectComponent projectComponent;
 
+  private PsiElement rootPsiElement;
+
   public ContextHelperTreeModel(ContextHelperProjectComponent projectComponent) {
     this.projectComponent = projectComponent;
   }
 
+  public void setRootPsiElement(PsiElement rootPsiElement) {
+    this.rootPsiElement = rootPsiElement;
+  }
+
   @Override
   public Object getRoot() {
-    return null;
+    return rootPsiElement;
   }
 
   @Override

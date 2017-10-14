@@ -14,6 +14,7 @@ import com.intellij.ui.components.JBScrollPane;
 import org.jetbrains.annotations.Nullable;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.lookup.StackOverflowClient;
+import ru.spb.se.contexthelper.ui.ContextHelperPanel;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -47,11 +48,12 @@ public class ContextHelpAction extends AnAction {
     }
     List<PsiElement> psiElements = new ArrayList<>();
     traversePsiElement(methodPsiElement, psiElements);
+    PsiMethodImpl parentMethod = (PsiMethodImpl) psiElements.get(0);
     StackOverflowClient stackOverflowClient = new StackOverflowClient();
-    String queryResponse =
-        stackOverflowClient.processQuery(((PsiMethodImpl) psiElements.get(0)).getName());
-    ContextHelperProjectComponent helperProjectComponent =
-        ContextHelperProjectComponent.getInstance(project);
+    String queryResponse = stackOverflowClient.processQuery(parentMethod.getName());
+    ContextHelperPanel contextHelperPanel =
+        ContextHelperProjectComponent.getInstance(project).getViewerPanel();
+    contextHelperPanel.updatePanelForRootElement(parentMethod);
     showDialogWithComponent(project, jComponentForText(queryResponse));
   }
 

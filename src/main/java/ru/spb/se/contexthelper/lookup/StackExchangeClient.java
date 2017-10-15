@@ -2,13 +2,9 @@ package ru.spb.se.contexthelper.lookup;
 
 import com.google.code.stackexchange.client.query.StackExchangeApiQueryFactory;
 import com.google.code.stackexchange.common.PagedList;
-import com.google.code.stackexchange.schema.Paging;
-import com.google.code.stackexchange.schema.Question;
-import com.google.code.stackexchange.schema.StackExchangeSite;
-import com.google.code.stackexchange.schema.User;
+import com.google.code.stackexchange.schema.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /** Client for StackExchange API. */
@@ -17,19 +13,20 @@ public class StackExchangeClient {
   private static final String APPLICATION_KEY = "F)x9bhGombhjqpnXt)5Mwg((";
   private static final StackExchangeSite STACK_EXCHANGE_SITE = StackExchangeSite.STACK_OVERFLOW;
 
-  private static final int PAGE_SIZE = 100;
+  private static final int QUESTIONS_PAGE_SIZE = 100;
+  private static final int ANSWERS_PAGE_SIZE = 10;
 
-  private final StackExchangeApiQueryFactory queryFactory;
+  /**
+   * To get a set of fields different from the default, we need to provide custom filter.
+   * Apart from default fields, this filter ask for the answers.title.
+   */
+  private static final String ANSWERS_FILER = "!6UYYQsxs_0G)y";
 
-  public StackExchangeClient() {
-    queryFactory = StackExchangeApiQueryFactory.newInstance(APPLICATION_KEY, STACK_EXCHANGE_SITE);
-  }
-
-  /** Returns Java tagged question for a query generated based on the parameter. */
-  public StackExchangeQueryResults processJavaQuery(String unrefinedQuery) {
-    String[] queryWords = unrefinedQuery.split("(?=\\p{Upper})");
-    String query = Arrays.stream(queryWords).reduce("", (s1, s2) -> s1 + " " + s2);
-    Paging paging = new Paging(1, PAGE_SIZE);
+  /** Returns Java tagged questions for the given query. */
+  public StackExchangeQuestionResults requestRelevantQuestions(String query) {
+    StackExchangeApiQueryFactory queryFactory =
+        StackExchangeApiQueryFactory.newInstance(APPLICATION_KEY, STACK_EXCHANGE_SITE);
+    Paging paging = new Paging(1, QUESTIONS_PAGE_SIZE);
     List<String> tagged = new ArrayList<>();
     tagged.add("java");
     PagedList<Question> questions =
@@ -39,6 +36,20 @@ public class StackExchangeClient {
             .withTags(tagged)
             .withSort(User.QuestionSortOrder.MOST_RELEVANT)
             .list();
-    return new StackExchangeQueryResults(query, questions);
+    // TODO(niksaz): Provide access to all questions, not only the first page.
+    return new StackExchangeQuestionResults(query, questions);
+  }
+
+  /** Returns answers for the question with the given id. */
+  public List<Answer> requestAnswersFor(long questionId) {
+    StackExchangeApiQueryFactory queryFactory =
+        StackExchangeApiQueryFactory.newInstance(APPLICATION_KEY, STACK_EXCHANGE_SITE);
+    Paging paging = new Paging(1, ANSWERS_PAGE_SIZE);
+    // TODO(niksaz): Provide access to all answers, not only the first page.
+    return queryFactory.newAnswerApiQuery()
+        .withQuestionIds(questionId)
+        .withPaging(paging)
+        .withFilter(ANSWERS_FILER)
+        .listByQuestions();
   }
 }

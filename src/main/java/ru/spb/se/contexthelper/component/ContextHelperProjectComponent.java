@@ -10,6 +10,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import org.jetbrains.annotations.NotNull;
+import ru.spb.se.contexthelper.lookup.StackExchangeClient;
 import ru.spb.se.contexthelper.ui.ContextHelperPanel;
 
 import static ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW;
@@ -24,15 +25,25 @@ public class ContextHelperProjectComponent implements ProjectComponent {
   private static final String ICON_PATH_TOOL_WINDOW = "/icons/se-icon.png";
 
   private final Project project;
+  private final StackExchangeClient stackExchangeClient;
 
   private ContextHelperPanel viewerPanel;
 
   public ContextHelperProjectComponent(Project project) {
     this.project = project;
+    this.stackExchangeClient = new StackExchangeClient();
   }
 
   public ContextHelperPanel getViewerPanel() {
     return viewerPanel;
+  }
+
+  public StackExchangeClient getStackExchangeClient() {
+    return stackExchangeClient;
+  }
+
+  public Project getProject() {
+    return project;
   }
 
   @Override
@@ -41,7 +52,7 @@ public class ContextHelperProjectComponent implements ProjectComponent {
   }
 
   private void initToolWindow() {
-    viewerPanel = new ContextHelperPanel(project);
+    viewerPanel = new ContextHelperPanel(this);
     ToolWindow toolWindow = getOrRegisterToolWindow();
     toolWindow.setIcon(IconLoader.getIcon(ICON_PATH_TOOL_WINDOW));
   }

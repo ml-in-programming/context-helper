@@ -11,10 +11,11 @@ import com.intellij.psi.impl.source.PsiMethodImpl;
 import org.jetbrains.annotations.Nullable;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.lookup.StackExchangeClient;
-import ru.spb.se.contexthelper.lookup.StackExchangeQueryResults;
+import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
 import ru.spb.se.contexthelper.ui.ContextHelperPanel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /** An action for getting help based on the context around editor's caret. */
@@ -45,13 +46,26 @@ public class ContextHelpAction extends AnAction {
     }
     List<PsiElement> psiElements = new ArrayList<>();
     traversePsiElement(methodPsiElement, psiElements);
-    PsiMethodImpl parentMethod = (PsiMethodImpl) psiElements.get(0);
-    StackExchangeClient stackExchangeClient = new StackExchangeClient();
-    StackExchangeQueryResults queryResults =
-        stackExchangeClient.processJavaQuery(parentMethod.getName());
-    ContextHelperPanel contextHelperPanel =
-        ContextHelperProjectComponent.getInstance(project).getViewerPanel();
+    runQueryFromContext(psiElements, project);
+  }
+
+  /** Runs a query for the given context. */
+  private static void runQueryFromContext(List<PsiElement> psiElements, Project project) {
+    ContextHelperProjectComponent helperProjectComponent =
+        ContextHelperProjectComponent.getInstance(project);
+    StackExchangeClient stackExchangeClient = helperProjectComponent.getStackExchangeClient();
+
+    String query = buildQueryFromContext(psiElements);
+    StackExchangeQuestionResults queryResults = stackExchangeClient.requestRelevantQuestions(query);
+    ContextHelperPanel contextHelperPanel = helperProjectComponent.getViewerPanel();
     contextHelperPanel.updatePanelWithQueryResults(queryResults);
+  }
+
+  /** Builds query by splitting parent's method name. */
+  private static String buildQueryFromContext(List<PsiElement> psiElements) {
+    PsiMethodImpl parentMethod = (PsiMethodImpl) psiElements.get(0);
+    String[] queryWords = parentMethod.getName().split("(?=\\p{Upper})");
+    return Arrays.stream(queryWords).reduce("", (s1, s2) -> s1 + " " + s2);
   }
 
   /** Finds a PSI element that represents a method by checking element's parents. */

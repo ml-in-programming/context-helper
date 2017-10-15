@@ -1,5 +1,6 @@
 package ru.spb.se.contexthelper.ui;
 
+import com.google.code.stackexchange.schema.Answer;
 import com.google.code.stackexchange.schema.Question;
 import com.intellij.openapi.util.IconLoader;
 
@@ -20,6 +21,9 @@ public class ContextHelperTreeCellRender implements TreeCellRenderer {
       Question question = (Question) value;
       label.setText("<html>" + question.getTitle() + "</html>");
       label.setIcon(IconLoader.getIcon(QUESTION_ICON_PATH));
+    } else if (value instanceof Answer) {
+      Answer answer = (Answer) value;
+      label.setText("<html>" + answer.getBody() + "</html>");
     }
     return label;
   }

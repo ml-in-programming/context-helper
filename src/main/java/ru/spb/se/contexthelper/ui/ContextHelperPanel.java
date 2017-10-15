@@ -5,8 +5,9 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBScrollPane;
 import ru.spb.se.contexthelper.ContextHelperConstants;
-import ru.spb.se.contexthelper.lookup.StackExchangeQueryResults;
-import ru.spb.se.contexthelper.model.ContextHelperTreeModel;
+import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
+import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
+import ru.spb.se.contexthelper.model.StackExchangeQuestionsTreeModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,15 +15,17 @@ import java.awt.*;
 /** ContextHelper's side panel. */
 public class ContextHelperPanel extends JPanel implements Runnable {
 
-  private final Project project;
+  private final ContextHelperProjectComponent contextHelperProjectComponent;
   private final JTextField queryJTextField;
   private final ContextHelperTree tree;
   private final JBScrollPane treeScrollPane;
-  private ContextHelperTreeModel treeModel;
+  private StackExchangeQuestionsTreeModel treeModel;
 
-  public ContextHelperPanel(Project project) {
-    this.project = project;
-    this.treeModel = new ContextHelperTreeModel(null);
+  public ContextHelperPanel(ContextHelperProjectComponent contextHelperProjectComponent) {
+    this.contextHelperProjectComponent = contextHelperProjectComponent;
+    this.treeModel =
+        new StackExchangeQuestionsTreeModel(
+            contextHelperProjectComponent.getStackExchangeClient(), null);
     this.queryJTextField = new JTextField("_placeholder_");
     this.tree = new ContextHelperTree(treeModel);
     this.treeScrollPane = new JBScrollPane(tree);
@@ -30,9 +33,11 @@ public class ContextHelperPanel extends JPanel implements Runnable {
   }
 
   /** Updates the underlying data model and JTree element. */
-  public void updatePanelWithQueryResults(StackExchangeQueryResults queryResults) {
+  public void updatePanelWithQueryResults(StackExchangeQuestionResults queryResults) {
     queryJTextField.setText(queryResults.getQueryContent());
-    treeModel = new ContextHelperTreeModel(queryResults.getQuestions());
+    treeModel =
+        new StackExchangeQuestionsTreeModel(
+            contextHelperProjectComponent.getStackExchangeClient(), queryResults.getQuestions());
     tree.setModel(treeModel);
     treeScrollPane.getVerticalScrollBar().setValue(0);
     showPanel();
@@ -46,6 +51,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
   }
 
   private void showPanel() {
+    Project project = contextHelperProjectComponent.getProject();
     ToolWindow toolWindow =
         ToolWindowManager.getInstance(project).getToolWindow(ContextHelperConstants.ID_TOOL_WINDOW);
     toolWindow.activate(this);

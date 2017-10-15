@@ -15,10 +15,13 @@ import java.awt.*;
 /** ContextHelper's side panel. */
 public class ContextHelperPanel extends JPanel implements Runnable {
 
+  private static final int SPLIT_DIVIDER_POSITION = 300;
+
   private final ContextHelperProjectComponent contextHelperProjectComponent;
   private final JTextField queryJTextField;
   private final ContextHelperTree tree;
   private final JBScrollPane treeScrollPane;
+  private final JTextPane bodyTextPane;
   private StackExchangeQuestionsTreeModel treeModel;
 
   public ContextHelperPanel(ContextHelperProjectComponent contextHelperProjectComponent) {
@@ -27,8 +30,11 @@ public class ContextHelperPanel extends JPanel implements Runnable {
         new StackExchangeQuestionsTreeModel(
             contextHelperProjectComponent.getStackExchangeClient(), null);
     this.queryJTextField = new JTextField();
-    this.tree = new ContextHelperTree(treeModel);
+    this.tree = new ContextHelperTree(this, treeModel);
     this.treeScrollPane = new JBScrollPane(tree);
+    this.bodyTextPane = new JTextPane();
+    bodyTextPane.setContentType("text/html");
+    bodyTextPane.setEditable(false);
     buildGui();
   }
 
@@ -43,11 +49,19 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     showPanel();
   }
 
+  void updateBodyTextPaneWithText(String text) {
+    bodyTextPane.setText(text);
+    bodyTextPane.setCaretPosition(0);
+  }
+
   /** Configures the panel's UI. */
   private void buildGui() {
     setLayout(new BorderLayout());
     add(queryJTextField, BorderLayout.PAGE_START);
-    add(treeScrollPane, BorderLayout.CENTER);
+    JSplitPane splitPane = new JSplitPane(
+        JSplitPane.VERTICAL_SPLIT, treeScrollPane, new JBScrollPane(bodyTextPane));
+    splitPane.setDividerLocation(SPLIT_DIVIDER_POSITION);
+    add(splitPane, BorderLayout.CENTER);
   }
 
   private void showPanel() {

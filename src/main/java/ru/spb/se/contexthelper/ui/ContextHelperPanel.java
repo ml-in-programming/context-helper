@@ -26,7 +26,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     this.treeModel =
         new StackExchangeQuestionsTreeModel(
             contextHelperProjectComponent.getStackExchangeClient(), null);
-    this.queryJTextField = new JTextField("_placeholder_");
+    this.queryJTextField = new JTextField();
     this.tree = new ContextHelperTree(treeModel);
     this.treeScrollPane = new JBScrollPane(tree);
     buildGui();

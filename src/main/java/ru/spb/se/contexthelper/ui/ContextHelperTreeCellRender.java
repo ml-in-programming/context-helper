@@ -11,6 +11,7 @@ import java.awt.*;
 public class ContextHelperTreeCellRender implements TreeCellRenderer {
 
   private static final String QUESTION_ICON_PATH = "/icons/so-icon.png";
+  private static final String ANSWER_ICON_PATH = "/icons/so-icon.png";
 
   @Override
   public Component getTreeCellRendererComponent(
@@ -23,8 +24,23 @@ public class ContextHelperTreeCellRender implements TreeCellRenderer {
       label.setIcon(IconLoader.getIcon(QUESTION_ICON_PATH));
     } else if (value instanceof Answer) {
       Answer answer = (Answer) value;
-      label.setText("<html>" + answer.getBody() + "</html>");
+      label.setText(
+          "<html>" +
+          "[" + renderScore(answer.getScore()) + "]" +
+          " by " + answer.getOwner().getDisplayName() +
+          " on " + answer.getCreationDate() +
+          "</html>");
+      label.setIcon(IconLoader.getIcon(ANSWER_ICON_PATH));
     }
     return label;
+  }
+
+  /** Renders {@link Long} sign correctly. */
+  private static String renderScore(long score) {
+    if (score > 0) {
+      return "+" + score;
+    } else {
+      return String.valueOf(score);
+    }
   }
 }

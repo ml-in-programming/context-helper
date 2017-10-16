@@ -13,13 +13,16 @@ public class StackExchangeClient {
   private static final String APPLICATION_KEY = "F)x9bhGombhjqpnXt)5Mwg((";
   private static final StackExchangeSite STACK_EXCHANGE_SITE = StackExchangeSite.STACK_OVERFLOW;
 
+  /** Apart from default fields, this filter ask for the question.body. */
   // TODO(niksaz): Use a filter for only fields, that are used in the plugin.
-  private static final String QUESTIONS_FILTER = "default";
+  // TODO(niksaz): Consider including shallow answers in questions, rather than asking for its
+  // content later.
+  private static final String QUESTIONS_FILTER = "!9YdnSIaCy";
   private static final int QUESTIONS_PAGE_SIZE = 100;
 
   /**
    * To get a set of fields different from the default, we need to provide custom filter.
-   * Apart from default fields, this filter ask for the answers.title.
+   * Apart from default fields, this filter ask for the answers.body.
    */
   // TODO(niksaz): Further refine the filter for Answers.
   private static final String ANSWERS_FILER = "!6UYYQsxs_0G)y";

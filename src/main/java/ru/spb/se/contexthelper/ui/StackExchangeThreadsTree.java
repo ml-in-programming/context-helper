@@ -2,17 +2,17 @@ package ru.spb.se.contexthelper.ui;
 
 import com.google.code.stackexchange.schema.Answer;
 import com.google.code.stackexchange.schema.Question;
-import ru.spb.se.contexthelper.model.StackExchangeQuestionsTreeModel;
+import ru.spb.se.contexthelper.model.StackExchangeThreadsTreeModel;
 
 import javax.swing.*;
 
-/** {@link JTree} view component for ContextHelper's side panel. */
-class ContextHelperTree extends JTree {
+/** {@link JTree} view component for displaying StackExchange threads. */
+class StackExchangeThreadsTree extends JTree {
 
-  ContextHelperTree(
-      ContextHelperPanel contextHelperPanel, StackExchangeQuestionsTreeModel treeModel) {
+  StackExchangeThreadsTree(
+      ContextHelperPanel contextHelperPanel, StackExchangeThreadsTreeModel treeModel) {
     super(treeModel);
-    setCellRenderer(new ContextHelperTreeCellRender());
+    setCellRenderer(new StackExchangeThreadsTreeCellRender());
     setRootVisible(false);
     addTreeSelectionListener(e -> {
       Object lastSelectedComponent = getLastSelectedPathComponent();

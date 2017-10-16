@@ -25,4 +25,6 @@ repositories {
 
 dependencies {
     compile group: 'com.googlecode.stackexchange', name: 'stackoverflow-java-sdk-release', version: '2.2.0'
+    compile group: 'com.google.guava', name: 'guava', version: '23.0'
+    testCompile group: 'com.google.truth', name: 'truth', version: '0.35'
 }

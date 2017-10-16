@@ -25,6 +25,7 @@ public class ContextHelperProjectComponent implements ProjectComponent {
   private static final String ICON_PATH_TOOL_WINDOW = "/icons/se-icon.png";
 
   private final Project project;
+
   private final StackExchangeClient stackExchangeClient;
 
   private ContextHelperPanel viewerPanel;

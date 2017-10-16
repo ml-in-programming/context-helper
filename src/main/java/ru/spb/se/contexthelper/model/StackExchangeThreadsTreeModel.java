@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** {@link TreeModel} bases on List<Question>. */
-public class StackExchangeQuestionsTreeModel implements TreeModel {
+/** {@link TreeModel} which provides data for StackExchange threads. */
+public class StackExchangeThreadsTreeModel implements TreeModel {
 
   private final StackExchangeClient stackExchangeClient;
 
@@ -20,7 +20,7 @@ public class StackExchangeQuestionsTreeModel implements TreeModel {
 
   private final Map<Question, List<Answer>> questionToAnswers = new HashMap<>();
 
-  public StackExchangeQuestionsTreeModel(
+  public StackExchangeThreadsTreeModel(
       StackExchangeClient stackExchangeClient, List<Question> questions) {
     this.stackExchangeClient = stackExchangeClient;
     this.questions = questions;
@@ -38,7 +38,7 @@ public class StackExchangeQuestionsTreeModel implements TreeModel {
       return list.get(index);
     } else if (parent instanceof Question) {
       Question question = (Question) parent;
-      List<Answer> answers = getOrRequestFor(question);
+      List<Answer> answers = getOrRequestAnswersFor(question);
       return answers.get(index);
     } else {
       return null;
@@ -52,7 +52,7 @@ public class StackExchangeQuestionsTreeModel implements TreeModel {
       return list.size();
     } else if (parent instanceof Question) {
       Question question = (Question) parent;
-      List<Answer> answers = getOrRequestFor(question);
+      List<Answer> answers = getOrRequestAnswersFor(question);
       return answers.size();
     } else {
       return 0;
@@ -82,7 +82,7 @@ public class StackExchangeQuestionsTreeModel implements TreeModel {
   public void removeTreeModelListener(TreeModelListener l) {
   }
 
-  private List<Answer> getOrRequestFor(Question question) {
+  private List<Answer> getOrRequestAnswersFor(Question question) {
     List<Answer> cachedAnswers = questionToAnswers.get(question);
     if (cachedAnswers == null) {
       cachedAnswers = stackExchangeClient.requestAnswersFor(question.getQuestionId());

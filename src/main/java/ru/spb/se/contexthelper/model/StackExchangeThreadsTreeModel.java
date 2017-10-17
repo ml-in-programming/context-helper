@@ -52,8 +52,9 @@ public class StackExchangeThreadsTreeModel implements TreeModel {
       return list.size();
     } else if (parent instanceof Question) {
       Question question = (Question) parent;
-      List<Answer> answers = getOrRequestAnswersFor(question);
-      return answers.size();
+      // Since the answer count could be larger than the number of fetched answers, we will display,
+      // the child count should not be larger than the displayed number.
+      return Math.min((int) question.getAnswerCount(), StackExchangeClient.ANSWERS_PAGE_SIZE);
     } else {
       return 0;
     }
@@ -61,7 +62,15 @@ public class StackExchangeThreadsTreeModel implements TreeModel {
 
   @Override
   public boolean isLeaf(Object node) {
-    return !(node instanceof List) && !(node instanceof Question);
+    if (node instanceof List) {
+      List list = (List) node;
+      return list.isEmpty();
+    } else if (node instanceof Question) {
+      Question question = (Question) node;
+      return question.getAnswerCount() == 0;
+    } else {
+      return true;
+    }
   }
 
   @Override

@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBScrollPane;
+import org.jdesktop.swingx.prompt.PromptSupport;
 import ru.spb.se.contexthelper.ContextHelperConstants;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
@@ -46,6 +47,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
   private void configureGui() {
     bodyTextPane.setContentType("text/html");
     bodyTextPane.setEditable(false);
+    PromptSupport.setPrompt("Enter your query", queryJTextField);
 
     setLayout(new BorderLayout());
     add(queryJTextField, BorderLayout.PAGE_START);

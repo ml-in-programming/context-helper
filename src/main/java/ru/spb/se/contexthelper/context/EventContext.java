@@ -13,7 +13,7 @@ public class EventContext {
     this.psiElements = psiElements;
   }
 
-  public List<PsiElement> getPsiElements() {
+  List<PsiElement> getPsiElements() {
     return psiElements;
   }
 }

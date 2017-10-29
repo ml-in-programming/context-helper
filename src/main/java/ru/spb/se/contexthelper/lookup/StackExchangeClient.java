@@ -14,10 +14,13 @@ public class StackExchangeClient {
   private static final String APPLICATION_KEY = "F)x9bhGombhjqpnXt)5Mwg((";
   private static final StackExchangeSite STACK_EXCHANGE_SITE = StackExchangeSite.STACK_OVERFLOW;
 
-  /** Included fields: question.answer_count, question.body, question.title. */
+  /**
+   * Included fields: question.answer_count, question.body, question.title, question.question_id,
+   * question.link.
+   */
   // TODO(niksaz): Consider including shallow answers in questions, rather than asking for its
   // content later.
-  private static final String QUESTIONS_FILTER = "!KGsZNLG*l6eqP";
+  private static final String QUESTIONS_FILTER = "!)1mUVrPI9sDnTx-H1.m";
   private static final int QUESTIONS_PAGE_SIZE = 100;
 
   /**

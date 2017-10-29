@@ -1,8 +1,11 @@
 package ru.spb.se.contexthelper.component;
 
+import com.google.code.stackexchange.schema.Question;
+import com.google.common.net.UrlEscapers;
 import com.intellij.openapi.components.NamedComponent;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
@@ -13,6 +16,13 @@ import org.jetbrains.annotations.NotNull;
 import ru.spb.se.contexthelper.lookup.StackExchangeClient;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
 import ru.spb.se.contexthelper.ui.ContextHelperPanel;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import static ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW;
 import static ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME;
@@ -36,7 +46,7 @@ public class ContextHelperProjectComponent implements ProjectComponent {
     this.stackExchangeClient = new StackExchangeClient();
   }
 
-  public ContextHelperPanel getViewerPanel() {
+  private ContextHelperPanel getViewerPanel() {
     return viewerPanel;
   }
 
@@ -107,10 +117,62 @@ public class ContextHelperProjectComponent implements ProjectComponent {
   }
 
   public void processQuery(String query) {
-    StackExchangeClient stackExchangeClient = getStackExchangeClient();
-    StackExchangeQuestionResults queryResults = stackExchangeClient.requestRelevantQuestions(query);
+    try {
+      List<Long> questionIds = experimentalQueryProcessing(query);
+      List<Question> questions = getStackExchangeClient().requestQuestionsWith(questionIds);
+      StackExchangeQuestionResults queryResults =
+          new StackExchangeQuestionResults(query, questions);
+      ContextHelperPanel contextHelperPanel = getViewerPanel();
+      contextHelperPanel.updatePanelWithQueryResults(queryResults);
+    } catch (Exception e) {
+      showErrorMessage("Unable to process the query.", project);
+    }
+    // Currently using Google Custom Search's topical search engine. But it has 100 queries per day
+    // limit. May return to StackExchange search in the future.
+    // StackExchangeQuestionResults queryResults = stackExchangeClient.requestRelevantQuestions
+    // (query);
+  }
 
-    ContextHelperPanel contextHelperPanel = getViewerPanel();
-    contextHelperPanel.updatePanelWithQueryResults(queryResults);
+  private List<Long> experimentalQueryProcessing(String query) throws Exception {
+    String key = "AIzaSyBXQg39PaVjqONPEL4eubyA7S-pEuqVKOc";
+    String searchEngineId = "004273159360178116673:j1srnoyrr-i";
+    String encodedUrl = UrlEscapers.urlFragmentEscaper().escape(
+        "https://www.googleapis.com/customsearch/v1"
+            + "?key=" + key
+            + "&cx=" + searchEngineId
+            + "&q=" + query + " java"
+            + "&alt=json");
+    URL url = new URL(encodedUrl);
+
+    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+    List<Long> questionIds = new ArrayList<>();
+    try (AutoCloseable ignored = urlConnection::disconnect) {
+      urlConnection.setRequestMethod("GET");
+      urlConnection.setRequestProperty("Accept", "application/json");
+      BufferedReader bufferedReader =
+          new BufferedReader(
+              new InputStreamReader(urlConnection.getInputStream()));
+      String nextLine;
+      while ((nextLine = bufferedReader.readLine()) != null) {
+        if (nextLine.contains("\"link\": \"")){
+          String link = nextLine.substring(
+              nextLine.indexOf("\"link\": \"") + ("\"link\": \"").length(),
+              nextLine.indexOf("\","));
+          // Format: https://stackoverflow.com/questions/id/...
+          String[] urlParts = link.split("/");
+          String idText = urlParts[4];
+          questionIds.add(Long.parseLong(idText));
+        }
+      }
+    }
+    return questionIds;
+  }
+
+  private static void showErrorMessage(String message, Project project) {
+    Messages.showMessageDialog(
+        project,
+        message,
+        "Error",
+        Messages.getInformationIcon());
   }
 }

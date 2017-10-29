@@ -5,6 +5,7 @@ import com.google.code.stackexchange.common.PagedList;
 import com.google.code.stackexchange.schema.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /** Client for StackExchange API. */
@@ -43,6 +44,21 @@ public class StackExchangeClient {
             .list();
     // TODO(niksaz): Provide access to all questions, not only the first page.
     return new StackExchangeQuestionResults(query, questions);
+  }
+
+  public List<Question> requestQuestionsWith(List<Long> questionIds) {
+    StackExchangeApiQueryFactory queryFactory =
+        StackExchangeApiQueryFactory.newInstance(APPLICATION_KEY, STACK_EXCHANGE_SITE);
+    Paging paging = new Paging(1, QUESTIONS_PAGE_SIZE);
+    List<Question> questions =
+        queryFactory.newQuestionApiQuery()
+            .withQuestionIds(questionIds)
+            .withFilter(QUESTIONS_FILTER)
+            .withPaging(paging)
+            .list();
+    // StackExchangeApi does not guarantee the same order of questions returned and initial ids.
+    questions.sort(Comparator.comparingInt(quest -> questionIds.indexOf(quest.getQuestionId())));
+    return questions;
   }
 
   /** Returns answers for the question with the given id. */

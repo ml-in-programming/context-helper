@@ -51,6 +51,8 @@ public class ContextHelperPanel extends JPanel implements Runnable {
 
     setLayout(new BorderLayout());
     add(queryJTextField, BorderLayout.PAGE_START);
+    queryJTextField.addActionListener(e ->
+        contextHelperProjectComponent.processQuery(queryJTextField.getText()));
     JSplitPane splitPane = new JSplitPane(
         JSplitPane.VERTICAL_SPLIT, treeScrollPane, new JBScrollPane(bodyTextPane));
     splitPane.setDividerLocation(SPLIT_DIVIDER_POSITION);

@@ -12,9 +12,6 @@ import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.context.ContextExtractor;
 import ru.spb.se.contexthelper.context.ContextQueryBuilder;
 import ru.spb.se.contexthelper.context.EventContext;
-import ru.spb.se.contexthelper.lookup.StackExchangeClient;
-import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
-import ru.spb.se.contexthelper.ui.ContextHelperPanel;
 
 /** IntentionAction for getting help based on the currently selected code in the editor. */
 public class ContextHelpIntention implements IntentionAction {
@@ -50,18 +47,8 @@ public class ContextHelpIntention implements IntentionAction {
     EventContext eventContext = contextExtractor.extractContext();
     ContextQueryBuilder contextQueryBuilder = new ContextQueryBuilder(eventContext);
     String query = contextQueryBuilder.buildQuery();
-    runQuery(query, project);
-  }
-
-  /** Runs the query and updates plugin's UI. */
-  private static void runQuery(String query, Project project) {
     ContextHelperProjectComponent helperProjectComponent =
         ContextHelperProjectComponent.getInstance(project);
-
-    StackExchangeClient stackExchangeClient = helperProjectComponent.getStackExchangeClient();
-    StackExchangeQuestionResults queryResults = stackExchangeClient.requestRelevantQuestions(query);
-
-    ContextHelperPanel contextHelperPanel = helperProjectComponent.getViewerPanel();
-    contextHelperPanel.updatePanelWithQueryResults(queryResults);
+    helperProjectComponent.processQuery(query);
   }
 }

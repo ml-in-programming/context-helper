@@ -11,6 +11,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import org.jetbrains.annotations.NotNull;
 import ru.spb.se.contexthelper.lookup.StackExchangeClient;
+import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
 import ru.spb.se.contexthelper.ui.ContextHelperPanel;
 
 import static ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW;
@@ -103,5 +104,13 @@ public class ContextHelperProjectComponent implements ProjectComponent {
 
   public static ContextHelperProjectComponent getInstance(Project project) {
     return project.getComponent(ContextHelperProjectComponent.class);
+  }
+
+  public void processQuery(String query) {
+    StackExchangeClient stackExchangeClient = getStackExchangeClient();
+    StackExchangeQuestionResults queryResults = stackExchangeClient.requestRelevantQuestions(query);
+
+    ContextHelperPanel contextHelperPanel = getViewerPanel();
+    contextHelperPanel.updatePanelWithQueryResults(queryResults);
   }
 }

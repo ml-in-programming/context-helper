@@ -17,7 +17,7 @@ import java.awt.*;
 /** ContextHelper's side panel. */
 public class ContextHelperPanel extends JPanel implements Runnable {
 
-  private static final int SPLIT_DIVIDER_POSITION = 300;
+  private static final int SPLIT_DIVIDER_POSITION = 200;
 
   private final ContextHelperProjectComponent contextHelperProjectComponent;
 

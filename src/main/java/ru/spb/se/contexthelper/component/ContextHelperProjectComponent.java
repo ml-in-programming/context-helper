@@ -119,13 +119,17 @@ public class ContextHelperProjectComponent implements ProjectComponent {
   public void processQuery(String query) {
     try {
       List<Long> questionIds = experimentalQueryProcessing(query);
+      if (questionIds.isEmpty()) {
+        showMessageDialog("No help available for the selected context.", "Info", project);
+        return;
+      }
       List<Question> questions = getStackExchangeClient().requestQuestionsWith(questionIds);
       StackExchangeQuestionResults queryResults =
           new StackExchangeQuestionResults(query, questions);
       ContextHelperPanel contextHelperPanel = getViewerPanel();
       contextHelperPanel.updatePanelWithQueryResults(queryResults);
     } catch (Exception e) {
-      showErrorMessage("Unable to process the query.", project);
+      showMessageDialog("Unable to process the query.", "Error", project);
     }
     // Currently using Google Custom Search's topical search engine. But it has 100 queries per day
     // limit. May return to StackExchange search in the future.
@@ -168,11 +172,11 @@ public class ContextHelperProjectComponent implements ProjectComponent {
     return questionIds;
   }
 
-  private static void showErrorMessage(String message, Project project) {
+  private static void showMessageDialog(String message, String title, Project project) {
     Messages.showMessageDialog(
         project,
         message,
-        "Error",
+        title,
         Messages.getInformationIcon());
   }
 }

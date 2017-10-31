@@ -11,7 +11,7 @@ public class StackExchangeQuestionResults {
 
   private final List<Question> questions;
 
-  StackExchangeQuestionResults(String queryContent, List<Question> questions) {
+  public StackExchangeQuestionResults(String queryContent, List<Question> questions) {
     this.queryContent = queryContent;
     this.questions = questions;
   }

@@ -11,12 +11,13 @@ import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
 import ru.spb.se.contexthelper.model.StackExchangeThreadsTreeModel;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
 import java.awt.*;
 
 /** ContextHelper's side panel. */
 public class ContextHelperPanel extends JPanel implements Runnable {
 
-  private static final int SPLIT_DIVIDER_POSITION = 300;
+  private static final int SPLIT_DIVIDER_POSITION = 200;
 
   private final ContextHelperProjectComponent contextHelperProjectComponent;
 
@@ -47,10 +48,22 @@ public class ContextHelperPanel extends JPanel implements Runnable {
   private void configureGui() {
     bodyTextPane.setContentType("text/html");
     bodyTextPane.setEditable(false);
+    bodyTextPane.addHyperlinkListener(e -> {
+      if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+        if (Desktop.isDesktopSupported()) {
+          try {
+            Desktop.getDesktop().browse(e.getURL().toURI());
+          } catch (Exception ignored) {
+          }
+        }
+      }
+    });
     PromptSupport.setPrompt("Enter your query", queryJTextField);
 
     setLayout(new BorderLayout());
     add(queryJTextField, BorderLayout.PAGE_START);
+    queryJTextField.addActionListener(e ->
+        contextHelperProjectComponent.processQuery(queryJTextField.getText()));
     JSplitPane splitPane = new JSplitPane(
         JSplitPane.VERTICAL_SPLIT, treeScrollPane, new JBScrollPane(bodyTextPane));
     splitPane.setDividerLocation(SPLIT_DIVIDER_POSITION);

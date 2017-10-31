@@ -25,22 +25,11 @@
   </project-components>
 
   <extensions defaultExtensionNs="com.intellij">
+    <intentionAction>
+      <className>ru.spb.se.contexthelper.ContextHelpIntention</className>
+      <category>Context Helper</category>
+      <descriptionDirectoryName>ContextHelpIntention</descriptionDirectoryName>
+    </intentionAction>
   </extensions>
-
-  <actions>
-    <action id="ContextHelpAction"
-            class="ru.spb.se.contexthelper.ContextHelpAction"
-            text="Get help based on the context"
-            icon="/icons/se-icon.png"
-            description="Gets help based on the editor's caret"/>
-
-    <group id="ContextHelperGroup">
-      <separator/>
-
-      <reference ref="ContextHelpAction"/>
-
-      <add-to-group group-id="MainToolBar" relative-to-action="SearchEverywhere" anchor="after"/>
-    </group>
-  </actions>
 
 </idea-plugin>

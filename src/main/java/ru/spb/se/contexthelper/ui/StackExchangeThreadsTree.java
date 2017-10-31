@@ -18,6 +18,7 @@ class StackExchangeThreadsTree extends JTree {
       Object lastSelectedComponent = getLastSelectedPathComponent();
       if (lastSelectedComponent instanceof Question) {
         Question question = (Question) lastSelectedComponent;
+        //TODO: Add question.link as a first line of the text.
         contextHelperPanel.updateBodyTextPaneWithText(question.getBody());
       } else if (lastSelectedComponent instanceof Answer) {
         Answer answer = (Answer) lastSelectedComponent;

@@ -6,6 +6,11 @@ apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'org.jetbrains.intellij'
 
+intellij {
+    version ideaVersion
+    pluginName 'Context Helper'
+}
+
 sourceSets {
     main {
         java.srcDir 'src/main/java/'

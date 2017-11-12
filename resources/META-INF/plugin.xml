@@ -26,10 +26,24 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <intentionAction>
-      <className>ru.spb.se.contexthelper.ContextHelpIntention</className>
+      <className>ru.spb.se.contexthelper.SelectionContextHelpIntention</className>
       <category>Context Helper</category>
       <descriptionDirectoryName>ContextHelpIntention</descriptionDirectoryName>
     </intentionAction>
   </extensions>
+
+  <actions>
+    <action id="DeclarationsContextHelpAction"
+            class="ru.spb.se.contexthelper.DeclarationsContextHelpAction"
+            text="Suggest help based on the available declarations"
+            icon="/icons/declaration-16.png"
+            description="Suggest help based on the available declarations"/>
+
+    <group id="ContextHelpGroup">
+      <separator/>
+      <reference ref="DeclarationsContextHelpAction"/>
+      <add-to-group group-id="MainToolBar" relative-to-action="SearchEverywhere" anchor="after"/>
+    </group>
+  </actions>
 
 </idea-plugin>

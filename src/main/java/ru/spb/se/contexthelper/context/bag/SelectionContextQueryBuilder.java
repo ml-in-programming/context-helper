@@ -1,4 +1,4 @@
-package ru.spb.se.contexthelper.context;
+package ru.spb.se.contexthelper.context.bag;
 
 import com.google.common.collect.Sets;
 import com.intellij.psi.JavaTokenType;
@@ -9,8 +9,8 @@ import com.intellij.psi.tree.IElementType;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/** Builds query from the {@link EventContext}. */
-public class ContextQueryBuilder {
+/** Builds query from the {@link SelectionContext}. */
+public class SelectionContextQueryBuilder {
   private final static int MAX_WORDS_FOR_QUERY = 5;
 
   private final static Set<IElementType> meaninglessForContextTokenTypes =
@@ -74,9 +74,9 @@ public class ContextQueryBuilder {
           JavaTokenType.DOUBLE_COLON,
           JavaTokenType.ARROW);
 
-  private final EventContext context;
+  private final SelectionContext context;
 
-  public ContextQueryBuilder(EventContext context) {
+  public SelectionContextQueryBuilder(SelectionContext context) {
     this.context = context;
   }
 

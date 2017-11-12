@@ -31,6 +31,6 @@ repositories {
 dependencies {
     compile group: 'org.swinglabs', name: 'swingx', version: '1.6.1'
     compile group: 'com.googlecode.stackexchange', name: 'stackoverflow-java-sdk-release', version: '2.2.0'
-    compile group: 'com.google.guava', name: 'guava', version: '23.0'
+    compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
     testCompile group: 'com.google.truth', name: 'truth', version: '0.35'
 }

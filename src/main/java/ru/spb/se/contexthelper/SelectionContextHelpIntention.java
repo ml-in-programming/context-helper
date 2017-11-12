@@ -9,13 +9,12 @@ import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
-import ru.spb.se.contexthelper.context.ContextExtractor;
-import ru.spb.se.contexthelper.context.ContextQueryBuilder;
-import ru.spb.se.contexthelper.context.EventContext;
+import ru.spb.se.contexthelper.context.bag.SelectionContextExtractor;
+import ru.spb.se.contexthelper.context.bag.SelectionContextQueryBuilder;
+import ru.spb.se.contexthelper.context.bag.SelectionContext;
 
 /** IntentionAction for getting help based on the currently selected code in the editor. */
-public class ContextHelpIntention implements IntentionAction {
-
+public class SelectionContextHelpIntention implements IntentionAction {
   @Nls
   @NotNull
   @Override
@@ -43,10 +42,10 @@ public class ContextHelpIntention implements IntentionAction {
 
   @Override
   public void invoke(@NotNull Project project, Editor editor, PsiFile file) throws IncorrectOperationException {
-    ContextExtractor contextExtractor = new ContextExtractor(editor, file);
-    EventContext eventContext = contextExtractor.extractContext();
-    ContextQueryBuilder contextQueryBuilder = new ContextQueryBuilder(eventContext);
-    String query = contextQueryBuilder.buildQuery();
+    SelectionContextExtractor selectionContextExtractor = new SelectionContextExtractor(editor, file);
+    SelectionContext selectionContext = selectionContextExtractor.extractContext();
+    SelectionContextQueryBuilder selectionContextQueryBuilder = new SelectionContextQueryBuilder(selectionContext);
+    String query = selectionContextQueryBuilder.buildQuery();
     ContextHelperProjectComponent helperProjectComponent =
         ContextHelperProjectComponent.getInstance(project);
     helperProjectComponent.processQuery(query);

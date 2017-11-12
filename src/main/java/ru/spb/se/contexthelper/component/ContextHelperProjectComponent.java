@@ -128,6 +128,10 @@ public class ContextHelperProjectComponent implements ProjectComponent {
   }
 
   public void processQuery(String query) {
+    if (query.isEmpty()) {
+      MessagesUtil.showInfoDialog("Unable to describe the context.", project);
+      return;
+    }
     try {
       List<Long> questionIds = getGoogleSearchClient().lookupQuestionIds(query);
       if (questionIds.isEmpty()) {

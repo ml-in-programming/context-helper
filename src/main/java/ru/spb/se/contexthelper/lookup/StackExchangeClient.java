@@ -3,6 +3,7 @@ package ru.spb.se.contexthelper.lookup;
 import com.google.code.stackexchange.client.query.StackExchangeApiQueryFactory;
 import com.google.code.stackexchange.common.PagedList;
 import com.google.code.stackexchange.schema.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -11,15 +12,11 @@ import java.util.List;
 /** Client for StackExchange API. */
 public class StackExchangeClient {
 
-  private static final String APPLICATION_KEY = "F)x9bhGombhjqpnXt)5Mwg((";
-  private static final StackExchangeSite STACK_EXCHANGE_SITE = StackExchangeSite.STACK_OVERFLOW;
-
   /**
    * Included fields: question.answer_count, question.body, question.title, question.question_id,
    * question.link.
    */
-  // TODO(niksaz): Consider including shallow answers in questions, rather than asking for its
-  // content later.
+  // TODO(niksaz): Consider including shallow answers, rather than asking for them later.
   private static final String QUESTIONS_FILTER = "!)1mUVrPI9sDnTx-H1.m";
   private static final int QUESTIONS_PAGE_SIZE = 100;
 
@@ -30,10 +27,19 @@ public class StackExchangeClient {
   private static final String ANSWERS_FILER = "!6QljBaH0jbgaIk6a";
   public static final int ANSWERS_PAGE_SIZE = 10;
 
+  @NotNull
+  private final String apiKey;
+  @NotNull
+  private final StackExchangeSite stackExchangeSite;
+
+  public StackExchangeClient(@NotNull String apiKey, @NotNull StackExchangeSite stackExchangeSite) {
+    this.apiKey = apiKey;
+    this.stackExchangeSite = stackExchangeSite;
+  }
+
   /** Returns Java tagged questions for the given query. */
   public StackExchangeQuestionResults requestRelevantQuestions(String query) {
-    StackExchangeApiQueryFactory queryFactory =
-        StackExchangeApiQueryFactory.newInstance(APPLICATION_KEY, STACK_EXCHANGE_SITE);
+    StackExchangeApiQueryFactory queryFactory = getQueryFactory();
     Paging paging = new Paging(1, QUESTIONS_PAGE_SIZE);
     List<String> tagged = new ArrayList<>();
     tagged.add("java");
@@ -50,8 +56,7 @@ public class StackExchangeClient {
   }
 
   public List<Question> requestQuestionsWith(List<Long> questionIds) {
-    StackExchangeApiQueryFactory queryFactory =
-        StackExchangeApiQueryFactory.newInstance(APPLICATION_KEY, STACK_EXCHANGE_SITE);
+    StackExchangeApiQueryFactory queryFactory = getQueryFactory();
     Paging paging = new Paging(1, QUESTIONS_PAGE_SIZE);
     List<Question> questions =
         queryFactory.newQuestionApiQuery()
@@ -66,8 +71,7 @@ public class StackExchangeClient {
 
   /** Returns answers for the question with the given id. */
   public List<Answer> requestAnswersFor(long questionId) {
-    StackExchangeApiQueryFactory queryFactory =
-        StackExchangeApiQueryFactory.newInstance(APPLICATION_KEY, STACK_EXCHANGE_SITE);
+    StackExchangeApiQueryFactory queryFactory = getQueryFactory();
     Paging paging = new Paging(1, ANSWERS_PAGE_SIZE);
     // TODO(niksaz): Provide access to all answers, not only the first page.
     return queryFactory.newAnswerApiQuery()
@@ -75,5 +79,9 @@ public class StackExchangeClient {
         .withPaging(paging)
         .withFilter(ANSWERS_FILER)
         .listByQuestions();
+  }
+
+  private StackExchangeApiQueryFactory getQueryFactory() {
+    return StackExchangeApiQueryFactory.newInstance(apiKey, stackExchangeSite);
   }
 }

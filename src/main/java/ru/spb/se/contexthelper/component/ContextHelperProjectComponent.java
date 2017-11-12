@@ -1,7 +1,7 @@
 package ru.spb.se.contexthelper.component;
 
 import com.google.code.stackexchange.schema.Question;
-import com.google.common.net.UrlEscapers;
+import com.google.code.stackexchange.schema.StackExchangeSite;
 import com.intellij.openapi.components.NamedComponent;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
@@ -15,13 +15,9 @@ import com.intellij.ui.content.ContentFactory;
 import org.jetbrains.annotations.NotNull;
 import ru.spb.se.contexthelper.lookup.StackExchangeClient;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
+import ru.spb.se.contexthelper.lookup.StackOverflowGoogleSearchClient;
 import ru.spb.se.contexthelper.ui.ContextHelperPanel;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import static ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW;
@@ -32,28 +28,43 @@ public class ContextHelperProjectComponent implements ProjectComponent {
 
   /** Last part of the name for {@link NamedComponent}. */
   private static final String COMPONENT_NAME = "ContextHelperProjectComponent";
-
   private static final String ICON_PATH_TOOL_WINDOW = "/icons/se-icon.png";
 
-  private final Project project;
+  private static final String STACK_EXCHANGE_API_KEY = "F)x9bhGombhjqpnXt)5Mwg((";
+  private static final StackExchangeSite STACK_EXCHANGE_SITE = StackExchangeSite.STACK_OVERFLOW;
 
+  private static final String GOOGLE_SEARCH_API_KEY = "AIzaSyBXQg39PaVjqONPEL4eubyA7S-pEuqVKOc";
+
+  @NotNull
+  private final Project project;
+  @NotNull
   private final StackExchangeClient stackExchangeClient;
+  @NotNull
+  private final StackOverflowGoogleSearchClient googleSearchClient;
 
   private ContextHelperPanel viewerPanel;
 
-  public ContextHelperProjectComponent(Project project) {
+  public ContextHelperProjectComponent(@NotNull Project project) {
     this.project = project;
-    this.stackExchangeClient = new StackExchangeClient();
+    this.stackExchangeClient = new StackExchangeClient(STACK_EXCHANGE_API_KEY, STACK_EXCHANGE_SITE);
+    this.googleSearchClient = new StackOverflowGoogleSearchClient(GOOGLE_SEARCH_API_KEY);
   }
 
   private ContextHelperPanel getViewerPanel() {
     return viewerPanel;
   }
 
+  @NotNull
   public StackExchangeClient getStackExchangeClient() {
     return stackExchangeClient;
   }
 
+  @NotNull
+  private StackOverflowGoogleSearchClient getGoogleSearchClient() {
+    return googleSearchClient;
+  }
+
+  @NotNull
   public Project getProject() {
     return project;
   }
@@ -118,7 +129,7 @@ public class ContextHelperProjectComponent implements ProjectComponent {
 
   public void processQuery(String query) {
     try {
-      List<Long> questionIds = experimentalQueryProcessing(query);
+      List<Long> questionIds = getGoogleSearchClient().lookupQuestionIds(query);
       if (questionIds.isEmpty()) {
         showMessageDialog("No help available for the selected context.", "Info", project);
         return;
@@ -135,41 +146,6 @@ public class ContextHelperProjectComponent implements ProjectComponent {
     // limit. May return to StackExchange search in the future.
     // StackExchangeQuestionResults queryResults = stackExchangeClient.requestRelevantQuestions
     // (query);
-  }
-
-  private List<Long> experimentalQueryProcessing(String query) throws Exception {
-    String key = "AIzaSyBXQg39PaVjqONPEL4eubyA7S-pEuqVKOc";
-    String searchEngineId = "004273159360178116673:j1srnoyrr-i";
-    String encodedUrl = UrlEscapers.urlFragmentEscaper().escape(
-        "https://www.googleapis.com/customsearch/v1"
-            + "?key=" + key
-            + "&cx=" + searchEngineId
-            + "&q=" + query + " java"
-            + "&alt=json");
-    URL url = new URL(encodedUrl);
-
-    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-    List<Long> questionIds = new ArrayList<>();
-    try (AutoCloseable ignored = urlConnection::disconnect) {
-      urlConnection.setRequestMethod("GET");
-      urlConnection.setRequestProperty("Accept", "application/json");
-      BufferedReader bufferedReader =
-          new BufferedReader(
-              new InputStreamReader(urlConnection.getInputStream()));
-      String nextLine;
-      while ((nextLine = bufferedReader.readLine()) != null) {
-        if (nextLine.contains("\"link\": \"")){
-          String link = nextLine.substring(
-              nextLine.indexOf("\"link\": \"") + ("\"link\": \"").length(),
-              nextLine.indexOf("\","));
-          // Format: https://stackoverflow.com/questions/id/...
-          String[] urlParts = link.split("/");
-          String idText = urlParts[4];
-          questionIds.add(Long.parseLong(idText));
-        }
-      }
-    }
-    return questionIds;
   }
 
   private static void showMessageDialog(String message, String title, Project project) {

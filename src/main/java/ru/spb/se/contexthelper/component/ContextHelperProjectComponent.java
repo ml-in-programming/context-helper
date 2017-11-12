@@ -123,15 +123,11 @@ public class ContextHelperProjectComponent implements ProjectComponent {
     return PLUGIN_NAME + "." + COMPONENT_NAME;
   }
 
-  public static ContextHelperProjectComponent getInstance(Project project) {
+  public static ContextHelperProjectComponent getFor(Project project) {
     return project.getComponent(ContextHelperProjectComponent.class);
   }
 
   public void processQuery(String query) {
-    if (query.isEmpty()) {
-      MessagesUtil.showInfoDialog("Unable to describe the context.", project);
-      return;
-    }
     try {
       List<Long> questionIds = getGoogleSearchClient().lookupQuestionIds(query);
       if (questionIds.isEmpty()) {

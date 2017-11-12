@@ -5,6 +5,7 @@ import com.intellij.psi.JavaTokenType;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
+import ru.spb.se.contexthelper.context.NotEnoughContextException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -108,6 +109,9 @@ public class SelectionContextQueryBuilder {
             .map(entry -> new WordInfo(entry.getKey(), entry.getValue()))
             .sorted(WordInfo.COMPARATOR_BY_TIMES_ENCOUNTERED)
             .collect(Collectors.toList());
+    if (words.isEmpty()) {
+      throw new NotEnoughContextException("No meaningful words to form the query.");
+    }
     return words.stream()
         .limit(MAX_WORDS_FOR_QUERY)
         .map(WordInfo::getText)

@@ -9,7 +9,7 @@ import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ActionEventUtil {
+public final class ActionEventUtil {
   @Nullable
   public static Project getProjectFor(@NotNull AnActionEvent event) {
     return event.getData(PlatformDataKeys.PROJECT);

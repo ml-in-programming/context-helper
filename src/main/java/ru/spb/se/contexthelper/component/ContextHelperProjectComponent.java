@@ -5,7 +5,6 @@ import com.google.code.stackexchange.schema.StackExchangeSite;
 import com.intellij.openapi.components.NamedComponent;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
@@ -17,6 +16,7 @@ import ru.spb.se.contexthelper.lookup.StackExchangeClient;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
 import ru.spb.se.contexthelper.lookup.StackOverflowGoogleSearchClient;
 import ru.spb.se.contexthelper.ui.ContextHelperPanel;
+import ru.spb.se.contexthelper.util.MessagesUtil;
 
 import java.util.List;
 
@@ -131,7 +131,7 @@ public class ContextHelperProjectComponent implements ProjectComponent {
     try {
       List<Long> questionIds = getGoogleSearchClient().lookupQuestionIds(query);
       if (questionIds.isEmpty()) {
-        showMessageDialog("No help available for the selected context.", "Info", project);
+        MessagesUtil.showInfoDialog("No help available for the selected context.", project);
         return;
       }
       List<Question> questions = getStackExchangeClient().requestQuestionsWith(questionIds);
@@ -140,19 +140,11 @@ public class ContextHelperProjectComponent implements ProjectComponent {
       ContextHelperPanel contextHelperPanel = getViewerPanel();
       contextHelperPanel.updatePanelWithQueryResults(queryResults);
     } catch (Exception e) {
-      showMessageDialog("Unable to process the query.", "Error", project);
+      MessagesUtil.showErrorDialog("Unable to process the query.", project);
     }
-    // Currently using Google Custom Search's topical search engine. But it has 100 queries per day
-    // limit. May return to StackExchange search in the future.
+    // Currently using Google Custom Search. But it has 100 queries per day limit. May return to
+    // StackExchange search in the future.
     // StackExchangeQuestionResults queryResults = stackExchangeClient.requestRelevantQuestions
     // (query);
-  }
-
-  private static void showMessageDialog(String message, String title, Project project) {
-    Messages.showMessageDialog(
-        project,
-        message,
-        title,
-        Messages.getInformationIcon());
   }
 }

@@ -28,7 +28,7 @@
     <intentionAction>
       <className>ru.spb.se.contexthelper.SelectionContextHelpIntention</className>
       <category>Context Helper</category>
-      <descriptionDirectoryName>ContextHelpIntention</descriptionDirectoryName>
+      <descriptionDirectoryName>SelectionContextHelpIntention</descriptionDirectoryName>
     </intentionAction>
   </extensions>
 

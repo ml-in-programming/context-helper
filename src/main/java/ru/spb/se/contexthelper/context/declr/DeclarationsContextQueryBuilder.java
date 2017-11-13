@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DeclarationsContextQueryBuilder {
+  private static final int MAX_CLASSES_FOR_QUERY = 2;
+
   @NotNull
   private final DeclarationsContext declarationsContext;
 
@@ -52,8 +54,9 @@ public class DeclarationsContextQueryBuilder {
     for (String className : declaredQualifiedClassNames) {
       System.out.println(className);
     }
-    String firstQualifiedClassName = declaredQualifiedClassNames.get(0);
-    String[] parts = firstQualifiedClassName.split("\\.");
-    return Arrays.stream(parts).collect(Collectors.joining(" "));
+    return declaredQualifiedClassNames.stream()
+        .limit(MAX_CLASSES_FOR_QUERY)
+        .flatMap(s -> Arrays.stream(s.split("\\.")))
+        .collect(Collectors.joining(" "));
   }
 }

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-class ContextPsiScopeProcessor implements PsiScopeProcessor {
+public class ContextPsiScopeProcessor implements PsiScopeProcessor {
   @NotNull
   private final List<Declaration> declarations = new ArrayList<>();
   private int declarationHolderLevel = 0;

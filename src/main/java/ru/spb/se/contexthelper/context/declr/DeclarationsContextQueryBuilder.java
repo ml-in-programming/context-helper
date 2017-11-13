@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 public class DeclarationsContextQueryBuilder {
   private static final int MAX_CLASSES_FOR_QUERY = 2;
 
+  private static final String DOT_SYMBOL_REGEX = "\\.";
+  private static final String UPPERCASE_LETTER_REGEX = "(?=\\p{Upper})";
+
   @NotNull
   private final DeclarationsContext declarationsContext;
 
@@ -56,7 +59,8 @@ public class DeclarationsContextQueryBuilder {
     }
     return declaredQualifiedClassNames.stream()
         .limit(MAX_CLASSES_FOR_QUERY)
-        .flatMap(s -> Arrays.stream(s.split("\\.")))
+        .flatMap(s -> Arrays.stream(s.split(DOT_SYMBOL_REGEX)))
+        .flatMap(s -> Arrays.stream(s.split(UPPERCASE_LETTER_REGEX)))
         .collect(Collectors.joining(" "));
   }
 }

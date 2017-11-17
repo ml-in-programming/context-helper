@@ -96,7 +96,7 @@ public class SelectionContextQueryBuilder {
       }
       if (psiElement.getTextLength() == 0) {
         // The node's text representation is empty: won't help us with forming the query. E.g.
-        // REFERENCE_PARAMETER_LIST is present in PSI tree but its text may be empty.
+        // REFERENCE_PARAMETER_LIST is present in PSI trie but its text may be empty.
         continue;
       }
       String elementText = psiElement.getText();

@@ -9,6 +9,7 @@ import ru.spb.se.contexthelper.context.declr.DeclarationsContextQueryBuilder
 import ru.spb.se.contexthelper.util.ActionEventUtil
 import ru.spb.se.contexthelper.util.MessagesUtil
 
+/** An action that is generating a query based on the declarations available at the cursor. */
 class DeclarationsContextHelpAction : AnAction() {
     override fun actionPerformed(event: AnActionEvent) {
         val project = ActionEventUtil.getProjectFor(event) ?: return

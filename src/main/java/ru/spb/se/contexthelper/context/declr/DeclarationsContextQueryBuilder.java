@@ -3,6 +3,8 @@ package ru.spb.se.contexthelper.context.declr;
 import com.intellij.psi.*;
 import org.jetbrains.annotations.NotNull;
 import ru.spb.se.contexthelper.context.NotEnoughContextException;
+import ru.spb.se.contexthelper.context.trie.Type;
+import ru.spb.se.contexthelper.context.trie.TypeTrie;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,11 +54,12 @@ public class DeclarationsContextQueryBuilder {
     if (declaredQualifiedClassNames.isEmpty()) {
       throw new NotEnoughContextException("No class is declared in the current context.");
     }
-    // TODO(niksaz): Remove the printing of class names.
-    System.out.println("========== !!!!!!!!!!!!!!!!!!!! ==========");
+    TypeTrie trie = new TypeTrie();
     for (String className : declaredQualifiedClassNames) {
-      System.out.println(className);
+      Type type = new Type(Arrays.asList(className.split(DOT_SYMBOL_REGEX)));
+      trie.addType(type);
     }
+    trie.printTrie();
     return declaredQualifiedClassNames.stream()
         .limit(MAX_CLASSES_FOR_QUERY)
         .flatMap(s -> Arrays.stream(s.split(DOT_SYMBOL_REGEX)))

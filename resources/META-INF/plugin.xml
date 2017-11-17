@@ -36,14 +36,9 @@
     <action id="DeclarationsContextHelpAction"
             class="ru.spb.se.contexthelper.DeclarationsContextHelpAction"
             text="Suggest help based on the available declarations"
-            icon="/icons/declaration-16.png"
-            description="Suggest help based on the available declarations"/>
-
-    <group id="ContextHelpGroup">
-      <separator/>
-      <reference ref="DeclarationsContextHelpAction"/>
-      <add-to-group group-id="MainToolBar" relative-to-action="SearchEverywhere" anchor="after"/>
-    </group>
+            description="Suggest help based on the available declarations">
+      <keyboard-shortcut first-keystroke="control shift H" keymap="$default"/>
+    </action>
   </actions>
 
 </idea-plugin>

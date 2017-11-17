@@ -1,10 +1,25 @@
+buildscript {
+    ext.kotlin_version = '1.1.60'
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 plugins {
-    id 'org.jetbrains.intellij' version '0.2.16'
+    id 'org.jetbrains.intellij' version '0.2.17'
 }
 
 apply plugin: 'idea'
 apply plugin: 'java'
+apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.intellij'
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/releases/'
+    }
+}
 
 intellij {
     version ideaVersion
@@ -18,13 +33,6 @@ sourceSets {
     }
     test {
         java.srcDir 'src/test/java/'
-    }
-}
-
-repositories {
-    mavenCentral()
-    maven {
-        url 'https://oss.sonatype.org/content/repositories/releases/'
     }
 }
 

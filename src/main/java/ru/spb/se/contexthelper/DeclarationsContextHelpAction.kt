@@ -29,7 +29,7 @@ class DeclarationsContextHelpAction : AnAction() {
             return
         }
         val contextExtractor = DeclarationsContextExtractor()
-        val context = contextExtractor.extractContextFor(psiElement)
+        val context = contextExtractor.extractContextFrom(psiElement)
         val queryBuilder = DeclarationsContextQueryBuilder(context)
         val query = try {
             queryBuilder.buildQuery()

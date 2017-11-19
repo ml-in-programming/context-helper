@@ -26,7 +26,7 @@ public class StackOverflowGoogleSearchClient {
         "https://www.googleapis.com/customsearch/v1"
             + "?key=" + apiKey
             + "&cx=" + SEARCH_ENGINE_ID
-            + "&q=" + query + " java site:stackoverflow.com"
+            + "&q=" + query + " java is:question"
             + "&alt=json");
     URL url = new URL(encodedUrl);
 

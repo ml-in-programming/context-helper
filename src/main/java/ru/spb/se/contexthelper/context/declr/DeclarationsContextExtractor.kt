@@ -4,18 +4,24 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiElement
 import com.intellij.psi.ResolveState
 
-class DeclarationsContextExtractor {
-    fun extractContextFrom(psiElement: PsiElement): DeclarationsContext {
-        val scopeProcessor = ContextPsiScopeProcessor()
-        var currentPsiElement = psiElement
-        var previousPsiElement = psiElement
-        while (currentPsiElement !is PsiDirectory) {
-            currentPsiElement.processDeclarations(
-                scopeProcessor, ResolveState.initial(), previousPsiElement, psiElement)
-            previousPsiElement = currentPsiElement
-            currentPsiElement = currentPsiElement.parent
-        }
+/** Extracts all available declarations up to the given [PsiElement]. */
+class DeclarationsContextExtractor(private val psiElement: PsiElement) {
+    private val scopeProcessor = ContextPsiScopeProcessor()
+    val context: DeclarationsContext
+
+    init {
+        extractContextFrom(psiElement, null)
         val declarations = scopeProcessor.declarations
-        return DeclarationsContext(declarations)
+        context = DeclarationsContext(declarations)
+    }
+
+    private fun extractContextFrom(currentPsiElement: PsiElement, lastParent: PsiElement?) {
+        if (currentPsiElement is PsiDirectory) {
+            return
+        }
+        currentPsiElement.processDeclarations(
+            scopeProcessor, ResolveState.initial(), lastParent, psiElement)
+        scopeProcessor.upParentCounter()
+        extractContextFrom(currentPsiElement.parent, currentPsiElement)
     }
 }

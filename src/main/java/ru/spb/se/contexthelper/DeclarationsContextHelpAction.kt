@@ -28,8 +28,8 @@ class DeclarationsContextHelpAction : AnAction() {
             MessagesUtil.showInfoDialog("No PSI for the element found", project)
             return
         }
-        val contextExtractor = DeclarationsContextExtractor()
-        val context = contextExtractor.extractContextFrom(psiElement)
+        val contextExtractor = DeclarationsContextExtractor(psiElement)
+        val context = contextExtractor.context
         val queryBuilder = DeclarationsContextQueryBuilder(context)
         val query = try {
             queryBuilder.buildQuery()

@@ -40,7 +40,7 @@ class DeclarationsContextQueryBuilder(private val declarationsContext: Declarati
                     }
                 if (relevantTypeName != null) {
                     val type = Type(relevantTypeName.split(DOT_SYMBOL_REGEX))
-                    contextTrie.addType(type, it.declarationHolderLevel)
+                    contextTrie.addType(type, it.parentLevel)
                 }
             }
         val relevantParts = contextTrie.buildRelevantParts()

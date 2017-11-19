@@ -1,5 +1,8 @@
 package ru.spb.se.contexthelper.context.trie
 
+import java.util.stream.Collectors
+
+// TODO(niksaz): Remove debug output.
 /** Prefix tree built from available [Type]s. */
 data class TypeContextTrie(private val root: Node = Node()) {
     fun addType(type: Type, typeLevel: Int) {
@@ -7,15 +10,15 @@ data class TypeContextTrie(private val root: Node = Node()) {
     }
 
     fun buildRelevantParts(): List<String> {
+        printTrie()
         val relevantParts = mutableListOf<String>()
         root.toEvaluatedNode().findRelevantParts(TYPES_TO_CONSIDER, relevantParts)
         return relevantParts
     }
 
-    fun printTrie() {
+    private fun printTrie() {
         root.toEvaluatedNode().printNode()
     }
-
 
     data class Node(
         private var mostRelevantLevel: Int? = null,
@@ -54,7 +57,19 @@ data class TypeContextTrie(private val root: Node = Node()) {
     ) {
         fun findRelevantParts(typesToFind: Long, parts: MutableList<String>) {
             val typesToFindMap = mutableMapOf<String?, Long>()
-            subtreeLevels.stream()
+            val scoredSubtreeLevels = subtreeLevels.stream()
+                .map {
+                    val partSize =
+                        if (it.first == null) 1 else edgeMap[it.first!!]!!.subtreeLevels.size
+                    val score = Math.exp(it.second.toDouble()) * partSize
+                    it.first to score
+                }
+                .sorted(Comparator.comparingDouble { it.second })
+                .collect(Collectors.toList())
+            println("step")
+            println(subtreeLevels)
+            println(scoredSubtreeLevels)
+            scoredSubtreeLevels.stream()
                 .limit(typesToFind)
                 .forEach { typesToFindMap.merge(it.first, 1, Long::plus) }
             for (subtreeLevel in subtreeLevels) {

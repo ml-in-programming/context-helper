@@ -14,6 +14,8 @@ apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.intellij'
 
+sourceCompatibility = 1.8
+
 repositories {
     mavenCentral()
     maven {
@@ -42,4 +44,12 @@ dependencies {
     compile group: 'com.googlecode.stackexchange', name: 'stackoverflow-java-sdk-release', version: '2.2.0'
     compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
     testCompile group: 'com.google.truth', name: 'truth', version: '0.35'
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
 }

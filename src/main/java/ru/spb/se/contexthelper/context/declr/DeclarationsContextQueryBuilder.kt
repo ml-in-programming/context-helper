@@ -43,7 +43,6 @@ class DeclarationsContextQueryBuilder(private val declarationsContext: Declarati
                     contextTrie.addType(type, it.declarationHolderLevel)
                 }
             }
-        contextTrie.printTrie()
         val relevantParts = contextTrie.buildRelevantParts()
         return relevantParts.stream()
             .flatMap { it.split(UPPERCASE_LETTER_REGEX).stream() }

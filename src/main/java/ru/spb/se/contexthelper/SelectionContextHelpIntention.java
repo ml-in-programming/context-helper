@@ -56,7 +56,8 @@ public class SelectionContextHelpIntention implements IntentionAction {
       MessagesUtil.showInfoDialog("Unable to describe the context.", project);
       return;
     }
-    ContextHelperProjectComponent helperComponent = ContextHelperProjectComponent.getFor(project);
+    ContextHelperProjectComponent helperComponent =
+        ContextHelperProjectComponent.Companion.getFor(project);
     helperComponent.processQuery(query);
   }
 }

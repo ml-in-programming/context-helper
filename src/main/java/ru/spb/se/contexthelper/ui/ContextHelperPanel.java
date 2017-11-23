@@ -3,7 +3,9 @@ package ru.spb.se.contexthelper.ui;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.JBProgressBar;
 import com.intellij.ui.components.JBScrollPane;
+import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.prompt.PromptSupport;
 import ru.spb.se.contexthelper.ContextHelperConstants;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
@@ -21,6 +23,8 @@ public class ContextHelperPanel extends JPanel implements Runnable {
 
   private final ContextHelperProjectComponent contextHelperProjectComponent;
 
+  private final JBProgressBar progressBar;
+
   private final JTextField queryJTextField;
 
   private final StackExchangeThreadsTree tree;
@@ -36,6 +40,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     this.treeModel =
         new StackExchangeThreadsTreeModel(
             contextHelperProjectComponent.getStackExchangeClient(), null);
+    this.progressBar = new JBProgressBar();
     this.queryJTextField = new JTextField();
     this.tree = new StackExchangeThreadsTree(this, treeModel);
     this.treeScrollPane = new JBScrollPane(tree);
@@ -60,8 +65,13 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     });
     PromptSupport.setPrompt("Enter your query", queryJTextField);
 
+    JPanel topPanel = new JPanel();
+    topPanel.setLayout(new VerticalLayout());
+    topPanel.add(progressBar);
+    topPanel.add(queryJTextField);
+
     setLayout(new BorderLayout());
-    add(queryJTextField, BorderLayout.PAGE_START);
+    add(topPanel, BorderLayout.PAGE_START);
     queryJTextField.addActionListener(e ->
         contextHelperProjectComponent.processQuery(queryJTextField.getText()));
     JSplitPane splitPane = new JSplitPane(
@@ -91,6 +101,20 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     ToolWindow toolWindow =
         ToolWindowManager.getInstance(project).getToolWindow(ContextHelperConstants.ID_TOOL_WINDOW);
     toolWindow.activate(this);
+  }
+
+  public void setQueryingStatus(boolean isQuerying) {
+    showPanel();
+    if (isQuerying) {
+      progressBar.setIndeterminate(true);
+      queryJTextField.setText("");
+      treeModel =
+          new StackExchangeThreadsTreeModel(
+              contextHelperProjectComponent.getStackExchangeClient(), null);
+      tree.setModel(treeModel);
+    } else {
+      progressBar.setIndeterminate(false);
+    }
   }
 
   @Override

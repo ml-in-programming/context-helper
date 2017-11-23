@@ -2,6 +2,7 @@ package ru.spb.se.contexthelper.component
 
 import com.google.code.stackexchange.schema.StackExchangeSite
 import com.intellij.openapi.components.ProjectComponent
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
@@ -68,6 +69,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     override fun getComponentName(): String = PLUGIN_NAME + "." + COMPONENT_NAME
 
     fun processQuery(query: String) {
+        LOG.info("processQuery($query)")
         val contextHelperPanel = viewerPanel!!
         val indicator = object : EmptyProgressIndicator() {
             override fun start() {
@@ -107,20 +109,24 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 SwingUtilities.invokeLater {
                     MessagesUtil.showErrorDialog("Unable to process the query.", project)
                 }
+                LOG.error(e)
             }
             indicator.stop()
         }
     }
 
     companion object {
+        private val LOG = Logger.getInstance(
+            "ru.spb.se.contexthelper.component.ContextHelperProjectComponent")
+
         /** Last part of the name for {@link NamedComponent}. */
-        val COMPONENT_NAME = "ContextHelperProjectComponent"
-        val ICON_PATH_TOOL_WINDOW = "/icons/se-icon.png"
+        private val COMPONENT_NAME = "ContextHelperProjectComponent"
+        private val ICON_PATH_TOOL_WINDOW = "/icons/se-icon.png"
 
-        val STACK_EXCHANGE_API_KEY = "F)x9bhGombhjqpnXt)5Mwg(("
-        val STACK_EXCHANGE_SITE = StackExchangeSite.STACK_OVERFLOW
+        private val STACK_EXCHANGE_API_KEY = "F)x9bhGombhjqpnXt)5Mwg(("
+        private val STACK_EXCHANGE_SITE = StackExchangeSite.STACK_OVERFLOW
 
-        val GOOGLE_SEARCH_API_KEY = "AIzaSyBXQg39PaVjqONPEL4eubyA7S-pEuqVKOc"
+        private val GOOGLE_SEARCH_API_KEY = "AIzaSyBXQg39PaVjqONPEL4eubyA7S-pEuqVKOc"
 
         fun getFor(project: Project): ContextHelperProjectComponent =
             project.getComponent(ContextHelperProjectComponent::class.java)

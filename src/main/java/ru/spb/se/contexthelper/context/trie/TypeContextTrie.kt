@@ -2,7 +2,6 @@ package ru.spb.se.contexthelper.context.trie
 
 import java.util.stream.Collectors
 
-// TODO(niksaz): Remove debug output.
 /** Prefix tree built from available [Type]s. */
 data class TypeContextTrie(private val root: Node = Node()) {
     fun addType(type: Type, typeLevel: Int) {
@@ -10,14 +9,9 @@ data class TypeContextTrie(private val root: Node = Node()) {
     }
 
     fun buildRelevantParts(): List<String> {
-        printTrie()
         val relevantParts = mutableListOf<String>()
         root.toEvaluatedNode().findRelevantParts(TYPES_TO_CONSIDER, relevantParts)
         return relevantParts
-    }
-
-    private fun printTrie() {
-        root.toEvaluatedNode().printNode()
     }
 
     data class Node(
@@ -66,9 +60,6 @@ data class TypeContextTrie(private val root: Node = Node()) {
                 }
                 .sorted(Comparator.comparingDouble { it.second })
                 .collect(Collectors.toList())
-            println("step")
-            println(subtreeLevels)
-            println(scoredSubtreeLevels)
             scoredSubtreeLevels.stream()
                 .limit(typesToFind)
                 .forEach { typesToFindMap.merge(it.first, 1, Long::plus) }
@@ -82,14 +73,6 @@ data class TypeContextTrie(private val root: Node = Node()) {
                     parts.add(part)
                     edgeMap[part]!!.findRelevantParts(typesInChild, parts)
                 }
-            }
-        }
-
-        fun printNode(indent: String = "") {
-            println("$subtreeLevels")
-            for (entry in edgeMap) {
-                print("$indent ${entry.key} ")
-                entry.value.printNode(indent + "  ")
             }
         }
     }

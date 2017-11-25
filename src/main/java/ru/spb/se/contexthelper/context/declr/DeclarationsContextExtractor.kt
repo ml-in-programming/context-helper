@@ -16,12 +16,11 @@ class DeclarationsContextExtractor(private val psiElement: PsiElement) {
     }
 
     private fun extractContextFrom(currentPsiElement: PsiElement, lastParent: PsiElement?) {
-        if (currentPsiElement is PsiDirectory) {
-            return
+        if (currentPsiElement !is PsiDirectory) {
+            currentPsiElement.processDeclarations(
+                scopeProcessor, ResolveState.initial(), lastParent, psiElement)
+            scopeProcessor.upParentCounter()
+            extractContextFrom(currentPsiElement.parent, currentPsiElement)
         }
-        currentPsiElement.processDeclarations(
-            scopeProcessor, ResolveState.initial(), lastParent, psiElement)
-        scopeProcessor.upParentCounter()
-        extractContextFrom(currentPsiElement.parent, currentPsiElement)
     }
 }

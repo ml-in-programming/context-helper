@@ -3,9 +3,8 @@ package ru.spb.se.contexthelper
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent
+import ru.spb.se.contexthelper.context.ContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
-import ru.spb.se.contexthelper.context.declr.DeclarationsContextExtractor
-import ru.spb.se.contexthelper.context.declr.DeclarationsContextQueryBuilder
 import ru.spb.se.contexthelper.util.ActionEventUtil
 import ru.spb.se.contexthelper.util.MessagesUtil
 
@@ -23,16 +22,14 @@ class DeclarationsContextHelpAction : AnAction() {
             MessagesUtil.showInfoDialog("No enclosing file found", project)
             return
         }
-        val psiElement = psiFile.findElementAt(editor.caretModel.offset)
+        val psiElement = psiFile.findElementAt(editor.caretModel.offset - 1)
         if (psiElement == null) {
             MessagesUtil.showInfoDialog("No PSI for the element found", project)
             return
         }
-        val contextExtractor = DeclarationsContextExtractor(psiElement)
-        val context = contextExtractor.context
-        val queryBuilder = DeclarationsContextQueryBuilder(context)
+        val contextProcessor = ContextProcessor(psiElement)
         val query = try {
-            queryBuilder.buildQuery()
+            contextProcessor.generateQuery()
         } catch (ignored: NotEnoughContextException) {
             MessagesUtil.showInfoDialog("Unable to describe the context.", project)
             return

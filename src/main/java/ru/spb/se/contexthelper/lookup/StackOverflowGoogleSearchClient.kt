@@ -17,7 +17,7 @@ class StackOverflowGoogleSearchClient(private val apiKey: String) {
                     request.readTimeout = HTTP_READ_TIMEOUT
                 }
             )
-        val list = customsearch.cse().list("$query java")
+        val list = customsearch.cse().list(query)
         list.key = apiKey
         list.cx = SEARCH_ENGINE_ID
         list.alt = "json"

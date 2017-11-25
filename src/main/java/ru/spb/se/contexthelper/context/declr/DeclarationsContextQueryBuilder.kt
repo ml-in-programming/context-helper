@@ -30,6 +30,6 @@ class DeclarationsContextQueryBuilder(private val declarationsContext: Declarati
         private val UPPERCASE_LETTER_REGEX = Regex("(?=\\p{Upper})")
 
         private val JAVA_PRIMITIVE_TYPE_NAMES =
-            setOf("boolean", "byte", "char", "short", "int", "long", "float", "double")
+            setOf("void", "boolean", "byte", "char", "short", "int", "long", "float", "double")
     }
 }

@@ -1,9 +1,9 @@
 package ru.spb.se.contexthelper.context.declr
 
+import ru.spb.se.contexthelper.context.NotEnoughContextException
 import ru.spb.se.contexthelper.context.getRelevantTypeName
 import ru.spb.se.contexthelper.context.trie.Type
 import ru.spb.se.contexthelper.context.trie.TypeContextTrie
-import java.util.stream.Collectors
 
 class DeclarationsContextQueryBuilder(private val declarationsContext: DeclarationsContext) {
     fun buildQuery(): String {
@@ -17,18 +17,19 @@ class DeclarationsContextQueryBuilder(private val declarationsContext: Declarati
                     contextTrie.addType(type, it.parentLevel)
                 }
             }
-        val relevantParts = contextTrie.buildRelevantParts()
-        return relevantParts.stream()
-            .flatMap { it.split(UPPERCASE_LETTER_REGEX).stream() }
-            .limit(MAX_PARTS_FOR_QUERY)
-            .collect(Collectors.joining(" "))
+        val relevantTypes = contextTrie.getRelevantTypes(2)
+        return when {
+            relevantTypes.isEmpty() -> throw NotEnoughContextException()
+            relevantTypes.size == 1 -> "How to use ${relevantTypes[0].simpleName} in Java?"
+            else -> {
+                val firstType = relevantTypes[0].simpleName
+                val secondType = relevantTypes[1].simpleName
+                "How to use $firstType with $secondType in Java?"
+            }
+        }
     }
 
     companion object {
-        private val MAX_PARTS_FOR_QUERY = 32L
-
-        private val UPPERCASE_LETTER_REGEX = Regex("(?=\\p{Upper})")
-
         private val JAVA_PRIMITIVE_TYPE_NAMES =
             setOf("void", "boolean", "byte", "char", "short", "int", "long", "float", "double")
     }

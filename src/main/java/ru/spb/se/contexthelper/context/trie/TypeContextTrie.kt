@@ -1,5 +1,6 @@
 package ru.spb.se.contexthelper.context.trie
 
+import com.intellij.util.containers.Stack
 import java.util.stream.Collectors
 
 /** Prefix tree built from available [Type]s. */
@@ -8,10 +9,10 @@ data class TypeContextTrie(private val root: Node = Node()) {
         root.addType(type.parts, 0, typeLevel)
     }
 
-    fun buildRelevantParts(): List<String> {
-        val relevantParts = mutableListOf<String>()
-        root.toEvaluatedNode().findRelevantParts(TYPES_TO_CONSIDER, relevantParts)
-        return relevantParts
+    fun getRelevantTypes(typesToConsider: Long): List<Type> {
+        val relevantTypes = mutableListOf<Type>()
+        root.buildNode().findRelevantTypes(typesToConsider, Stack(), relevantTypes)
+        return relevantTypes
     }
 
     data class Node(
@@ -29,27 +30,31 @@ data class TypeContextTrie(private val root: Node = Node()) {
             node.addType(parts, partIndex + 1, typeLevel)
         }
 
-        fun toEvaluatedNode(): EvaluatedNode {
+        fun buildNode(): BuiltNode {
             val levels = mutableListOf<Pair<String?, Int>>()
-            val evaluatedEdgeMap = mutableMapOf<String, EvaluatedNode>()
+            val evaluatedEdgeMap = mutableMapOf<String, BuiltNode>()
             if (mostRelevantLevel != null) {
                 levels.add(null to mostRelevantLevel!!)
             }
             for (entry in edgeMap) {
-                val childEvaluatedNode = entry.value.toEvaluatedNode()
+                val childEvaluatedNode = entry.value.buildNode()
                 evaluatedEdgeMap.put(entry.key, childEvaluatedNode)
                 childEvaluatedNode.subtreeLevels.mapTo(levels) { entry.key  to it.second }
             }
             levels.sortBy { it.second }
-            return EvaluatedNode(levels.toList(), evaluatedEdgeMap)
+            return BuiltNode(levels.toList(), evaluatedEdgeMap)
         }
     }
 
-    data class EvaluatedNode(
+    data class BuiltNode(
         val subtreeLevels: List<Pair<String?, Int>>,
-        private val edgeMap: Map<String, EvaluatedNode>
+        private val edgeMap: Map<String, BuiltNode>
     ) {
-        fun findRelevantParts(typesToFind: Long, parts: MutableList<String>) {
+        fun findRelevantTypes(
+            typesToFind: Long,
+            parts: Stack<String>,
+            types: MutableList<Type>
+        ) {
             val typesToFindMap = mutableMapOf<String?, Long>()
             val scoredSubtreeLevels = subtreeLevels.stream()
                 .map {
@@ -68,16 +73,14 @@ data class TypeContextTrie(private val root: Node = Node()) {
                 val typesInChild = typesToFindMap[part] ?: continue
                 typesToFindMap.remove(part)
                 if (part == null) {
+                    types.add(Type(parts.toList()))
                     // It is current vertex and we have already added name components.
                 } else {
-                    parts.add(part)
-                    edgeMap[part]!!.findRelevantParts(typesInChild, parts)
+                    parts.push(part)
+                    edgeMap[part]!!.findRelevantTypes(typesInChild, parts, types)
+                    parts.pop()
                 }
             }
         }
-    }
-    
-    companion object {
-        val TYPES_TO_CONSIDER = 3L
     }
 }

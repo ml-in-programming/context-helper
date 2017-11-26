@@ -3,7 +3,7 @@ package ru.spb.se.contexthelper.context
 import com.intellij.psi.*
 
 /** Exception is thrown if the query can not be built because of the lack of the context. */
-class NotEnoughContextException(message: String) : RuntimeException(message)
+class NotEnoughContextException : RuntimeException()
 
 fun getRelevantTypeName(psiElement: PsiElement): String? =
     when (psiElement) {

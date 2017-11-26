@@ -100,7 +100,6 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                     //     stackExchangeClient.requestRelevantQuestions(query);
                     val questions = stackExchangeClient.requestQuestionsWith(questionIds)
                     val queryResults = StackExchangeQuestionResults(query, questions)
-
                     SwingUtilities.invokeLater {
                         contextHelperPanel.updatePanelWithQueryResults(queryResults)
                     }

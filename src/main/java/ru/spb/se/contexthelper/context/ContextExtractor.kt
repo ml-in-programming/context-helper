@@ -47,7 +47,6 @@ class ContextProcessor(private val psiElement: PsiElement) {
         val declarationsContextExtractor = DeclarationsContextExtractor(psiElement)
         val context = declarationsContextExtractor.context
         val queryBuilder = DeclarationsContextQueryBuilder(context)
-        val query = queryBuilder.buildQuery()
-        return "$query java"
+        return queryBuilder.buildQuery()
     }
 }

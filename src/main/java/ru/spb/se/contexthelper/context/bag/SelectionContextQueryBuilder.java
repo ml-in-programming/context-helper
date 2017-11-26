@@ -110,7 +110,7 @@ public class SelectionContextQueryBuilder {
             .sorted(WordInfo.COMPARATOR_BY_TIMES_ENCOUNTERED)
             .collect(Collectors.toList());
     if (words.isEmpty()) {
-      throw new NotEnoughContextException("No meaningful words to form the query.");
+      throw new NotEnoughContextException();
     }
     return words.stream()
         .limit(MAX_WORDS_FOR_QUERY)

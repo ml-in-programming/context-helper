@@ -8,15 +8,16 @@ import com.intellij.openapi.diagnostic.Logger
 
 class StackOverflowGoogleSearchClient(private val apiKey: String) {
     fun lookupQuestionIds(query: String): List<Long> {
-        val customsearch =
-            Customsearch(
-                NetHttpTransport(),
-                JacksonFactory(),
-                HttpRequestInitializer { request ->
-                    request.connectTimeout = HTTP_REQUEST_TIMEOUT
-                    request.readTimeout = HTTP_READ_TIMEOUT
-                }
-            )
+        val builder = Customsearch.Builder(
+            NetHttpTransport(),
+            JacksonFactory(),
+            HttpRequestInitializer { request ->
+                request.connectTimeout = HTTP_REQUEST_TIMEOUT
+                request.readTimeout = HTTP_READ_TIMEOUT
+            }
+        )
+        builder.applicationName = "SnippetSearch"
+        val customsearch = builder.build()
         val list = customsearch.cse().list(query)
         list.key = apiKey
         list.cx = SEARCH_ENGINE_ID

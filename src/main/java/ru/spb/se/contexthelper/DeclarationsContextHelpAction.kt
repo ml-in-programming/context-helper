@@ -14,7 +14,7 @@ class DeclarationsContextHelpAction : AnAction() {
         val project = ActionEventUtil.getProjectFor(event) ?: return
         val editor = ActionEventUtil.getEditorFor(event)
         if (editor == null) {
-            MessagesUtil.showInfoDialog("Editor is not selected", project)
+            MessagesUtil.showInfoDialog("Source code editor is not selected", project)
             return
         }
         val psiFile = ActionEventUtil.getPsiFileFor(event)

@@ -12,14 +12,20 @@ class ContextProcessor(private val psiElement: PsiElement) {
     }
 
     private fun generateQueryIfInPsiReferenceExpression(): String? {
-        val parent = psiElement.parent
-        if (parent is PsiReferenceExpression || parent is PsiMethodCallExpression) {
-            val leftType = getLeftPartReferenceType(parent.firstChild)
-            leftType?.let {
-                return "How to get ${psiElement.text} from ${it.simpleName} in Java?"
-            }
+        val reference = findReferenceParent(psiElement) ?: return null
+        val leftType = getLeftPartReferenceType(reference.firstChild) ?: return null
+        val rightIdentifier = reference.children.find { it is PsiIdentifier } ?: return null
+        val identifierParts = rightIdentifier.text.split(UPPERCASE_REGEX)
+        return "How to ${identifierParts.joinToString(" ")} ${leftType.simpleName} in java?"
+    }
+
+    private fun findReferenceParent(psiElement: PsiElement?): PsiElement? {
+        return when (psiElement) {
+            null -> null
+            is PsiReferenceExpression -> psiElement
+            is PsiMethodCallExpression -> psiElement.methodExpression
+            else -> findReferenceParent(psiElement.parent)
         }
-        return null
     }
 
     private fun getLeftPartReferenceType(element: PsiElement): Type? {
@@ -48,5 +54,9 @@ class ContextProcessor(private val psiElement: PsiElement) {
         val context = declarationsContextExtractor.context
         val queryBuilder = DeclarationsContextQueryBuilder(context)
         return queryBuilder.buildQuery()
+    }
+
+    companion object {
+        private val UPPERCASE_REGEX = Regex("(?=\\p{Upper})")
     }
 }

@@ -1,5 +1,7 @@
 package ru.spb.se.contexthelper.lookup
 
+import ru.spb.se.contexthelper.context.Query
+
 /** Class which ranks the extracted StackOverflow queries based on given keywords. */
 class QueryRecommender {
     private var querySuggestions: List<String> = listOf()
@@ -11,9 +13,18 @@ class QueryRecommender {
         querySuggestions = bufferedReader.useLines { it.toList() }
     }
 
-    fun findSimilar(query: String, count: Int): List<String> {
-        val mutableList = mutableListOf(query)
-        querySuggestions.take(count - 1).forEach { mutableList.add(it.capitalize()) }
+    fun relevantQuestions(query: Query, count: Int): List<String> {
+        val mutableList = mutableListOf(query.defaultQuestion)
+        val scoredSuggestions = querySuggestions.map { suggestion ->
+            val score = query.keywords.map {
+                if (suggestion.contains(it.word)) it.weight else 0
+            }.sum()
+            suggestion to score
+        }
+        scoredSuggestions
+            .sortedByDescending { it.second }
+            .take(count - 1)
+            .forEach { mutableList.add(it.first.capitalize()) }
         return mutableList.toList()
     }
 }

@@ -58,6 +58,6 @@ public class SelectionContextHelpIntention implements IntentionAction {
     }
     ContextHelperProjectComponent helperComponent =
         ContextHelperProjectComponent.Companion.getFor(project);
-    helperComponent.processQuery(query);
+    helperComponent.processQuery(query + " java");
   }
 }

@@ -78,23 +78,24 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
     fun assistAround(psiElement: PsiElement, editor: Editor) {
         val contextProcessor = ContextProcessor(psiElement)
-        val primaryQuery = try {
+        val query = try {
             contextProcessor.generateQuery()
         } catch (ignored: NotEnoughContextException) {
             MessagesUtil.showInfoDialog("Unable to describe the context.", project)
             return
         }
-        val queryList = JBList<String>(queryRecommender.findSimilar(primaryQuery, QUERIES_SUGGEST_COUNT))
+        val questionList =
+            JBList<String>(queryRecommender.relevantQuestions(query, QUESTS_SUGGEST_COUNT))
         val popupWindow =
-            JBPopupFactory.getInstance().createListPopupBuilder(queryList)
+            JBPopupFactory.getInstance().createListPopupBuilder(questionList)
                 .setTitle("Select query for StackOverflow")
                 .setMovable(false)
                 .setResizable(false)
                 .setRequestFocus(true)
                 .setItemChoosenCallback {
-                    val selectedQuery = queryList.selectedValue
+                    val selectedQuery = questionList.selectedValue
                     if (selectedQuery != null) {
-                        processQuery(selectedQuery)
+                        processQuery(selectedQuery + " java")
                     }
                 }.createPopup()
         popupWindow.showInBestPositionFor(editor)
@@ -155,7 +156,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         private val ICON_PATH_TOOL_WINDOW = "/icons/se-icon.png"
 
         private val QUERIES_PATH = "/tasks/suggested.txt"
-        private val QUERIES_SUGGEST_COUNT = 5
+        private val QUESTS_SUGGEST_COUNT = 5
 
         private val STACK_EXCHANGE_API_KEY = "F)x9bhGombhjqpnXt)5Mwg(("
         private val STACK_EXCHANGE_SITE = StackExchangeSite.STACK_OVERFLOW

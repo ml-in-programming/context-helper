@@ -2,11 +2,16 @@ package ru.spb.se.contexthelper
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.ui.popup.JBPopup
+import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.ui.components.JBList
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent
 import ru.spb.se.contexthelper.context.ContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
 import ru.spb.se.contexthelper.util.ActionEventUtil
 import ru.spb.se.contexthelper.util.MessagesUtil
+import javax.swing.SwingUtilities
 
 /** An action that is generating a query based on the declarations available at the cursor. */
 class DeclarationsContextHelpAction : AnAction() {
@@ -34,7 +39,28 @@ class DeclarationsContextHelpAction : AnAction() {
             MessagesUtil.showInfoDialog("Unable to describe the context.", project)
             return
         }
-        val helperComponent = ContextHelperProjectComponent.getFor(project)
-        helperComponent.processQuery(query)
+        val queryList = JBList<String>(query)
+        val popupWindow =
+            JBPopupFactory.getInstance().createListPopupBuilder(queryList)
+                .setTitle("Select query for StackOverflow")
+                .setMovable(false)
+                .setResizable(false)
+                .setRequestFocus(true)
+                .setItemChoosenCallback {
+                    val selectedQuery = queryList.selectedValue
+                    if (selectedQuery != null) {
+                        val helperComponent = ContextHelperProjectComponent.getFor(project)
+                        helperComponent.processQuery(selectedQuery)
+                    }
+
+                }.createPopup()
+        showPopupUnderneathCaret(popupWindow, editor)
+    }
+
+    private fun showPopupUnderneathCaret(popupWindow: JBPopup, editor: Editor) {
+        val visualPosition = editor.offsetToVisualPosition(editor.caretModel.offset)
+        val point = editor.visualPositionToXY(visualPosition)
+        SwingUtilities.convertPointToScreen(point, editor.component)
+        popupWindow.showInBestPositionFor(editor)
     }
 }

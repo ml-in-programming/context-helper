@@ -14,7 +14,7 @@ class QueryRecommender {
     }
 
     fun relevantQuestions(query: Query, count: Int): List<String> {
-        val mutableList = mutableListOf(query.defaultQuestion)
+        val mutableList = mutableListOf<String>(/* query.defaultQuestion */)
         val scoredSuggestions = querySuggestions.map { suggestion ->
             val score = query.keywords.map {
                 if (suggestion.contains(it.word)) it.weight else 0
@@ -23,7 +23,7 @@ class QueryRecommender {
         }
         scoredSuggestions
             .sortedByDescending { it.second }
-            .take(count - 1)
+            .take(count)
             .forEach { mutableList.add(it.first.capitalize()) }
         return mutableList.toList()
     }

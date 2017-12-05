@@ -88,7 +88,9 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
             JBList<String>(queryRecommender.relevantQuestions(query, QUESTS_SUGGEST_COUNT))
         val popupWindow =
             JBPopupFactory.getInstance().createListPopupBuilder(questionList)
-                .setTitle("Select query for StackOverflow")
+                .setAdText(query.keywords.joinToString(", ") {
+                    keyword -> "${keyword.word}(${keyword.weight})"
+                })
                 .setMovable(false)
                 .setResizable(false)
                 .setRequestFocus(true)

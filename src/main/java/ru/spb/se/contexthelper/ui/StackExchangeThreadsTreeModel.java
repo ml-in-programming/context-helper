@@ -1,4 +1,4 @@
-package ru.spb.se.contexthelper.model;
+package ru.spb.se.contexthelper.ui;
 
 import com.google.code.stackexchange.schema.Answer;
 import com.google.code.stackexchange.schema.Question;
@@ -20,8 +20,8 @@ public class StackExchangeThreadsTreeModel implements TreeModel {
 
   private final Map<Question, List<Answer>> questionToAnswers = new HashMap<>();
 
-  public StackExchangeThreadsTreeModel(
-      StackExchangeClient stackExchangeClient, List<Question> questions) {
+  StackExchangeThreadsTreeModel(
+    StackExchangeClient stackExchangeClient, List<Question> questions) {
     this.stackExchangeClient = stackExchangeClient;
     this.questions = questions;
   }

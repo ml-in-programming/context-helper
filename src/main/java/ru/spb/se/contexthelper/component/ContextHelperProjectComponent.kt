@@ -3,15 +3,22 @@ package ru.spb.se.contexthelper.component
 import com.google.code.stackexchange.schema.StackExchangeSite
 import com.intellij.openapi.components.ProjectComponent
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.psi.PsiElement
+import com.intellij.ui.components.JBList
 import com.intellij.ui.content.ContentFactory
 import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
+import ru.spb.se.contexthelper.context.ContextProcessor
+import ru.spb.se.contexthelper.context.NotEnoughContextException
+import ru.spb.se.contexthelper.lookup.QueryRecommender
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
 import ru.spb.se.contexthelper.lookup.StackOverflowGoogleSearchClient
@@ -22,15 +29,21 @@ import kotlin.concurrent.thread
 
 /** Component which is called to initialize ContextHelper plugin for each [Project]. */
 class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
-    val stackExchangeClient =
-        StackExchangeClient(STACK_EXCHANGE_API_KEY, STACK_EXCHANGE_SITE)
-
+    val stackExchangeClient = StackExchangeClient(STACK_EXCHANGE_API_KEY, STACK_EXCHANGE_SITE)
     private val googleSearchClient = StackOverflowGoogleSearchClient(GOOGLE_SEARCH_API_KEY)
+    private val queryRecommender: QueryRecommender = QueryRecommender()
 
     private var viewerPanel: ContextHelperPanel? = null
 
+    override fun getComponentName(): String = PLUGIN_NAME + "." + COMPONENT_NAME
+
     override fun projectOpened() {
         initToolWindow()
+        queryRecommender.loadQueries(QUERIES_PATH)
+    }
+
+    override fun projectClosed() {
+        disposeToolWindow()
     }
 
     private fun initToolWindow() {
@@ -55,9 +68,6 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     private fun isToolWindowRegistered(): Boolean =
         ToolWindowManager.getInstance(project).getToolWindow(ID_TOOL_WINDOW) != null
 
-    override fun projectClosed() {
-        disposeToolWindow()
-    }
 
     private fun disposeToolWindow() {
         viewerPanel = null
@@ -66,7 +76,29 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         }
     }
 
-    override fun getComponentName(): String = PLUGIN_NAME + "." + COMPONENT_NAME
+    fun assistAround(psiElement: PsiElement, editor: Editor) {
+        val contextProcessor = ContextProcessor(psiElement)
+        val primaryQuery = try {
+            contextProcessor.generateQuery()
+        } catch (ignored: NotEnoughContextException) {
+            MessagesUtil.showInfoDialog("Unable to describe the context.", project)
+            return
+        }
+        val queryList = JBList<String>(queryRecommender.findSimilar(primaryQuery, QUERIES_SUGGEST_COUNT))
+        val popupWindow =
+            JBPopupFactory.getInstance().createListPopupBuilder(queryList)
+                .setTitle("Select query for StackOverflow")
+                .setMovable(false)
+                .setResizable(false)
+                .setRequestFocus(true)
+                .setItemChoosenCallback {
+                    val selectedQuery = queryList.selectedValue
+                    if (selectedQuery != null) {
+                        processQuery(selectedQuery)
+                    }
+                }.createPopup()
+        popupWindow.showInBestPositionFor(editor)
+    }
 
     fun processQuery(query: String) {
         LOG.info("processQuery($query)")
@@ -121,6 +153,9 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         /** Last part of the name for {@link NamedComponent}. */
         private val COMPONENT_NAME = "ContextHelperProjectComponent"
         private val ICON_PATH_TOOL_WINDOW = "/icons/se-icon.png"
+
+        private val QUERIES_PATH = "/tasks/suggested.txt"
+        private val QUERIES_SUGGEST_COUNT = 5
 
         private val STACK_EXCHANGE_API_KEY = "F)x9bhGombhjqpnXt)5Mwg(("
         private val STACK_EXCHANGE_SITE = StackExchangeSite.STACK_OVERFLOW

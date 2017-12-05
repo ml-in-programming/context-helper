@@ -2,7 +2,6 @@ package ru.spb.se.contexthelper.ui;
 
 import com.google.code.stackexchange.schema.Answer;
 import com.google.code.stackexchange.schema.Question;
-import ru.spb.se.contexthelper.model.StackExchangeThreadsTreeModel;
 
 import javax.swing.*;
 

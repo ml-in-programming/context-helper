@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.1.61'
+    ext.kotlin_version = '1.2.0'
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -30,8 +30,12 @@ intellij {
 
 sourceSets {
     main {
-        java.srcDir 'src/main/java/'
-        resources.srcDir 'resources/'
+        java {
+            srcDirs = ['src/main/java/']
+        }
+        resources {
+            srcDirs = ['resources/', 'data/']
+        }
     }
     test {
         java.srcDir 'src/test/java/'

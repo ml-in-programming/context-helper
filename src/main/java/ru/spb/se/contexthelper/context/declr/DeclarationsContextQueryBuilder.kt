@@ -20,11 +20,11 @@ class DeclarationsContextQueryBuilder(private val declarationsContext: Declarati
         val relevantTypes = contextTrie.getRelevantTypes(2)
         return when {
             relevantTypes.isEmpty() -> throw NotEnoughContextException()
-            relevantTypes.size == 1 -> "How to use ${relevantTypes[0].simpleName} in Java?"
+            relevantTypes.size == 1 -> "How to use ${relevantTypes[0].simpleName} in java?"
             else -> {
                 val firstType = relevantTypes[0].simpleName
                 val secondType = relevantTypes[1].simpleName
-                "How to use $firstType with $secondType in Java?"
+                "How to use $firstType with $secondType in java?"
             }
         }
     }

@@ -10,7 +10,6 @@ import org.jdesktop.swingx.prompt.PromptSupport;
 import ru.spb.se.contexthelper.ContextHelperConstants;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
-import ru.spb.se.contexthelper.model.StackExchangeThreadsTreeModel;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;

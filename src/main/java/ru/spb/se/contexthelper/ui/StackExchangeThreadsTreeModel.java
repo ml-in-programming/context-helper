@@ -2,6 +2,7 @@ package ru.spb.se.contexthelper.ui;
 
 import com.google.code.stackexchange.schema.Answer;
 import com.google.code.stackexchange.schema.Question;
+import java.util.Comparator;
 import ru.spb.se.contexthelper.lookup.StackExchangeClient;
 
 import javax.swing.event.TreeModelListener;
@@ -95,6 +96,7 @@ public class StackExchangeThreadsTreeModel implements TreeModel {
     List<Answer> cachedAnswers = questionToAnswers.get(question);
     if (cachedAnswers == null) {
       cachedAnswers = stackExchangeClient.requestAnswersFor(question.getQuestionId());
+      cachedAnswers.sort(Comparator.comparingLong(Answer::getScore).reversed());
       questionToAnswers.put(question, cachedAnswers);
     }
     return cachedAnswers;

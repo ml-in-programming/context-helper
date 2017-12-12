@@ -39,6 +39,8 @@ object StatsSender {
     }
 
     fun send(text: String, compress: Boolean = true): Boolean {
+        // TODO(niksaz): Remove debug output.
+        println(text)
         val info = requestServerUrl() ?: return false
         try {
             val response = createRequest(info, text, compress).execute()
@@ -76,14 +78,11 @@ private object Base64GzipCompressor {
     }
 }
 
-fun <T> createReportLine(
-    recorderId: String,
-    sessionId: String,
-    actionType: String,
-    data: T
-): String {
-    val json = Utils.gson.toJson(data)
-    val userUid = PermanentInstallationID.get()
+fun <T> createReportLine(sessionId: String, actionType: String, data: T): String {
     val stamp = System.currentTimeMillis()
-    return "$stamp\t$recorderId\t$userUid\t$sessionId\t$actionType\t$json"
+    val recorderId = "context-helper"
+    val recorderVersion = "1.0"
+    val userId = PermanentInstallationID.get()
+    val json = Utils.gson.toJson(data)
+    return "$stamp\t$recorderId\t$recorderVersion\t$userId\t$sessionId\t$actionType\t$json"
 }

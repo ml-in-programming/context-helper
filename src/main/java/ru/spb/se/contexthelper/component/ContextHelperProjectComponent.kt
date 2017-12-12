@@ -18,6 +18,7 @@ import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
 import ru.spb.se.contexthelper.context.ContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
+import ru.spb.se.contexthelper.logs.PopupLog
 import ru.spb.se.contexthelper.logs.StatsSender
 import ru.spb.se.contexthelper.logs.createReportLine
 import ru.spb.se.contexthelper.lookup.QueryRecommender
@@ -86,14 +87,16 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
             MessagesUtil.showInfoDialog("Unable to describe the context.", project)
             return
         }
-        val questionList =
-            JBList<String>(queryRecommender.relevantQuestions(query, QUESTS_SUGGEST_COUNT))
+        val questionList = queryRecommender.relevantQuestions(query, QUESTS_SUGGEST_COUNT)
+        val questionJBList = JBList<String>(questionList)
         val sessionId = "${System.currentTimeMillis()}"
-        val line = createReportLine("context-helper", sessionId, "QUERY_POPUP", null)
-        StatsSender.send(line)
-        println(line)
+        val report = createReportLine(
+            sessionId,
+            "QUERY_POPUP",
+            PopupLog(query.keywords, questionList))
+        StatsSender.send(report)
         val popupWindow =
-            JBPopupFactory.getInstance().createListPopupBuilder(questionList)
+            JBPopupFactory.getInstance().createListPopupBuilder(questionJBList)
                 .setAdText(query.keywords.joinToString(", ") {
                     keyword -> "${keyword.word}(${keyword.weight})"
                 })
@@ -101,18 +104,15 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 .setResizable(false)
                 .setRequestFocus(true)
                 .setItemChoosenCallback {
-                    val selectedQuery = questionList.selectedValue
-                    if (selectedQuery != null) {
-                        processQuery(selectedQuery + " java", sessionId)
-                    }
+                    val selectedIndex = questionJBList.selectedIndex
+                    val selectionReport = createReportLine(sessionId, "QUERY_HIT", selectedIndex)
+                    StatsSender.send(selectionReport)
+                    processQuery(questionJBList.selectedValue + " java")
                 }.createPopup()
         popupWindow.showInBestPositionFor(editor)
     }
 
-    fun processQuery(query: String, sessionId: String) {
-        val line = createReportLine("context-helper", sessionId, "QUERY_FIRED", null)
-        StatsSender.send(line)
-        println(line)
+    fun processQuery(query: String) {
         LOG.info("processQuery($query)")
         val contextHelperPanel = viewerPanel!!
         val indicator = object : EmptyProgressIndicator() {

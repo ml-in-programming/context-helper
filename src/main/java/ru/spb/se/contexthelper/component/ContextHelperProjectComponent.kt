@@ -18,6 +18,8 @@ import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
 import ru.spb.se.contexthelper.context.ContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
+import ru.spb.se.contexthelper.logs.StatsSender
+import ru.spb.se.contexthelper.logs.createReportLine
 import ru.spb.se.contexthelper.lookup.QueryRecommender
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
@@ -86,6 +88,10 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         }
         val questionList =
             JBList<String>(queryRecommender.relevantQuestions(query, QUESTS_SUGGEST_COUNT))
+        val sessionId = "${System.currentTimeMillis()}"
+        val line = createReportLine("context-helper", sessionId, "QUERY_POPUP", null)
+        StatsSender.send(line)
+        println(line)
         val popupWindow =
             JBPopupFactory.getInstance().createListPopupBuilder(questionList)
                 .setAdText(query.keywords.joinToString(", ") {
@@ -97,13 +103,16 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 .setItemChoosenCallback {
                     val selectedQuery = questionList.selectedValue
                     if (selectedQuery != null) {
-                        processQuery(selectedQuery + " java")
+                        processQuery(selectedQuery + " java", sessionId)
                     }
                 }.createPopup()
         popupWindow.showInBestPositionFor(editor)
     }
 
-    fun processQuery(query: String) {
+    fun processQuery(query: String, sessionId: String) {
+        val line = createReportLine("context-helper", sessionId, "QUERY_FIRED", null)
+        StatsSender.send(line)
+        println(line)
         LOG.info("processQuery($query)")
         val contextHelperPanel = viewerPanel!!
         val indicator = object : EmptyProgressIndicator() {

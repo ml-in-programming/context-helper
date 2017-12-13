@@ -49,6 +49,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
     override fun projectClosed() {
         statsCollector.flush()
+        statsCollector.ensureSent()
         if (isToolWindowRegistered()) {
             ToolWindowManager.getInstance(project).unregisterToolWindow(ID_TOOL_WINDOW)
         }

@@ -111,6 +111,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
           new StackExchangeThreadsTreeModel(
               contextHelperProjectComponent.getStackExchangeClient(), null);
       tree.setModel(treeModel);
+      updateBodyTextPaneWithText("");
     } else {
       progressBar.setIndeterminate(false);
     }

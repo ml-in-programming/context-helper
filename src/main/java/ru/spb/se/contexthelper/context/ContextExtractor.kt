@@ -14,10 +14,13 @@ class ContextProcessor(private val psiElement: PsiElement) {
     private fun generateQueryIfInPsiReferenceExpression(): Query? {
         val reference = findReferenceParent(psiElement) ?: return null
         val leftType = getLeftPartReferenceType(reference.firstChild) ?: return null
+        val leftTypeParts = leftType.simpleName.split(UPPERCASE_REGEX)
         val rightIdentifier = reference.children.find { it is PsiIdentifier } ?: return null
         val rightIdentifierParts = rightIdentifier.text.split(UPPERCASE_REGEX)
         val keywords = mutableListOf<Keyword>()
-        keywords.add(Keyword(leftType.simpleName, rightIdentifierParts.size + 1))
+        leftTypeParts.forEach {
+            keywords.add(Keyword(it, 2))
+        }
         rightIdentifierParts.forEach {
             keywords.add(Keyword(it, 1))
         }

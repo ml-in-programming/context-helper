@@ -1,4 +1,4 @@
-package ru.spb.se.contexthelper.logs
+package ru.spb.se.contexthelper.stats
 
 import com.google.common.net.HttpHeaders
 import com.google.gson.Gson
@@ -39,8 +39,6 @@ object StatsSender {
     }
 
     fun send(text: String, compress: Boolean = true): Boolean {
-        // TODO(niksaz): Remove debug output.
-        println(text)
         val info = requestServerUrl() ?: return false
         try {
             val response = createRequest(info, text, compress).execute()

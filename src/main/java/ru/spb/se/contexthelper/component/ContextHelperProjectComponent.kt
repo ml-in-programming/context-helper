@@ -4,7 +4,6 @@ import com.google.code.stackexchange.schema.StackExchangeSite
 import com.intellij.openapi.components.ProjectComponent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.IconLoader
@@ -18,13 +17,13 @@ import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
 import ru.spb.se.contexthelper.context.ContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
-import ru.spb.se.contexthelper.logs.PopupLog
-import ru.spb.se.contexthelper.logs.StatsSender
-import ru.spb.se.contexthelper.logs.createReportLine
 import ru.spb.se.contexthelper.lookup.QueryRecommender
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
 import ru.spb.se.contexthelper.lookup.StackOverflowGoogleSearchClient
+import ru.spb.se.contexthelper.stats.PopupLog
+import ru.spb.se.contexthelper.stats.StatsCollector
+import ru.spb.se.contexthelper.stats.createReportLine
 import ru.spb.se.contexthelper.ui.ContextHelperPanel
 import ru.spb.se.contexthelper.util.MessagesUtil
 import javax.swing.SwingUtilities
@@ -36,23 +35,23 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     private val googleSearchClient = StackOverflowGoogleSearchClient(GOOGLE_SEARCH_API_KEY)
     private val queryRecommender: QueryRecommender = QueryRecommender()
 
-    private var viewerPanel: ContextHelperPanel? = null
+    private val statsCollector: StatsCollector = StatsCollector()
+
+    private var viewerPanel: ContextHelperPanel = ContextHelperPanel(this)
 
     override fun getComponentName(): String = PLUGIN_NAME + "." + COMPONENT_NAME
 
     override fun projectOpened() {
-        initToolWindow()
+        val toolWindow = getOrRegisterToolWindow()
+        toolWindow.icon = IconLoader.getIcon(ICON_PATH_TOOL_WINDOW)
         queryRecommender.loadQueries(QUERIES_PATH)
     }
 
     override fun projectClosed() {
-        disposeToolWindow()
-    }
-
-    private fun initToolWindow() {
-        viewerPanel = ContextHelperPanel(this)
-        val toolWindow = getOrRegisterToolWindow()
-        toolWindow.icon = IconLoader.getIcon(ICON_PATH_TOOL_WINDOW)
+        statsCollector.flush()
+        if (isToolWindowRegistered()) {
+            ToolWindowManager.getInstance(project).unregisterToolWindow(ID_TOOL_WINDOW)
+        }
     }
 
     private fun getOrRegisterToolWindow(): ToolWindow {
@@ -72,13 +71,6 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         ToolWindowManager.getInstance(project).getToolWindow(ID_TOOL_WINDOW) != null
 
 
-    private fun disposeToolWindow() {
-        viewerPanel = null
-        if (isToolWindowRegistered()) {
-            ToolWindowManager.getInstance(project).unregisterToolWindow(ID_TOOL_WINDOW)
-        }
-    }
-
     fun assistAround(psiElement: PsiElement, editor: Editor) {
         val contextProcessor = ContextProcessor(psiElement)
         val query = try {
@@ -90,11 +82,11 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         val questionList = queryRecommender.relevantQuestions(query, QUESTS_SUGGEST_COUNT)
         val questionJBList = JBList<String>(questionList)
         val sessionId = "${System.currentTimeMillis()}"
-        val report = createReportLine(
+        val popupReport = createReportLine(
             sessionId,
             "QUERY_POPUP",
             PopupLog(query.keywords, questionList))
-        StatsSender.send(report)
+        statsCollector.appendReport(popupReport)
         val popupWindow =
             JBPopupFactory.getInstance().createListPopupBuilder(questionJBList)
                 .setAdText(query.keywords.joinToString(", ") {
@@ -105,8 +97,8 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 .setRequestFocus(true)
                 .setItemChoosenCallback {
                     val selectedIndex = questionJBList.selectedIndex
-                    val selectionReport = createReportLine(sessionId, "QUERY_HIT", selectedIndex)
-                    StatsSender.send(selectionReport)
+                    val hitReport = createReportLine(sessionId, "QUERY_HIT", selectedIndex)
+                    statsCollector.appendReport(hitReport)
                     processQuery(questionJBList.selectedValue + " java")
                 }.createPopup()
         popupWindow.showInBestPositionFor(editor)
@@ -114,22 +106,11 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
     fun processQuery(query: String) {
         LOG.info("processQuery($query)")
-        val contextHelperPanel = viewerPanel!!
-        val indicator = object : EmptyProgressIndicator() {
-            override fun start() {
-                SwingUtilities.invokeLater {
-                    contextHelperPanel.setQueryingStatus(true)
-                }
-            }
-
-            override fun stop() {
-                SwingUtilities.invokeLater {
-                    contextHelperPanel.setQueryingStatus(false)
-                }
-            }
-        }
+        val contextHelperPanel = viewerPanel
         thread(isDaemon = true) {
-            indicator.start()
+            SwingUtilities.invokeLater {
+                contextHelperPanel.setQueryingStatus(true)
+            }
             try {
                 val questionIds = googleSearchClient.lookupQuestionIds(query)
                 if (questionIds.isEmpty()) {
@@ -154,7 +135,9 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 }
                 LOG.error(e)
             }
-            indicator.stop()
+            SwingUtilities.invokeLater {
+                contextHelperPanel.setQueryingStatus(false)
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-package ru.spb.se.contexthelper.logs
+package ru.spb.se.contexthelper.stats
 
 import ru.spb.se.contexthelper.context.Keyword
 

@@ -43,6 +43,7 @@ sourceSets {
 }
 
 dependencies {
+    compile project(":log-analysis")
     compile group: 'org.swinglabs', name: 'swingx', version: '1.6.1'
     compile group: 'com.googlecode.stackexchange', name: 'stackoverflow-java-sdk-release', version: '2.2.0'
     compile group: 'org.jetbrains', name: 'annotations', version: '15.0'

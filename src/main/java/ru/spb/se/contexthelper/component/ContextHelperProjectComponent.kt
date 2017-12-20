@@ -17,11 +17,12 @@ import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
 import ru.spb.se.contexthelper.context.ContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
+import ru.spb.se.contexthelper.logs.KeywordLog
+import ru.spb.se.contexthelper.logs.PopupLog
 import ru.spb.se.contexthelper.lookup.QueryRecommender
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
 import ru.spb.se.contexthelper.lookup.StackOverflowGoogleSearchClient
-import ru.spb.se.contexthelper.stats.PopupLog
 import ru.spb.se.contexthelper.stats.StatsCollector
 import ru.spb.se.contexthelper.stats.createReportLine
 import ru.spb.se.contexthelper.ui.ContextHelperPanel
@@ -86,7 +87,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         val popupReport = createReportLine(
             sessionId,
             "QUERY_POPUP",
-            PopupLog(query.keywords, questionList))
+            PopupLog(query.keywords.map { KeywordLog(it.word, it.weight) }, questionList))
         statsCollector.appendReport(popupReport)
         val popupWindow =
             JBPopupFactory.getInstance().createListPopupBuilder(questionJBList)

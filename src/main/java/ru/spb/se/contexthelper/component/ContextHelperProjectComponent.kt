@@ -17,14 +17,15 @@ import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
 import ru.spb.se.contexthelper.context.ContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
-import ru.spb.se.contexthelper.logs.KeywordLog
-import ru.spb.se.contexthelper.logs.PopupLog
+import ru.spb.se.contexthelper.logs.data.KeywordLogData
+import ru.spb.se.contexthelper.logs.data.PopupLogData
+import ru.spb.se.contexthelper.logs.data.SelectionLogData
 import ru.spb.se.contexthelper.lookup.QueryRecommender
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
 import ru.spb.se.contexthelper.lookup.StackOverflowGoogleSearchClient
-import ru.spb.se.contexthelper.stats.StatsCollector
-import ru.spb.se.contexthelper.stats.createReportLine
+import ru.spb.se.contexthelper.reporting.StatsCollector
+import ru.spb.se.contexthelper.reporting.createLogLine
 import ru.spb.se.contexthelper.ui.ContextHelperPanel
 import ru.spb.se.contexthelper.util.MessagesUtil
 import javax.swing.SwingUtilities
@@ -84,10 +85,10 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         val questionList = queryRecommender.relevantQuestions(query, QUESTS_SUGGEST_COUNT)
         val questionJBList = JBList<String>(questionList)
         val sessionId = "${System.currentTimeMillis()}"
-        val popupReport = createReportLine(
+        val popupReport = createLogLine(
             sessionId,
             "QUERY_POPUP",
-            PopupLog(query.keywords.map { KeywordLog(it.word, it.weight) }, questionList))
+            PopupLogData(query.keywords.map { KeywordLogData(it.word, it.weight) }, questionList))
         statsCollector.appendReport(popupReport)
         val popupWindow =
             JBPopupFactory.getInstance().createListPopupBuilder(questionJBList)
@@ -99,7 +100,10 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 .setRequestFocus(true)
                 .setItemChoosenCallback {
                     val selectedIndex = questionJBList.selectedIndex
-                    val hitReport = createReportLine(sessionId, "QUERY_HIT", selectedIndex)
+                    val hitReport = createLogLine(
+                        sessionId,
+                        "QUERY_HIT",
+                        SelectionLogData(selectedIndex))
                     statsCollector.appendReport(hitReport)
                     processQuery(questionJBList.selectedValue + " java")
                 }.createPopup()

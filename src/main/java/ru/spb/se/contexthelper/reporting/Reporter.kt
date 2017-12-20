@@ -1,4 +1,4 @@
-package ru.spb.se.contexthelper.stats
+package ru.spb.se.contexthelper.reporting
 
 import com.google.common.net.HttpHeaders
 import com.google.gson.Gson
@@ -8,6 +8,8 @@ import org.apache.commons.codec.binary.Base64OutputStream
 import org.apache.http.client.fluent.Request
 import org.apache.http.entity.ContentType
 import org.apache.http.message.BasicHeader
+import ru.spb.se.contexthelper.logs.Log
+import ru.spb.se.contexthelper.logs.data.LogData
 import java.io.ByteArrayOutputStream
 import java.util.zip.GZIPOutputStream
 
@@ -76,11 +78,11 @@ private object Base64GzipCompressor {
     }
 }
 
-fun <T> createReportLine(sessionId: String, actionType: String, data: T): String {
+fun createLogLine(sessionId: String, actionType: String, logData: LogData): String {
     val stamp = System.currentTimeMillis()
     val recorderId = "context-helper"
     val recorderVersion = "1.0"
     val userId = PermanentInstallationID.get()
-    val json = Utils.gson.toJson(data)
-    return "$stamp\t$recorderId\t$recorderVersion\t$userId\t$sessionId\t$actionType\t$json"
+    val log = Log(stamp, recorderId, recorderVersion, userId, sessionId, actionType, logData)
+    return log.toString()
 }

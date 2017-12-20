@@ -1,4 +1,4 @@
-package ru.spb.se.contexthelper.stats
+package ru.spb.se.contexthelper.reporting
 
 import kotlin.concurrent.thread
 

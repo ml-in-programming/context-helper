@@ -8,8 +8,8 @@ import org.apache.commons.codec.binary.Base64OutputStream
 import org.apache.http.client.fluent.Request
 import org.apache.http.entity.ContentType
 import org.apache.http.message.BasicHeader
-import ru.spb.se.contexthelper.logs.Log
-import ru.spb.se.contexthelper.logs.data.LogData
+import ru.spb.se.contexthelper.log.Log
+import ru.spb.se.contexthelper.log.data.LogData
 import java.io.ByteArrayOutputStream
 import java.util.zip.GZIPOutputStream
 

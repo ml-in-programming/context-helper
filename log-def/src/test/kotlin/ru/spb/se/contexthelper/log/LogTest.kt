@@ -1,8 +1,8 @@
-package ru.spb.se.contexthelper.logs
+package ru.spb.se.contexthelper.log
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
-import ru.spb.se.contexthelper.logs.data.SelectionLogData
+import ru.spb.se.contexthelper.log.data.SelectionLogData
 
 class LogTest {
     @Test

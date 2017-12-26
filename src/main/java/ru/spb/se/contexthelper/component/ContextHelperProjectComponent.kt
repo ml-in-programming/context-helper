@@ -17,9 +17,9 @@ import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
 import ru.spb.se.contexthelper.context.ContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
-import ru.spb.se.contexthelper.logs.data.KeywordLogData
-import ru.spb.se.contexthelper.logs.data.PopupLogData
-import ru.spb.se.contexthelper.logs.data.SelectionLogData
+import ru.spb.se.contexthelper.log.data.KeywordLogData
+import ru.spb.se.contexthelper.log.data.PopupLogData
+import ru.spb.se.contexthelper.log.data.SelectionLogData
 import ru.spb.se.contexthelper.lookup.QueryRecommender
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults

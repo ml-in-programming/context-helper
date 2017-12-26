@@ -1,8 +1,8 @@
-package ru.spb.se.contexthelper.logs.validation
+package ru.spb.se.contexthelper.log.validation
 
-import ru.spb.se.contexthelper.logs.Log
+import ru.spb.se.contexthelper.log.Log
 
-class InputSessionValidator(private val sessionValidationResult: SimpleSessionValidationResult) {
+class InputSessionValidator(private val sessionValidationResult: SessionValidationResult) {
     fun validate(input: Iterable<String>) {
         var currentSessionUid: String? = null
         val session = mutableListOf<LogLine>()
@@ -11,8 +11,12 @@ class InputSessionValidator(private val sessionValidationResult: SimpleSessionVa
             if (line.trim().isEmpty()) continue
 
             val log = Log.fromString(line)
-            val logLine = LogLine(log, line)
+            if (log == null) {
+                sessionValidationResult.addErrorLine(line)
+                continue
+            }
 
+            val logLine = LogLine(log, line)
             if (logLine.log.sessionId == currentSessionUid) {
                 session.add(logLine)
             }

@@ -1,0 +1,3 @@
+1514298689783	context-helper	1.0	a590add0-f56f-4053-8b65-b27fe89c239d	1514298687418	QUERY_HIT	{"numberSelected":0}
+1514298702429	context-helper	1.0	a590add0-f56f-4053-8b65-b27fe89c239d	1514298702429	QUARRY	{"keywords":[{"word":"http","weight":2},{"word":"response","weight":2},{"word":"get","weight":1},{"word":"entity","weight":1}],"questions":["Get httpresponse entity","Get json object from http response","Get response code of httpput","Get httpresponse from httpclient","Get large response from http"]}
+1514298704054	context-helper	1.0	a590add0-f56f-4053-8b65-b27fe89c239d	1514298702429	QUERY_HIT	{"numberSelected":2}

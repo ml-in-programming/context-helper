@@ -9,37 +9,48 @@ import java.io.File
 class InputSessionValidatorTest {
     @Test
     fun checkValidSessions1() {
-        val result = SessionValidationResult()
-        val validator = InputSessionValidator(result)
         val lines = File("src/test/resources/validSessions1.txt").readLines()
-        validator.validate(lines)
+        val result = validateLines(lines)
 
         assertThat(result.validLines).hasSize(6)
-        assertThat(result.validLines).containsExactlyElementsIn(lines).inOrder()
+        assertThat(result.validLines).containsExactlyElementsIn(lines)
         assertThat(result.errorLines).hasSize(0)
     }
 
     @Test
     fun checkValidSessions2() {
-        val result = SessionValidationResult()
-        val validator = InputSessionValidator(result)
         val lines = File("src/test/resources/validSessions2.txt").readLines()
-        validator.validate(lines)
+        val result = validateLines(lines)
 
         assertThat(result.validLines).hasSize(5)
-        assertThat(result.validLines).containsExactlyElementsIn(lines).inOrder()
+        assertThat(result.validLines).containsExactlyElementsIn(lines)
         assertThat(result.errorLines).hasSize(0)
     }
 
     @Test
     fun checkLexicallyInvalidSessions() {
-        val result = SessionValidationResult()
-        val validator = InputSessionValidator(result)
         val lines = File("src/test/resources/lexicallyInvalidSessions.txt").readLines()
-        validator.validate(lines)
+        val result = validateLines(lines)
 
         assertThat(result.validLines).hasSize(0)
         assertThat(result.errorLines).hasSize(6)
-        assertThat(result.errorLines).containsExactlyElementsIn(lines).inOrder()
+        assertThat(result.errorLines).containsExactlyElementsIn(lines)
+    }
+
+    @Test
+    fun checkSemanticallyInvalidSessions() {
+        val lines = File("src/test/resources/semanticallyInvalidSessions.txt").readLines()
+        val result = validateLines(lines)
+
+        assertThat(result.validLines).hasSize(0)
+        assertThat(result.errorLines).hasSize(3)
+        assertThat(result.errorLines).containsExactlyElementsIn(lines)
+    }
+
+    private fun validateLines(lines: List<String>): SessionValidationResult {
+        val result = SessionValidationResult()
+        val validator = InputSessionValidator(result)
+        validator.validate(lines)
+        return result
     }
 }

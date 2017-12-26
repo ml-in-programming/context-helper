@@ -1,5 +1,6 @@
 package ru.spb.se.contexthelper.log.validation
 
+import ru.spb.se.contexthelper.log.ActionType
 import ru.spb.se.contexthelper.log.Log
 
 class InputSessionValidator(private val sessionValidationResult: SessionValidationResult) {
@@ -32,28 +33,12 @@ class InputSessionValidator(private val sessionValidationResult: SessionValidati
 
     private fun processSession(session: List<LogLine>) {
         if (session.isEmpty()) return
-//        session.filter { it.log }
-//        if (session.any { !it.isValid }) {
-//            storeSession(session, isValidSession = false)
-//            return
-//        }
-//
-//        var isValidSession = false
-//        var errorMessage = ""
-//        val initial = session.first()
-//        if (initial.event is CompletionStartedEvent) {
-//            val state = CompletionValidationState(initial.event)
-//            session.drop(1).forEach { state.accept(it.event!!) }
-//            isValidSession = state.isSessionValid()
-//            if (!isValidSession) {
-//                errorMessage = state.errorMessage()
-//            }
-//        }
-//        else {
-//            errorMessage = "Session starts with other event: ${initial.event?.actionType}"
-//        }
-
-        storeSession(session, true)
+        val suggestedSomething =
+            session.any { it.log.actionType == ActionType.QUERY_POPUP.typeName }
+        val selectedSomething =
+            session.any { it.log.actionType == ActionType.QUERY_HIT.typeName }
+        val isValidSession = suggestedSomething || !selectedSomething
+        storeSession(session, isValidSession)
     }
 
     private fun storeSession(session: List<LogLine>, isValidSession: Boolean) {

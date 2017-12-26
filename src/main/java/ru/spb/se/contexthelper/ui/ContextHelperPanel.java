@@ -3,17 +3,20 @@ package ru.spb.se.contexthelper.ui;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.ui.JBProgressBar;
 import com.intellij.ui.components.JBScrollPane;
+import java.awt.BorderLayout;
+import java.awt.Desktop;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JSplitPane;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.event.HyperlinkEvent;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.prompt.PromptSupport;
 import ru.spb.se.contexthelper.ContextHelperConstants;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
-
-import javax.swing.*;
-import javax.swing.event.HyperlinkEvent;
-import java.awt.*;
 
 /** ContextHelper's side panel. */
 public class ContextHelperPanel extends JPanel implements Runnable {
@@ -22,7 +25,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
 
   private final ContextHelperProjectComponent contextHelperProjectComponent;
 
-  private final JBProgressBar progressBar;
+  private final JProgressBar progressBar;
 
   private final JTextField queryJTextField;
 
@@ -39,7 +42,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     this.treeModel =
         new StackExchangeThreadsTreeModel(
             contextHelperProjectComponent.getStackExchangeClient(), null);
-    this.progressBar = new JBProgressBar();
+    this.progressBar = new JProgressBar();
     this.queryJTextField = new JTextField();
     this.tree = new StackExchangeThreadsTree(this, treeModel);
     this.treeScrollPane = new JBScrollPane(tree);

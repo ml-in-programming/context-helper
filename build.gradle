@@ -11,11 +11,15 @@ plugins {
 }
 
 apply plugin: 'idea'
-apply plugin: 'java'
-apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.intellij'
 
-sourceCompatibility = 1.8
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'kotlin'
+
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+}
 
 repositories {
     mavenCentral()
@@ -45,17 +49,24 @@ sourceSets {
 
 dependencies {
     compile project(":log-analysis")
+    compileOnly 'com.google.code.gson:gson:2.8.2'
     compile group: 'org.swinglabs', name: 'swingx', version: '1.6.1'
     compile group: 'com.googlecode.stackexchange', name: 'stackoverflow-java-sdk-release', version: '2.2.0'
     compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
     compile group: 'com.google.apis', name: 'google-api-services-customsearch', version: 'v1-rev57-1.23.0'
-    testCompile group: 'com.google.truth', name: 'truth', version: '0.35'
+}
+
+allprojects {
+    dependencies {
+        testCompile group: 'junit', name: 'junit', version: '4.12'
+        testCompile group: 'com.google.truth', name: 'truth', version: '0.36'
+    }
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = javaVersion
 }
 
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = javaVersion
 }

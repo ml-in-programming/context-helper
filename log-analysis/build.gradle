@@ -9,21 +9,20 @@ buildscript {
     }
 }
 
-apply plugin: 'kotlin'
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile 'com.google.code.gson:gson:1.4'
+    compileOnly 'com.google.code.gson:gson:2.8.2'
+    testCompile 'com.google.code.gson:gson:2.8.2'
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = javaVersion
 }
 
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = javaVersion
 }

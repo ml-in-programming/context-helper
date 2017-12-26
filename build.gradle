@@ -48,7 +48,7 @@ sourceSets {
 }
 
 dependencies {
-    compile project(":log-analysis")
+    compile project(":log-def")
     compileOnly 'com.google.code.gson:gson:2.8.2'
     compile group: 'org.swinglabs', name: 'swingx', version: '1.6.1'
     compile group: 'com.googlecode.stackexchange', name: 'stackoverflow-java-sdk-release', version: '2.2.0'

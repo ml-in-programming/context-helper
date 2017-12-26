@@ -11,5 +11,4 @@ buildscript {
 
 dependencies {
     compileOnly 'com.google.code.gson:gson:2.8.2'
-    testCompile 'com.google.code.gson:gson:2.8.2'
 }

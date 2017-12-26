@@ -60,18 +60,21 @@ dependencies {
     compileOnly 'com.google.code.gson:gson:2.8.2'
     compile group: 'org.swinglabs', name: 'swingx', version: '1.6.1'
     compile group: 'com.googlecode.stackexchange', name: 'stackoverflow-java-sdk-release', version: '2.2.0'
-    compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
     compile group: 'com.google.apis', name: 'google-api-services-customsearch', version: 'v1-rev57-1.23.0'
 }
 
 allprojects {
     dependencies {
-        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-        compile "org.jetbrains.kotlin:kotlin-runtime:$kotlinVersion"
-        compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+        compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        compileOnly "org.jetbrains.kotlin:kotlin-runtime:$kotlinVersion"
+        compileOnly "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
         testCompile group: 'junit', name: 'junit', version: '4.12'
         testCompile group: 'com.google.truth', name: 'truth', version: '0.36'
+    }
+
+    configurations {
+        testCompile.extendsFrom compileOnly
     }
 
     compileKotlin {

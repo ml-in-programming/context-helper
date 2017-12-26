@@ -13,3 +13,13 @@ dependencies {
     compile project(':log-def')
     compile 'com.google.code.gson:gson:2.8.2'
 }
+
+jar {
+    baseName = "context-helper-log-validator"
+
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}

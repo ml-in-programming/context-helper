@@ -26,7 +26,7 @@ data class Log private constructor (
         sessionId: String,
         actionType: ActionType,
         logData: LogData
-        ) : this(stamp, recorderId, recorderVersion, userId, sessionId, actionType.typeName, logData) {
+    ) : this(stamp, recorderId, recorderVersion, userId, sessionId, actionType.typeName, logData) {
         assert(logData.javaClass == actionType.clazz) {
             "Argument log data's class does not match action type's class: " +
                 "${logData.javaClass} ${actionType.clazz}"

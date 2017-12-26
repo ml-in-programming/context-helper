@@ -1,6 +1,9 @@
 buildscript {
     ext.kotlin_version = kotlinVersion
 
+    repositories {
+        mavenCentral()
+    }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -21,8 +24,13 @@ allprojects {
     targetCompatibility = javaVersion
 }
 
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
 repositories {
-    mavenCentral()
     maven {
         url 'https://oss.sonatype.org/content/repositories/releases/'
     }
@@ -58,15 +66,19 @@ dependencies {
 
 allprojects {
     dependencies {
+        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        compile "org.jetbrains.kotlin:kotlin-runtime:$kotlinVersion"
+        compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+
         testCompile group: 'junit', name: 'junit', version: '4.12'
         testCompile group: 'com.google.truth', name: 'truth', version: '0.36'
     }
-}
 
-compileKotlin {
-    kotlinOptions.jvmTarget = javaVersion
-}
+    compileKotlin {
+        kotlinOptions.jvmTarget = javaVersion
+    }
 
-compileTestKotlin {
-    kotlinOptions.jvmTarget = javaVersion
+    compileTestKotlin {
+        kotlinOptions.jvmTarget = javaVersion
+    }
 }

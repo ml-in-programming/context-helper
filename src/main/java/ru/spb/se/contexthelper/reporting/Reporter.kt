@@ -14,9 +14,11 @@ import ru.spb.se.contexthelper.log.data.LogData
 import java.io.ByteArrayOutputStream
 import java.util.zip.GZIPOutputStream
 
-private class StatsServerInfo(@JvmField var status: String,
-                              @JvmField var url: String,
-                              @JvmField var urlForZipBase64Content: String) {
+private class StatsServerInfo(
+    @JvmField var status: String,
+    @JvmField var url: String,
+    @JvmField var urlForZipBase64Content: String
+) {
     fun isServiceAlive() = "ok" == status
 }
 
@@ -33,8 +35,7 @@ object StatsSender {
             val response = Request.Get(infoUrl).execute().returnContent().asString()
             val info = Utils.gson.fromJson(response, StatsServerInfo::class.java)
             if (info.isServiceAlive()) return info
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             LOG.debug(e)
         }
 
@@ -49,8 +50,7 @@ object StatsSender {
             if (code in 200..299) {
                 return true
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             LOG.debug(e)
         }
         return false
@@ -63,7 +63,6 @@ object StatsSender {
             request.addHeader(BasicHeader(HttpHeaders.CONTENT_ENCODING, "gzip"))
             return request
         }
-
         return Request.Post(info.url).bodyString(text, ContentType.TEXT_HTML)
     }
 

@@ -9,20 +9,7 @@ buildscript {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     compileOnly 'com.google.code.gson:gson:2.8.2'
     testCompile 'com.google.code.gson:gson:2.8.2'
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-}
-
-compileKotlin {
-    kotlinOptions.jvmTarget = javaVersion
-}
-
-compileTestKotlin {
-    kotlinOptions.jvmTarget = javaVersion
 }

@@ -9,20 +9,7 @@ buildscript {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     compile project(':log-def')
     compile 'com.google.code.gson:gson:2.8.2'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-}
-
-compileKotlin {
-    kotlinOptions.jvmTarget = javaVersion
-}
-
-compileTestKotlin {
-    kotlinOptions.jvmTarget = javaVersion
 }

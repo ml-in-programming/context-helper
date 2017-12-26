@@ -20,8 +20,7 @@ class InputSessionValidator(private val sessionValidationResult: SessionValidati
             val logLine = LogLine(log, line)
             if (logLine.log.sessionId == currentSessionUid) {
                 session.add(logLine)
-            }
-            else {
+            } else {
                 processSession(session)
                 session.clear()
                 currentSessionUid = logLine.log.sessionId
@@ -44,8 +43,7 @@ class InputSessionValidator(private val sessionValidationResult: SessionValidati
     private fun storeSession(session: List<LogLine>, isValidSession: Boolean) {
         if (isValidSession) {
             sessionValidationResult.addValidSession(session)
-        }
-        else {
+        } else {
             sessionValidationResult.addErrorSession(session)
         }
     }

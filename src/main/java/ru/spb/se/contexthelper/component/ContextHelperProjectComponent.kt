@@ -17,6 +17,7 @@ import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
 import ru.spb.se.contexthelper.context.ContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
+import ru.spb.se.contexthelper.log.ActionType
 import ru.spb.se.contexthelper.log.data.KeywordLogData
 import ru.spb.se.contexthelper.log.data.PopupLogData
 import ru.spb.se.contexthelper.log.data.SelectionLogData
@@ -87,7 +88,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         val sessionId = "${System.currentTimeMillis()}"
         val popupReport = createLogLine(
             sessionId,
-            "QUERY_POPUP",
+            ActionType.QUERY_POPUP,
             PopupLogData(query.keywords.map { KeywordLogData(it.word, it.weight) }, questionList))
         statsCollector.appendReport(popupReport)
         val popupWindow =
@@ -102,7 +103,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                     val selectedIndex = questionJBList.selectedIndex
                     val hitReport = createLogLine(
                         sessionId,
-                        "QUERY_HIT",
+                        ActionType.QUERY_HIT,
                         SelectionLogData(selectedIndex))
                     statsCollector.appendReport(hitReport)
                     processQuery(questionJBList.selectedValue + " java")

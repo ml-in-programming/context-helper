@@ -26,7 +26,7 @@ class InputSessionValidatorTest {
         val lines = File("src/test/resources/validSessions2.txt").readLines()
         validator.validate(lines)
 
-        assertThat(result.validLines).hasSize(4)
+        assertThat(result.validLines).hasSize(5)
         assertThat(result.validLines).containsExactlyElementsIn(lines).inOrder()
         assertThat(result.errorLines).hasSize(0)
     }

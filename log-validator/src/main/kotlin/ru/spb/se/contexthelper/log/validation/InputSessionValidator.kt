@@ -10,7 +10,7 @@ class InputSessionValidator(private val sessionValidationResult: SessionValidati
         for (line in input) {
             if (line.trim().isEmpty()) continue
 
-            val log = Log.fromString(line)
+            val log = Log.fromTabSeparatedString(line)
             if (log == null) {
                 sessionValidationResult.addErrorLine(line)
                 continue
@@ -32,6 +32,7 @@ class InputSessionValidator(private val sessionValidationResult: SessionValidati
 
     private fun processSession(session: List<LogLine>) {
         if (session.isEmpty()) return
+//        session.filter { it.log }
 //        if (session.any { !it.isValid }) {
 //            storeSession(session, isValidSession = false)
 //            return

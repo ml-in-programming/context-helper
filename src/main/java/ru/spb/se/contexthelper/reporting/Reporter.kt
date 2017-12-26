@@ -8,6 +8,7 @@ import org.apache.commons.codec.binary.Base64OutputStream
 import org.apache.http.client.fluent.Request
 import org.apache.http.entity.ContentType
 import org.apache.http.message.BasicHeader
+import ru.spb.se.contexthelper.log.ActionType
 import ru.spb.se.contexthelper.log.Log
 import ru.spb.se.contexthelper.log.data.LogData
 import java.io.ByteArrayOutputStream
@@ -78,11 +79,14 @@ private object Base64GzipCompressor {
     }
 }
 
-fun createLogLine(sessionId: String, actionType: String, logData: LogData): String {
+fun createLogLine(sessionId: String, actionType: ActionType, logData: LogData): String {
     val stamp = System.currentTimeMillis()
-    val recorderId = "context-helper"
-    val recorderVersion = "1.0"
     val userId = PermanentInstallationID.get()
-    val log = Log(stamp, recorderId, recorderVersion, userId, sessionId, actionType, logData)
-    return log.toString()
+    val log = Log(
+        stamp = stamp,
+        userId = userId,
+        sessionId = sessionId,
+        actionType = actionType,
+        logData = logData)
+    return log.toTabSeparatedString()
 }

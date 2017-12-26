@@ -13,10 +13,10 @@ class LogTest {
             "1.0",
             "b27fe89c239d",
             "513801179873",
-            "QUERY_HIT",
+            ActionType.QUERY_HIT,
             SelectionLogData(0)
         )
-        val logText = log.toString()
+        val logText = log.toTabSeparatedString()
         assertThat(logText).isEqualTo(
             "1513801181316\tcontext-helper\t1.0" +
                 "\tb27fe89c239d\t513801179873\tQUERY_HIT\t{\"numberSelected\":0}")
@@ -26,14 +26,14 @@ class LogTest {
     fun testDeserialization() {
         val logText = "1513801181316\tcontext-helper\t1.0" +
             "\tb27fe89c239d\t513801179873\tQUERY_HIT\t{\"numberSelected\":0}"
-        val log = Log.fromString(logText)
+        val log = Log.fromTabSeparatedString(logText)
         assertThat(log).isEqualTo(Log(
             1513801181316L,
             "context-helper",
             "1.0",
             "b27fe89c239d",
             "513801179873",
-            "QUERY_HIT",
+            ActionType.QUERY_HIT,
             SelectionLogData(0)))
     }
 }

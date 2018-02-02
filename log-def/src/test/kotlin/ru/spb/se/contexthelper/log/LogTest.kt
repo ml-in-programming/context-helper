@@ -19,13 +19,13 @@ class LogTest {
         val logText = log.toTabSeparatedString()
         assertThat(logText).isEqualTo(
             "1513801181316\tcontext-helper\t1.0" +
-                "\tb27fe89c239d\t513801179873\tQUERY_HIT\t{\"numberSelected\":0}")
+                "\tb27fe89c239d\t513801179873\t-1\tQUERY_HIT\t{\"numberSelected\":0}")
     }
 
     @Test
     fun testDeserialization() {
         val logText = "1513801181316\tcontext-helper\t1.0" +
-            "\tb27fe89c239d\t513801179873\tQUERY_HIT\t{\"numberSelected\":0}"
+            "\tb27fe89c239d\t513801179873\t-1\tQUERY_HIT\t{\"numberSelected\":0}"
         val log = Log.fromTabSeparatedString(logText)
         assertThat(log).isEqualTo(Log(
             1513801181316L,

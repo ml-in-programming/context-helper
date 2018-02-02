@@ -33,7 +33,7 @@ class InputSessionValidatorTest {
         val result = validateLines(lines)
 
         assertThat(result.validLines).hasSize(0)
-        assertThat(result.errorLines).hasSize(6)
+        assertThat(result.errorLines).hasSize(7)
         assertThat(result.errorLines).containsExactlyElementsIn(lines)
     }
 

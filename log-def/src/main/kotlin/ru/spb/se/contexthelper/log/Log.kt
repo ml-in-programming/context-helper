@@ -15,6 +15,7 @@ data class Log private constructor (
     val recorderVersion: String,
     val userId: String,
     val sessionId: String,
+    val bucket: Int,
     val actionType: String,
     val logData: LogData
 ) {
@@ -26,7 +27,7 @@ data class Log private constructor (
         sessionId: String,
         actionType: ActionType,
         logData: LogData
-    ) : this(stamp, recorderId, recorderVersion, userId, sessionId, actionType.typeName, logData) {
+    ) : this(stamp, recorderId, recorderVersion, userId, sessionId, -1, actionType.typeName, logData) {
         assert(logData.javaClass == actionType.clazz) {
             "Argument log data's class does not match action type's class: " +
                 "${logData.javaClass} ${actionType.clazz}"
@@ -35,8 +36,8 @@ data class Log private constructor (
 
     fun toTabSeparatedString(): String {
         val jsonLogData = Utils.gson.toJson(logData)
-        return "$stamp\t$recorderId\t$recorderVersion\t" +
-            "$userId\t$sessionId\t$actionType\t$jsonLogData"
+        return "$stamp\t$recorderId\t$recorderVersion\t$userId\t" +
+               "$sessionId\t$bucket\t$actionType\t$jsonLogData"
     }
 
     companion object {
@@ -48,17 +49,19 @@ data class Log private constructor (
                 val recorderVersion = parts[2]
                 val userId = parts[3]
                 val sessionId = parts[4]
-                val actionTypeName = parts[5]
+                val bucket = parts[5].toInt()
+                val actionTypeName = parts[6]
                 val actionType =
                     ActionType.values()
                         .firstOrNull { it.typeName == actionTypeName } ?: return null
-                val logData = Utils.gson.fromJson(parts[6], actionType.clazz)
+                val logData = Utils.gson.fromJson(parts[7], actionType.clazz)
                 return Log(
                     stamp,
                     recorderId,
                     recorderVersion,
                     userId,
                     sessionId,
+                    bucket,
                     actionTypeName,
                     logData)
             } catch (e: Exception) {

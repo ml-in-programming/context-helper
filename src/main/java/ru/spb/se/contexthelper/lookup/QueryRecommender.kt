@@ -6,25 +6,32 @@ import ru.spb.se.contexthelper.context.Query
 class QueryRecommender {
     private var querySuggestions: List<String> = listOf()
 
-    fun loadQueries(resourceName: String) {
+    fun loadSuggestions(resourceName: String) {
         val classLoader = javaClass.classLoader
         val inputStream = classLoader.getResourceAsStream(resourceName)!!
         val bufferedReader = inputStream.bufferedReader()
         querySuggestions = bufferedReader.useLines { it.toList() }
     }
 
-    fun relevantQuestions(query: Query, count: Int): List<String> {
-        val mutableList = mutableListOf<String>(/* query.defaultQuestion */)
+    fun getRelevantQuestions(query: Query, count: Int): List<String> {
+        val questions = mutableListOf<String>(/* query.defaultQuestion */)
         val scoredSuggestions = querySuggestions.map { suggestion ->
-            val score = query.keywords.map {
-                if (suggestion.contains(it.word)) it.weight else 0
+            val score = query.keywords.map { keyword ->
+                val containsKeyword =
+                    suggestion
+                        .split(" ")
+                        .any { it.hasPrefixOrSuffixEqualTo(keyword.word)}
+                if (containsKeyword) keyword.weight else 0
             }.sum()
             suggestion to score
         }
         scoredSuggestions
             .sortedByDescending { it.second }
             .take(count)
-            .forEach { mutableList.add(it.first.capitalize()) }
-        return mutableList.toList()
+            .forEach { questions.add(it.first.capitalize()) }
+        return questions.toList()
     }
+
+    private fun String.hasPrefixOrSuffixEqualTo(query: String): Boolean =
+        commonPrefixWith(query) == query || commonSuffixWith(query) == query
 }

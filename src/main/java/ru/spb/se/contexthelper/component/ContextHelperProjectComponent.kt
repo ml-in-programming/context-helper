@@ -47,7 +47,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     override fun projectOpened() {
         val toolWindow = getOrRegisterToolWindow()
         toolWindow.icon = IconLoader.getIcon(ICON_PATH_TOOL_WINDOW)
-        queryRecommender.loadQueries(QUERIES_PATH)
+        queryRecommender.loadSuggestions(QUERIES_PATH)
     }
 
     override fun projectClosed() {
@@ -83,7 +83,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
             MessagesUtil.showInfoDialog("Unable to describe the context.", project)
             return
         }
-        val questionList = queryRecommender.relevantQuestions(query, QUESTS_SUGGEST_COUNT)
+        val questionList = queryRecommender.getRelevantQuestions(query, QUESTS_SUGGEST_COUNT)
         val questionJBList = JBList<String>(questionList)
         val sessionId = "${System.currentTimeMillis()}"
         val popupReport = createLogLine(
@@ -153,16 +153,16 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
             "ru.spb.se.contexthelper.component.ContextHelperProjectComponent")
 
         /** Last part of the name for {@link NamedComponent}. */
-        private val COMPONENT_NAME = "ContextHelperProjectComponent"
-        private val ICON_PATH_TOOL_WINDOW = "/icons/se-icon.png"
+        private const val COMPONENT_NAME = "ContextHelperProjectComponent"
+        private const val ICON_PATH_TOOL_WINDOW = "/icons/se-icon.png"
 
-        private val QUERIES_PATH = "/tasks/suggested.txt"
-        private val QUESTS_SUGGEST_COUNT = 5
+        private const val QUERIES_PATH = "/tasks/suggested.txt"
+        private const val QUESTS_SUGGEST_COUNT = 5
 
-        private val STACK_EXCHANGE_API_KEY = "F)x9bhGombhjqpnXt)5Mwg(("
+        private const val STACK_EXCHANGE_API_KEY = "F)x9bhGombhjqpnXt)5Mwg(("
         private val STACK_EXCHANGE_SITE = StackExchangeSite.STACK_OVERFLOW
 
-        private val GOOGLE_SEARCH_API_KEY = "AIzaSyBXQg39PaVjqONPEL4eubyA7S-pEuqVKOc"
+        private const val GOOGLE_SEARCH_API_KEY = "AIzaSyBXQg39PaVjqONPEL4eubyA7S-pEuqVKOc"
 
         fun getFor(project: Project): ContextHelperProjectComponent =
             project.getComponent(ContextHelperProjectComponent::class.java)

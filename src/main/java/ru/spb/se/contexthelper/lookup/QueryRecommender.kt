@@ -2,34 +2,36 @@ package ru.spb.se.contexthelper.lookup
 
 import ru.spb.se.contexthelper.context.Query
 
+/** Class which represents loaded suggested questions. */
+data class QuestionSuggestion(val wordSequence: List<String>)
+
 /** Class which ranks the extracted StackOverflow queries based on given keywords. */
 class QueryRecommender {
-    private var querySuggestions: List<String> = listOf()
+    private var questionSuggestions: List<QuestionSuggestion> = listOf()
 
     fun loadSuggestions(resourceName: String) {
         val classLoader = javaClass.classLoader
         val inputStream = classLoader.getResourceAsStream(resourceName)!!
         val bufferedReader = inputStream.bufferedReader()
-        querySuggestions = bufferedReader.useLines { it.toList() }
+        questionSuggestions = bufferedReader.useLines { lines ->
+            lines.map { QuestionSuggestion(it.split(" ")) }.toList()
+        }
     }
 
     fun getRelevantQuestions(query: Query, count: Int): List<String> {
-        val questions = mutableListOf<String>(/* query.defaultQuestion */)
-        val scoredSuggestions = querySuggestions.map { suggestion ->
+        val indexToScores = questionSuggestions.mapIndexed { index, suggestion ->
             val score = query.keywords.map { keyword ->
                 val containsKeyword =
-                    suggestion
-                        .split(" ")
-                        .any { it.hasPrefixOrSuffixEqualTo(keyword.word)}
+                    suggestion.wordSequence.any { it.hasPrefixOrSuffixEqualTo(keyword.word)}
                 if (containsKeyword) keyword.weight else 0
             }.sum()
-            suggestion to score
+            index to score
         }
-        scoredSuggestions
+        return indexToScores
             .sortedByDescending { it.second }
             .take(count)
-            .forEach { questions.add(it.first.capitalize()) }
-        return questions.toList()
+            .map { questionSuggestions[it.first].wordSequence.joinToString(" ").capitalize() }
+            .toList()
     }
 
     private fun String.hasPrefixOrSuffixEqualTo(query: String): Boolean =

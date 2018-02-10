@@ -30,3 +30,7 @@ fun getRelevantTypeName(psiElement: PsiElement): String? =
             null
         }
     }
+
+private val UPPERCASE_REGEX = Regex("(?=\\p{Upper})")
+
+fun String.splitByUppercase(): List<String> = split(UPPERCASE_REGEX)

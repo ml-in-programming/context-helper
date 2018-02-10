@@ -1,9 +1,6 @@
 package ru.spb.se.contexthelper.context.declr
 
-import ru.spb.se.contexthelper.context.Keyword
-import ru.spb.se.contexthelper.context.NotEnoughContextException
-import ru.spb.se.contexthelper.context.Query
-import ru.spb.se.contexthelper.context.getRelevantTypeName
+import ru.spb.se.contexthelper.context.*
 import ru.spb.se.contexthelper.context.trie.Type
 import ru.spb.se.contexthelper.context.trie.TypeContextTrie
 
@@ -23,17 +20,18 @@ class DeclarationsContextQueryBuilder(private val declarationsContext: Declarati
         return when {
             relevantTypes.isEmpty() -> throw NotEnoughContextException()
             relevantTypes.size == 1 -> {
-                val firstTypeName = relevantTypes[0].simpleName
-                Query(
-                    listOf(Keyword(firstTypeName, 1)),
-                    "How to use ${relevantTypes[0].simpleName}")
+                val typeName = relevantTypes[0].simpleName
+                val keywords = typeName.splitByUppercase().map { Keyword(it, 1) }
+                Query(keywords, "How to use $typeName")
             }
             else -> {
                 val firstTypeName = relevantTypes[0].simpleName
                 val secondTypeName = relevantTypes[1].simpleName
-                Query(
-                    listOf(Keyword(firstTypeName, 1), Keyword(secondTypeName, 1)),
-                    "How to use $firstTypeName with $secondTypeName")
+                val keywords =
+                    listOf(firstTypeName, secondTypeName)
+                        .flatMap { it.splitByUppercase() }
+                        .map { Keyword(it, 1) }
+                Query(keywords, "How to use $firstTypeName with $secondTypeName")
             }
         }
     }

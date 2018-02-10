@@ -38,7 +38,7 @@ data class TypeContextTrie(private val root: Node = Node()) {
             }
             for (entry in edgeMap) {
                 val childEvaluatedNode = entry.value.buildNode()
-                evaluatedEdgeMap.put(entry.key, childEvaluatedNode)
+                evaluatedEdgeMap[entry.key] = childEvaluatedNode
                 childEvaluatedNode.subtreeLevels.mapTo(levels) { entry.key  to it.second }
             }
             levels.sortBy { it.second }

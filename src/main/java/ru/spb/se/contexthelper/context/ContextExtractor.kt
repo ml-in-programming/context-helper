@@ -14,9 +14,9 @@ class ContextProcessor(private val psiElement: PsiElement) {
     private fun generateQueryIfInPsiReferenceExpression(): Query? {
         val reference = findReferenceParent(psiElement) ?: return null
         val leftType = getLeftPartReferenceType(reference.firstChild) ?: return null
-        val leftTypeParts = leftType.simpleName.split(UPPERCASE_REGEX)
+        val leftTypeParts = leftType.simpleName.splitByUppercase()
         val rightIdentifier = reference.children.find { it is PsiIdentifier } ?: return null
-        val rightIdentifierParts = rightIdentifier.text.split(UPPERCASE_REGEX)
+        val rightIdentifierParts = rightIdentifier.text.splitByUppercase()
         val keywords = mutableListOf<Keyword>()
         leftTypeParts.forEach {
             keywords.add(Keyword(it, 2))
@@ -64,9 +64,5 @@ class ContextProcessor(private val psiElement: PsiElement) {
         val context = declarationsContextExtractor.context
         val queryBuilder = DeclarationsContextQueryBuilder(context)
         return queryBuilder.buildQuery()
-    }
-
-    companion object {
-        private val UPPERCASE_REGEX = Regex("(?=\\p{Upper})")
     }
 }

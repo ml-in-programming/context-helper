@@ -21,7 +21,7 @@ import ru.spb.se.contexthelper.log.ActionType
 import ru.spb.se.contexthelper.log.data.KeywordLogData
 import ru.spb.se.contexthelper.log.data.PopupLogData
 import ru.spb.se.contexthelper.log.data.SelectionLogData
-import ru.spb.se.contexthelper.lookup.QueryRecommender
+import ru.spb.se.contexthelper.lookup.QuestionRecommender
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
 import ru.spb.se.contexthelper.lookup.StackOverflowGoogleSearchClient
@@ -36,7 +36,7 @@ import kotlin.concurrent.thread
 class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     val stackExchangeClient = StackExchangeClient(STACK_EXCHANGE_API_KEY, STACK_EXCHANGE_SITE)
     private val googleSearchClient = StackOverflowGoogleSearchClient(GOOGLE_SEARCH_API_KEY)
-    private val queryRecommender: QueryRecommender = QueryRecommender()
+    private val questionRecommender: QuestionRecommender = QuestionRecommender()
 
     private val statsCollector: StatsCollector = StatsCollector()
 
@@ -47,7 +47,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     override fun projectOpened() {
         val toolWindow = getOrRegisterToolWindow()
         toolWindow.icon = IconLoader.getIcon(ICON_PATH_TOOL_WINDOW)
-        queryRecommender.loadSuggestions(QUERIES_PATH)
+        questionRecommender.loadSuggestions(QUERIES_PATH)
     }
 
     override fun projectClosed() {
@@ -83,7 +83,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
             MessagesUtil.showInfoDialog("Unable to describe the context.", project)
             return
         }
-        val questionList = queryRecommender.getRelevantQuestions(query, QUESTS_SUGGEST_COUNT)
+        val questionList = questionRecommender.getRelevantQuestions(query, QUESTS_SUGGEST_COUNT)
         val questionJBList = JBList<String>(questionList)
         val sessionId = "${System.currentTimeMillis()}"
         val popupReport = createLogLine(

@@ -6,7 +6,7 @@ import ru.spb.se.contexthelper.context.Query
 data class QuestionSuggestion(val wordSequence: List<String>)
 
 /** Class which ranks the extracted StackOverflow queries based on given keywords. */
-class QueryRecommender {
+class QuestionRecommender {
     private var questionSuggestions: List<QuestionSuggestion> = listOf()
 
     fun loadSuggestions(resourceName: String) {

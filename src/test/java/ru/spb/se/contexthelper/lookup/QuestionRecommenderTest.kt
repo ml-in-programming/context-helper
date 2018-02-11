@@ -4,10 +4,10 @@ import org.junit.Test
 import ru.spb.se.contexthelper.context.Keyword
 import ru.spb.se.contexthelper.context.Query
 
-class QueryRecommenderTest {
+class QuestionRecommenderTest {
     @Test
     fun commonLookup() {
-        val recommender = QueryRecommender()
+        val recommender = QuestionRecommender()
         recommender.loadSuggestions(QUERIES_PATH)
         val query = Query(
             listOf(
@@ -21,7 +21,7 @@ class QueryRecommenderTest {
 
     @Test
     fun camelCaseClassLookup() {
-        val recommender = QueryRecommender()
+        val recommender = QuestionRecommender()
         recommender.loadSuggestions(QUERIES_PATH)
         val query = Query(
             listOf(

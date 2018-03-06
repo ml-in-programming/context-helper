@@ -55,6 +55,13 @@ sourceSets {
     }
 }
 
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    baseName = "context-helper"
+}
+
 dependencies {
     compile project(":log-def")
     compileOnly 'com.google.code.gson:gson:2.8.2'

@@ -6,7 +6,7 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.customsearch.Customsearch
 import com.intellij.openapi.diagnostic.Logger
 
-class StackOverflowGoogleSearchClient(private val apiKey: String) {
+class GoogleCustomSearchClient(private val apiKey: String) {
     fun lookupQuestionIds(query: String): List<Long> {
         val builder = Customsearch.Builder(
             NetHttpTransport(),
@@ -39,11 +39,11 @@ class StackOverflowGoogleSearchClient(private val apiKey: String) {
 
     companion object {
         private val LOG = Logger.getInstance(
-            "ru.spb.se.contexthelper.lookup.StackOverflowGoogleSearchClient")
+            "ru.spb.se.contexthelper.lookup.GoogleCustomSearchClient")
 
-        private var SEARCH_ENGINE_ID = "004273159360178116673:j1srnoyrr-i"
+        private const val SEARCH_ENGINE_ID = "004273159360178116673:j1srnoyrr-i"
 
-        private val HTTP_REQUEST_TIMEOUT = 5000
-        private val HTTP_READ_TIMEOUT = 5000
+        private const val HTTP_REQUEST_TIMEOUT = 5000
+        private const val HTTP_READ_TIMEOUT = 5000
     }
 }

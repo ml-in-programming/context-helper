@@ -6,21 +6,25 @@ import ru.spb.se.contexthelper.context.declr.DeclarationsContextQueryBuilder
 import ru.spb.se.contexthelper.context.trie.Type
 
 class ContextProcessor(private val psiElement: PsiElement) {
-    fun generateQuery(): Query {
-        generateQueryIfInPsiReferenceExpression()?.let { return it }
-        return generateGenericQuery()
+    fun generateQuery(): String {
+        val referenceQuery = generateQueryIfInPsiReferenceExpression()
+        val genericQuery = generateGenericQuery()
+        val genericQuestion = genericQuery.keywords.joinToString(" OR ") { it.word }
+        return if (referenceQuery != null) {
+            referenceQuery.keywords.joinToString(" ") { it.word } +
+                " ($genericQuestion) java"
+        } else {
+            "$genericQuery java"
+        }
     }
 
     private fun generateQueryIfInPsiReferenceExpression(): Query? {
         val reference = findReferenceParent(psiElement) ?: return null
         val leftType = getLeftPartReferenceType(reference.firstChild) ?: return null
-        val leftTypeParts = leftType.simpleName.splitByUppercase()
         val rightIdentifier = reference.children.find { it is PsiIdentifier } ?: return null
         val rightIdentifierParts = rightIdentifier.text.splitByUppercase()
         val keywords = mutableListOf<Keyword>()
-        leftTypeParts.forEach {
-            keywords.add(Keyword(it, 2))
-        }
+        keywords.add(Keyword(leftType.parts.joinToString("."), 1))
         rightIdentifierParts.forEach {
             keywords.add(Keyword(it, 1))
         }

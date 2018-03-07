@@ -5,13 +5,15 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBScrollPane;
 import java.awt.BorderLayout;
-import java.awt.Desktop;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
-import javax.swing.event.HyperlinkEvent;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.prompt.PromptSupport;
 import ru.spb.se.contexthelper.ContextHelperConstants;
@@ -26,15 +28,13 @@ public class ContextHelperPanel extends JPanel implements Runnable {
   private final ContextHelperProjectComponent contextHelperProjectComponent;
 
   private final JProgressBar progressBar;
-
   private final JTextField queryJTextField;
-
-  private final StackExchangeThreadsTree tree;
 
   private final JBScrollPane treeScrollPane;
 
-  private final JTextPane bodyTextPane;
+  private WebView webView;
 
+  private final StackExchangeThreadsTree tree;
   private StackExchangeThreadsTreeModel treeModel;
 
   public ContextHelperPanel(ContextHelperProjectComponent contextHelperProjectComponent) {
@@ -46,25 +46,12 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     this.queryJTextField = new JTextField();
     this.tree = new StackExchangeThreadsTree(this, treeModel);
     this.treeScrollPane = new JBScrollPane(tree);
-    this.bodyTextPane = new JTextPane();
 
     configureGui();
   }
 
   /** Configures the panel's UI. */
   private void configureGui() {
-    bodyTextPane.setContentType("text/html");
-    bodyTextPane.setEditable(false);
-    bodyTextPane.addHyperlinkListener(e -> {
-      if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-        if (Desktop.isDesktopSupported()) {
-          try {
-            Desktop.getDesktop().browse(e.getURL().toURI());
-          } catch (Exception ignored) {
-          }
-        }
-      }
-    });
     PromptSupport.setPrompt("Enter your query", queryJTextField);
 
     JPanel topPanel = new JPanel();
@@ -74,10 +61,17 @@ public class ContextHelperPanel extends JPanel implements Runnable {
 
     setLayout(new BorderLayout());
     add(topPanel, BorderLayout.PAGE_START);
+
+    JFXPanel jfxPanel = new JFXPanel();
+    Platform.runLater(() -> {
+      webView = new WebView();
+      jfxPanel.setScene(new Scene(webView));
+    });
+
     queryJTextField.addActionListener(e ->
         contextHelperProjectComponent.processQuery(queryJTextField.getText()));
     JSplitPane splitPane = new JSplitPane(
-        JSplitPane.VERTICAL_SPLIT, treeScrollPane, new JBScrollPane(bodyTextPane));
+        JSplitPane.VERTICAL_SPLIT, treeScrollPane, jfxPanel);
     splitPane.setDividerLocation(SPLIT_DIVIDER_POSITION);
     add(splitPane, BorderLayout.CENTER);
   }
@@ -93,9 +87,11 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     showPanel();
   }
 
-  void updateBodyTextPaneWithText(String text) {
-    bodyTextPane.setText(text);
-    bodyTextPane.setCaretPosition(0);
+  void updateWebViewWithHtml(String context) {
+    Platform.runLater(() -> {
+      WebEngine engine = webView.getEngine();
+      engine.loadContent(context, "text/html");
+    });
   }
 
   private void showPanel() {
@@ -114,7 +110,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
           new StackExchangeThreadsTreeModel(
               contextHelperProjectComponent.getStackExchangeClient(), null);
       tree.setModel(treeModel);
-      updateBodyTextPaneWithText("");
+      updateWebViewWithHtml("");
     } else {
       progressBar.setIndeterminate(false);
     }

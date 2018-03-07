@@ -20,18 +20,15 @@ class DeclarationsContextQueryBuilder(private val declarationsContext: Declarati
         return when {
             relevantTypes.isEmpty() -> throw NotEnoughContextException()
             relevantTypes.size == 1 -> {
-                val typeName = relevantTypes[0].simpleName
-                val keywords = typeName.splitByUppercase().map { Keyword(it, 1) }
-                Query(keywords, "How to use $typeName")
+                Query(listOf(
+                    Keyword(relevantTypes[0].parts.joinToString("."), 1)),
+                    "")
             }
             else -> {
-                val firstTypeName = relevantTypes[0].simpleName
-                val secondTypeName = relevantTypes[1].simpleName
-                val keywords =
-                    listOf(firstTypeName, secondTypeName)
-                        .flatMap { it.splitByUppercase() }
-                        .map { Keyword(it, 1) }
-                Query(keywords, "How to use $firstTypeName with $secondTypeName")
+                Query(listOf(
+                    Keyword(relevantTypes[0].parts.joinToString("."), 1),
+                    Keyword(relevantTypes[1].parts.joinToString("."), 1)),
+                    "")
             }
         }
     }

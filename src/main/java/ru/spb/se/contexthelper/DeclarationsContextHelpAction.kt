@@ -47,6 +47,6 @@ class DeclarationsContextHelpAction : AnAction() {
             return
         }
         val helperComponent = ContextHelperProjectComponent.getFor(project)
-        helperComponent.assistAround(psiElement, editor)
+        helperComponent.assistAround(psiElement)
     }
 }

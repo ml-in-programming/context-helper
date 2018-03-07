@@ -3,7 +3,7 @@ package ru.spb.se.contexthelper.ui;
 import com.google.code.stackexchange.schema.Answer;
 import com.google.code.stackexchange.schema.Question;
 
-import javax.swing.*;
+import javax.swing.JTree;
 
 /** {@link JTree} view component for displaying StackExchange threads. */
 class StackExchangeThreadsTree extends JTree {
@@ -18,10 +18,10 @@ class StackExchangeThreadsTree extends JTree {
       if (lastSelectedComponent instanceof Question) {
         Question question = (Question) lastSelectedComponent;
         //TODO: Add question.link as a first line of the text.
-        contextHelperPanel.updateBodyTextPaneWithText(question.getBody());
+        contextHelperPanel.updateWebViewWithHtml(question.getBody());
       } else if (lastSelectedComponent instanceof Answer) {
         Answer answer = (Answer) lastSelectedComponent;
-        contextHelperPanel.updateBodyTextPaneWithText(answer.getBody());
+        contextHelperPanel.updateWebViewWithHtml(answer.getBody());
       }
     });
   }

@@ -18,10 +18,18 @@ class StackExchangeThreadsTree extends JTree {
       if (lastSelectedComponent instanceof Question) {
         Question question = (Question) lastSelectedComponent;
         //TODO: Add question.link as a first line of the text.
-        contextHelperPanel.updateWebViewWithHtml(question.getBody());
+        contextHelperPanel.updateWebViewWithHtml(
+          "<script src=\"https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js\"></script>"
+            + question.getBody()
+            .replace("<code>", "<pre class=\"prettyprint\"><code>")
+            .replace("</code>", "</code></pre>"));
       } else if (lastSelectedComponent instanceof Answer) {
         Answer answer = (Answer) lastSelectedComponent;
-        contextHelperPanel.updateWebViewWithHtml(answer.getBody());
+        contextHelperPanel.updateWebViewWithHtml(
+          "<script src=\"https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js\"></script>"
+            + answer.getBody()
+            .replace("<code>", "<pre class=\"prettyprint\"><code>")
+            .replace("</code>", "</code></pre>"));
       }
     });
   }

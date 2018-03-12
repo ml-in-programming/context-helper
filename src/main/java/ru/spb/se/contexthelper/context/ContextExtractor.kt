@@ -14,7 +14,7 @@ class ContextProcessor(private val psiElement: PsiElement) {
             referenceQuery.keywords.joinToString(" ") { it.word } +
                 " ($genericQuestion) java"
         } else {
-            "$genericQuery java"
+            "$genericQuestion java"
         }
     }
 

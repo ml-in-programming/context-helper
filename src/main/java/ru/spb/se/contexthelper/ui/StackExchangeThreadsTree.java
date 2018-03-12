@@ -9,7 +9,7 @@ import javax.swing.JTree;
 class StackExchangeThreadsTree extends JTree {
 
   StackExchangeThreadsTree(
-      ContextHelperPanel contextHelperPanel, StackExchangeThreadsTreeModel treeModel) {
+      StackExchangeTreeListener treeListener, StackExchangeThreadsTreeModel treeModel) {
     super(treeModel);
     setCellRenderer(new StackExchangeThreadsTreeCellRender());
     setRootVisible(false);
@@ -18,19 +18,21 @@ class StackExchangeThreadsTree extends JTree {
       if (lastSelectedComponent instanceof Question) {
         Question question = (Question) lastSelectedComponent;
         //TODO: Add question.link as a first line of the text.
-        contextHelperPanel.updateWebViewWithHtml(
-          "<script src=\"https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js\"></script>"
-            + question.getBody()
-            .replace("<code>", "<pre class=\"prettyprint\"><code>")
-            .replace("</code>", "</code></pre>"));
+        treeListener.questionClicked(question);
+        treeListener.renderHtmlText(prettified(question.getBody()));
       } else if (lastSelectedComponent instanceof Answer) {
         Answer answer = (Answer) lastSelectedComponent;
-        contextHelperPanel.updateWebViewWithHtml(
-          "<script src=\"https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js\"></script>"
-            + answer.getBody()
-            .replace("<code>", "<pre class=\"prettyprint\"><code>")
-            .replace("</code>", "</code></pre>"));
+        treeListener.answerClicked(answer);
+        treeListener.renderHtmlText(prettified(answer.getBody()));
       }
     });
+  }
+
+  private static String prettified(String body) {
+    return "<script src=\"https://cdn.rawgit.com/google/code-prettify/"
+      + "master/loader/run_prettify.js\"></script>"
+      + body
+          .replace("<code>", "<pre class=\"prettyprint\"><code>")
+          .replace("</code>", "</code></pre>");
   }
 }

@@ -1,10 +1,14 @@
 package ru.spb.se.contexthelper.ui;
 
+import com.google.code.stackexchange.schema.Answer;
+import com.google.code.stackexchange.schema.Question;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
 import java.awt.BorderLayout;
+import java.awt.event.ItemEvent;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -21,7 +25,7 @@ import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
 
 /** ContextHelper's side panel. */
-public class ContextHelperPanel extends JPanel implements Runnable {
+public class ContextHelperPanel extends JPanel implements Runnable, StackExchangeTreeListener {
 
   private static final int SPLIT_DIVIDER_POSITION = 200;
 
@@ -33,6 +37,9 @@ public class ContextHelperPanel extends JPanel implements Runnable {
   private final JBScrollPane treeScrollPane;
 
   private WebView webView;
+
+  private final JBCheckBox checkBox;
+  private Object selectedItem;
 
   private final StackExchangeThreadsTree tree;
   private StackExchangeThreadsTreeModel treeModel;
@@ -46,6 +53,7 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     this.queryJTextField = new JTextField();
     this.tree = new StackExchangeThreadsTree(this, treeModel);
     this.treeScrollPane = new JBScrollPane(tree);
+    this.checkBox = new JBCheckBox("Do you find this item relevant to the problem?");
 
     configureGui();
   }
@@ -68,16 +76,29 @@ public class ContextHelperPanel extends JPanel implements Runnable {
       jfxPanel.setScene(new Scene(webView));
     });
 
+    checkBox.setVisible(false);
+    checkBox.addItemListener(itemEvent -> {
+      if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
+        checkBox.setEnabled(false);
+        // TODO: send "useful" event through itemSelected
+      }
+    });
+
+    JPanel bottomPanel = new JPanel();
+    bottomPanel.setLayout(new BorderLayout());
+    bottomPanel.add(checkBox, BorderLayout.PAGE_START);
+    bottomPanel.add(jfxPanel, BorderLayout.CENTER);
     queryJTextField.addActionListener(e ->
         contextHelperProjectComponent.processQuery(queryJTextField.getText()));
     JSplitPane splitPane = new JSplitPane(
-        JSplitPane.VERTICAL_SPLIT, treeScrollPane, jfxPanel);
+        JSplitPane.VERTICAL_SPLIT, treeScrollPane, bottomPanel);
     splitPane.setDividerLocation(SPLIT_DIVIDER_POSITION);
     add(splitPane, BorderLayout.CENTER);
   }
 
   /** Updates the underlying data model and JTree element. */
   public void updatePanelWithQueryResults(StackExchangeQuestionResults queryResults) {
+    // TODO: send "questions" event
     queryJTextField.setText(queryResults.getQueryContent());
     treeModel =
         new StackExchangeThreadsTreeModel(
@@ -85,13 +106,6 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     tree.setModel(treeModel);
     treeScrollPane.getVerticalScrollBar().setValue(0);
     showPanel();
-  }
-
-  void updateWebViewWithHtml(String context) {
-    Platform.runLater(() -> {
-      WebEngine engine = webView.getEngine();
-      engine.loadContent(context, "text/html");
-    });
   }
 
   private void showPanel() {
@@ -106,11 +120,12 @@ public class ContextHelperPanel extends JPanel implements Runnable {
     if (isQuerying) {
       progressBar.setIndeterminate(true);
       queryJTextField.setText("");
+      checkBox.setVisible(false);
       treeModel =
           new StackExchangeThreadsTreeModel(
               contextHelperProjectComponent.getStackExchangeClient(), null);
       tree.setModel(treeModel);
-      updateWebViewWithHtml("");
+      renderHtmlText("");
     } else {
       progressBar.setIndeterminate(false);
     }
@@ -118,5 +133,33 @@ public class ContextHelperPanel extends JPanel implements Runnable {
 
   @Override
   public void run() {
+  }
+
+  @Override
+  public void renderHtmlText(String htmlText) {
+    Platform.runLater(() -> {
+      WebEngine engine = webView.getEngine();
+      engine.loadContent(htmlText, "text/html");
+    });
+  }
+
+  @Override
+  public void questionClicked(Question question) {
+    selectedItem = question;
+    // TODO: send "clicked" event
+    enableCheckBox();
+  }
+
+  @Override
+  public void answerClicked(Answer answer) {
+    selectedItem = answer;
+    // TODO: send "clicked" event
+    enableCheckBox();
+  }
+
+  private void enableCheckBox() {
+    checkBox.setVisible(true);
+    checkBox.setSelected(false);
+    checkBox.setEnabled(true);
   }
 }

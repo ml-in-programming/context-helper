@@ -23,14 +23,15 @@ class GoogleCustomSearchClient(private val apiKey: String) {
         list.cx = SEARCH_ENGINE_ID
         list.alt = "json"
         val searchResult = list.execute()
+        searchResult.items ?: return emptyList()
         return searchResult.items.mapNotNull {
             val link = it.link
             // Format: https://stackoverflow.com/questions/id/...
             val urlParts = link.split(Regex("/"))
-            val questionIdText = urlParts[4]
             try {
+                val questionIdText = urlParts[4]
                 questionIdText.toLong()
-            } catch (e: NumberFormatException) {
+            } catch (e: Exception) {
                 LOG.warn(e.message)
                 null
             }

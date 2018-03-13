@@ -100,9 +100,16 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                     // StackExchangeQuestionResults queryResults =
                     //     stackExchangeClient.requestRelevantQuestions(query);
                     val questions = stackExchangeClient.requestQuestionsWith(questionIds)
-                    val queryResults = StackExchangeQuestionResults(query, questions)
-                    SwingUtilities.invokeLater {
-                        contextHelperPanel.updatePanelWithQueryResults(queryResults)
+                    if (questions.isEmpty()) {
+                        SwingUtilities.invokeLater {
+                            MessagesUtil.showInfoDialog(
+                                "No help available for the selected context.", project)
+                        }
+                    } else {
+                        val queryResults = StackExchangeQuestionResults(query, questions)
+                        SwingUtilities.invokeLater {
+                            contextHelperPanel.updatePanelWithQueryResults(queryResults)
+                        }
                     }
                 }
             } catch (e: Exception) {

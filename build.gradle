@@ -39,6 +39,7 @@ repositories {
 intellij {
     version ideaVersion
     pluginName 'Context Helper'
+    intellij.updateSinceUntilBuild false
 }
 
 sourceSets {

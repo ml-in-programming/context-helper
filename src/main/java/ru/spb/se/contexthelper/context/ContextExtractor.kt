@@ -9,12 +9,12 @@ class ContextProcessor(private val psiElement: PsiElement) {
     fun generateQuery(): String {
         val referenceQuery = generateQueryIfInPsiReferenceExpression()
         val genericQuery = generateGenericQuery()
-        val genericQuestion = genericQuery.keywords.joinToString(" OR ") { it.word }
+        val questionFromGeneric = genericQuery.keywords.joinToString("|") { it.word }
         return if (referenceQuery != null) {
             referenceQuery.keywords.joinToString(" ") { it.word } +
-                " ($genericQuestion) java"
+                " (\"\"|$questionFromGeneric) java"
         } else {
-            "$genericQuestion java"
+            "($questionFromGeneric) java"
         }
     }
 

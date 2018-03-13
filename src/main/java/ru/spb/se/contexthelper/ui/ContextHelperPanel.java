@@ -9,6 +9,7 @@ import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
 import java.awt.BorderLayout;
 import java.awt.event.ItemEvent;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -80,7 +81,18 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     checkBox.addItemListener(itemEvent -> {
       if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
         checkBox.setEnabled(false);
-        // TODO: send "useful" event through itemSelected
+
+        Long id = null;
+        if (selectedItem instanceof Question) {
+          Question question = (Question) selectedItem;
+          id = question.getQuestionId();
+        } else if (selectedItem instanceof Answer) {
+          Answer answer = (Answer) selectedItem;
+          id = answer.getAnswerId();
+        }
+        if (id != null) {
+          contextHelperProjectComponent.sendHelpfulMessage(Long.toString(id));
+        }
       }
     });
 
@@ -88,17 +100,22 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     bottomPanel.setLayout(new BorderLayout());
     bottomPanel.add(checkBox, BorderLayout.PAGE_START);
     bottomPanel.add(jfxPanel, BorderLayout.CENTER);
-    queryJTextField.addActionListener(e ->
-        contextHelperProjectComponent.processQuery(queryJTextField.getText()));
-    JSplitPane splitPane = new JSplitPane(
-        JSplitPane.VERTICAL_SPLIT, treeScrollPane, bottomPanel);
+    queryJTextField.addActionListener(actionEvent -> {
+      contextHelperProjectComponent.enterNewSession();
+      contextHelperProjectComponent.processQuery(queryJTextField.getText());
+    });
+    JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, treeScrollPane, bottomPanel);
     splitPane.setDividerLocation(SPLIT_DIVIDER_POSITION);
     add(splitPane, BorderLayout.CENTER);
   }
 
   /** Updates the underlying data model and JTree element. */
   public void updatePanelWithQueryResults(StackExchangeQuestionResults queryResults) {
-    // TODO: send "questions" event
+    contextHelperProjectComponent.sendQuestionsMessage(
+      queryResults.getQueryContent(),
+      queryResults.getQuestions().stream()
+        .map(Question::getQuestionId)
+        .collect(Collectors.toList()));
     queryJTextField.setText(queryResults.getQueryContent());
     treeModel =
         new StackExchangeThreadsTreeModel(
@@ -146,14 +163,14 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   @Override
   public void questionClicked(Question question) {
     selectedItem = question;
-    // TODO: send "clicked" event
+    contextHelperProjectComponent.sendClicksMessage(Long.toString(question.getQuestionId()));
     enableCheckBox();
   }
 
   @Override
   public void answerClicked(Answer answer) {
     selectedItem = answer;
-    // TODO: send "clicked" event
+    contextHelperProjectComponent.sendClicksMessage(Long.toString(answer.getAnswerId()));
     enableCheckBox();
   }
 

@@ -33,7 +33,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     private val statsCollector: StatsCollector = StatsCollector()
 
     private var sessionID: String = ""
-    private val usageCollector: LocalUsageCollector = LocalUsageCollector()
+    private val usageCollector: LocalUsageCollector = LocalUsageCollector(localSeverHostName)
 
     private var viewerPanel: ContextHelperPanel = ContextHelperPanel(this)
 
@@ -125,21 +125,23 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         usageCollector.sendContextsMessage(installationID, sessionID, caretOffset, documentText)
     }
 
-    fun sendQuestionsMessage() {
-        TODO("not implemented yet")
+    fun sendQuestionsMessage(request: String, questionIds: List<Long>) {
+        usageCollector.sendQuestionsMessage(sessionID, request, questionIds)
     }
 
-    fun sendClicksMessage() {
-        TODO("not implemented yet")
+    fun sendClicksMessage(itemID: String) {
+        usageCollector.sendClicksMessage(sessionID, itemID)
     }
 
-    fun sendHelpfulMessage() {
-        TODO("not implemented yet")
+    fun sendHelpfulMessage(itemID: String) {
+        usageCollector.sendHelpfulMessage(sessionID, itemID)
     }
 
     companion object {
         private val LOG = Logger.getInstance(
             "ru.spb.se.contexthelper.component.ContextHelperProjectComponent")
+
+        private const val localSeverHostName = "93.92.205.31"
 
         private val installationID = PermanentInstallationID.get()
 

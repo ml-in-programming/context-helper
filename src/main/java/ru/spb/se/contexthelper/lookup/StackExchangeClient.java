@@ -21,10 +21,10 @@ public class StackExchangeClient {
   private static final int QUESTIONS_PAGE_SIZE = 100;
 
   /**
-   * Included fields: answer.body, answer.creation_date, answer.owner, answer.score,
-   * shallow_user.display_name.
+   * Included fields: answer.answer_id, answer.body, answer.creation_date, answer.owner,
+   * answer.score, shallow_user.display_name.
    */
-  private static final String ANSWERS_FILER = "!6QljBaH0jbgaIk6a";
+  private static final String ANSWERS_FILER = "!Fcb3plMp6RG-q6e9_9oob)z-X9";
   public static final int ANSWERS_PAGE_SIZE = 10;
 
   @NotNull

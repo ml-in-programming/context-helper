@@ -1,6 +1,7 @@
 package ru.spb.se.contexthelper.component
 
 import com.google.code.stackexchange.schema.StackExchangeSite
+import com.intellij.openapi.application.PermanentInstallationID
 import com.intellij.openapi.components.ProjectComponent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -17,6 +18,7 @@ import ru.spb.se.contexthelper.context.NotEnoughContextException
 import ru.spb.se.contexthelper.lookup.GoogleCustomSearchClient
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
+import ru.spb.se.contexthelper.reporting.LocalUsageCollector
 import ru.spb.se.contexthelper.reporting.StatsCollector
 import ru.spb.se.contexthelper.ui.ContextHelperPanel
 import ru.spb.se.contexthelper.util.MessagesUtil
@@ -29,6 +31,9 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     private val googleSearchClient = GoogleCustomSearchClient(GOOGLE_SEARCH_API_KEY)
 
     private val statsCollector: StatsCollector = StatsCollector()
+
+    private var sessionID: String = ""
+    private val usageCollector: LocalUsageCollector = LocalUsageCollector()
 
     private var viewerPanel: ContextHelperPanel = ContextHelperPanel(this)
 
@@ -112,9 +117,31 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         }
     }
 
+    fun enterNewSession() {
+        sessionID = "$installationID-${System.currentTimeMillis()}"
+    }
+
+    fun sendContextsMessage(caretOffset: Int, documentText: String) {
+        usageCollector.sendContextsMessage(installationID, sessionID, caretOffset, documentText)
+    }
+
+    fun sendQuestionsMessage() {
+        TODO("not implemented yet")
+    }
+
+    fun sendClicksMessage() {
+        TODO("not implemented yet")
+    }
+
+    fun sendHelpfulMessage() {
+        TODO("not implemented yet")
+    }
+
     companion object {
         private val LOG = Logger.getInstance(
             "ru.spb.se.contexthelper.component.ContextHelperProjectComponent")
+
+        private val installationID = PermanentInstallationID.get()
 
         /** Last part of the name for {@link NamedComponent}. */
         private const val COMPONENT_NAME = "ContextHelperProjectComponent"

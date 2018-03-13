@@ -53,7 +53,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     this.queryJTextField = new JTextField();
     this.tree = new StackExchangeThreadsTree(this, treeModel);
     this.treeScrollPane = new JBScrollPane(tree);
-    this.checkBox = new JBCheckBox("Do you find this item relevant to the problem?");
+    this.checkBox = new JBCheckBox("Do you find this item helpful to the problem?");
 
     configureGui();
   }

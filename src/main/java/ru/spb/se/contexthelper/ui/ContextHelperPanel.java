@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javax.swing.JPanel;
@@ -75,6 +77,15 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     JFXPanel jfxPanel = new JFXPanel();
     Platform.runLater(() -> {
       webView = new WebView();
+      webView.addEventFilter(KeyEvent.KEY_RELEASED, (KeyEvent e) -> {
+        if (e.getCode() == KeyCode.ADD || e.getCode() == KeyCode.EQUALS
+          || e.getCode() == KeyCode.PLUS) {
+          webView.setZoom(webView.getZoom() * 1.1);
+        }
+        else if (e.getCode() == KeyCode.SUBTRACT || e.getCode() == KeyCode.MINUS ){
+          webView.setZoom(webView.getZoom() / 1.1);
+        }
+      });
       jfxPanel.setScene(new Scene(webView));
     });
 
@@ -105,6 +116,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
       contextHelperProjectComponent.enterNewSession();
       contextHelperProjectComponent.processQuery(queryJTextField.getText());
     });
+    @SuppressWarnings("SuspiciousNameCombination")
     JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, treeScrollPane, bottomPanel);
     splitPane.setDividerLocation(SPLIT_DIVIDER_POSITION);
     add(splitPane, BorderLayout.CENTER);

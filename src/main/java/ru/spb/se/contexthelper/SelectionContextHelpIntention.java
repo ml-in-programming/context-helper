@@ -1,5 +1,7 @@
 package ru.spb.se.contexthelper;
 
+import static ru.spb.se.contexthelper.util.MessagesUtilKt.showInfoDialog;
+
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.editor.Editor;
@@ -13,7 +15,6 @@ import ru.spb.se.contexthelper.context.NotEnoughContextException;
 import ru.spb.se.contexthelper.context.bag.SelectionContextExtractor;
 import ru.spb.se.contexthelper.context.bag.SelectionContextQueryBuilder;
 import ru.spb.se.contexthelper.context.bag.SelectionContext;
-import ru.spb.se.contexthelper.util.MessagesUtil;
 
 /** IntentionAction for getting help based on the currently selected code in the editor. */
 @SuppressWarnings("IntentionDescriptionNotFoundInspection")
@@ -53,7 +54,7 @@ public class SelectionContextHelpIntention implements IntentionAction {
     try {
       query = queryBuilder.buildQuery();
     } catch (NotEnoughContextException ignored) {
-      MessagesUtil.showInfoDialog("Unable to describe the context.", project);
+      showInfoDialog("Unable to describe the context.", project);
       return;
     }
     ContextHelperProjectComponent helperComponent =

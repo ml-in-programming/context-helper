@@ -21,7 +21,8 @@ import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
 import ru.spb.se.contexthelper.reporting.LocalUsageCollector
 import ru.spb.se.contexthelper.reporting.StatsCollector
 import ru.spb.se.contexthelper.ui.ContextHelperPanel
-import ru.spb.se.contexthelper.util.MessagesUtil
+import ru.spb.se.contexthelper.util.showErrorDialog
+import ru.spb.se.contexthelper.util.showInfoDialog
 import javax.swing.SwingUtilities
 import kotlin.concurrent.thread
 
@@ -74,7 +75,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         val query = try {
             contextProcessor.generateQuery()
         } catch (ignored: NotEnoughContextException) {
-            MessagesUtil.showInfoDialog("Unable to describe the context.", project)
+            showInfoDialog("Unable to describe the context.", project)
             return
         }
         processQuery(query)
@@ -91,8 +92,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 val questionIds = googleSearchClient.lookupQuestionIds(query)
                 if (questionIds.isEmpty()) {
                     SwingUtilities.invokeLater {
-                        MessagesUtil.showInfoDialog(
-                            "No help available for the selected context.", project)
+                        showInfoDialog("No help available for the selected context.", project)
                     }
                 } else {
                     // Currently using Google Custom Search. But it has 100 queries per day limit.
@@ -102,8 +102,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                     val questions = stackExchangeClient.requestQuestionsWith(questionIds)
                     if (questions.isEmpty()) {
                         SwingUtilities.invokeLater {
-                            MessagesUtil.showInfoDialog(
-                                "No help available for the selected context.", project)
+                            showInfoDialog("No help available for the selected context.", project)
                         }
                     } else {
                         val queryResults = StackExchangeQuestionResults(query, questions)
@@ -114,7 +113,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 }
             } catch (e: Exception) {
                 SwingUtilities.invokeLater {
-                    MessagesUtil.showErrorDialog("Unable to process the query.", project)
+                    showErrorDialog("Unable to process the query.", project)
                 }
                 LOG.error(e)
             }

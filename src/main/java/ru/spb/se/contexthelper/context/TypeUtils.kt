@@ -17,7 +17,8 @@ fun getRelevantTypeName(psiElement: PsiElement): String? =
         is PsiVariable -> {
             // PsiLocalVariable || PsiField || PsiParameter
             val psiTypeElement = psiElement.typeElement
-            psiTypeElement?.innermostComponentReferenceElement?.qualifiedName
+            val result = psiTypeElement?.innermostComponentReferenceElement?.qualifiedName
+            result ?: psiElement.type.canonicalText
         }
         is PsiMethod -> {
             val psiReturnTypeElement = psiElement.returnType

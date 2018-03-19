@@ -5,7 +5,10 @@ import ru.spb.se.contexthelper.context.declr.DeclarationsContextExtractor
 import ru.spb.se.contexthelper.context.declr.DeclarationsContextQueryBuilder
 import ru.spb.se.contexthelper.context.trie.Type
 
-class ContextProcessor(private val psiElement: PsiElement) {
+class ContextProcessor(initPsiElement: PsiElement) {
+    private val psiElement =
+        if (initPsiElement is PsiJavaToken) initPsiElement.prevSibling else initPsiElement
+
     fun generateQuery(): String {
         val referenceQuery = generateQueryIfInPsiReferenceExpression()
         val genericQuery = generateGenericQuery()

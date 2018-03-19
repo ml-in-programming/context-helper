@@ -9,6 +9,7 @@ import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
 import java.awt.BorderLayout;
 import java.awt.event.ItemEvent;
+import java.net.URL;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -142,7 +143,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
           new StackExchangeThreadsTreeModel(
               contextHelperProjectComponent.getStackExchangeClient(), null);
       tree.setModel(treeModel);
-      renderHtmlText("");
+      renderPrettifiedHtml("");
     } else {
       progressBar.setIndeterminate(false);
     }
@@ -153,10 +154,23 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   }
 
   @Override
-  public void renderHtmlText(String htmlText) {
+  public void renderPrettifiedHtml(String htmlText) {
     Platform.runLater(() -> {
+      URL url = this.getClass().getResource("/prettify.js");
       WebEngine engine = webView.getEngine();
-      engine.loadContent(htmlText, "text/html");
+      engine.loadContent(
+          "<html>\n"
+          + "<head>\n"
+          + "  <script type=\"text/javascript\" src=\"" + url.toString() + "\"></script>\n"
+          + "</head>\n"
+          + "<body>\n"
+          + htmlText
+            .replace("<code>", "<pre class=\"prettyprint\">")
+            .replace("</code>", "</pre>")
+          + "</body>\n"
+          + "</html>"
+        , "text/html"
+      );
     });
   }
 

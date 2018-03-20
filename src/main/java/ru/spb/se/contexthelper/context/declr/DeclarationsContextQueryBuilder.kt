@@ -5,7 +5,7 @@ import ru.spb.se.contexthelper.context.trie.Type
 import ru.spb.se.contexthelper.context.trie.TypeContextTrie
 
 class DeclarationsContextQueryBuilder(private val declarationsContext: DeclarationsContext) {
-    fun buildQuery(): Query {
+    fun buildQuery(): Query? {
         val contextTrie = TypeContextTrie()
         declarationsContext.declarations
             .forEach {
@@ -18,7 +18,7 @@ class DeclarationsContextQueryBuilder(private val declarationsContext: Declarati
             }
         val relevantTypes = contextTrie.getRelevantTypes(2)
         return when {
-            relevantTypes.isEmpty() -> throw NotEnoughContextException()
+            relevantTypes.isEmpty() -> null
             relevantTypes.size == 1 -> {
                 Query(listOf(
                     Keyword(relevantTypes[0].parts.joinToString("."), 1)))

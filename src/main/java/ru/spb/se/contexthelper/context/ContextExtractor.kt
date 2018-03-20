@@ -10,18 +10,28 @@ class ContextProcessor(initPsiElement: PsiElement) {
         if (initPsiElement is PsiJavaToken) initPsiElement.prevSibling else initPsiElement
 
     fun generateQuery(): String {
-        val nearCursorQuery = generateQueryAroundPsiElement()
-        val genericQuery = generateGenericQuery()
-        val questionFromGeneric = genericQuery.keywords.joinToString("|") { it.word }
-        return if (nearCursorQuery != null) {
-            nearCursorQuery.keywords.joinToString(" ") { it.word } +
-                " (\"\"|$questionFromGeneric) java"
-        } else {
-            "($questionFromGeneric) java"
+        val queryBuilder = ArrayList<String>()
+        val nearCursorQuery = composeQueryAroundPsiElement()
+        if (nearCursorQuery != null) {
+            queryBuilder.add(nearCursorQuery.keywords.joinToString(" ") { it.word })
         }
+        val genericQuery = composeGenericQuery()
+        if (genericQuery != null) {
+            val questionFromGeneric = genericQuery.keywords.joinToString("|") { it.word }
+            if (queryBuilder.isNotEmpty()) {
+                queryBuilder.add("(\"\"|$questionFromGeneric)")
+            } else {
+                queryBuilder.add("($questionFromGeneric)")
+            }
+        }
+        if (queryBuilder.isEmpty()) {
+            throw NotEnoughContextException()
+        }
+        queryBuilder.add("java")
+        return queryBuilder.joinToString(" ")
     }
 
-    private fun generateQueryAroundPsiElement(): Query? {
+    private fun composeQueryAroundPsiElement(): Query? {
         val keywords = mutableListOf<Keyword>()
         if (psiElement is PsiNewExpression) {
             val createReference = psiElement.classReference?.resolve() ?: return null
@@ -73,7 +83,7 @@ class ContextProcessor(initPsiElement: PsiElement) {
         return null
     }
 
-    private fun generateGenericQuery(): Query {
+    private fun composeGenericQuery(): Query? {
         val declarationsContextExtractor = DeclarationsContextExtractor(psiElement)
         val context = declarationsContextExtractor.context
         val queryBuilder = DeclarationsContextQueryBuilder(context)

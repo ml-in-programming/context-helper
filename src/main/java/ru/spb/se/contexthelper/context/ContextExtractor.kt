@@ -10,30 +10,37 @@ class ContextProcessor(initPsiElement: PsiElement) {
         if (initPsiElement is PsiJavaToken) initPsiElement.prevSibling else initPsiElement
 
     fun generateQuery(): String {
-        val referenceQuery = generateQueryIfInPsiReferenceExpression()
+        val nearCursorQuery = generateQueryAroundPsiElement()
         val genericQuery = generateGenericQuery()
         val questionFromGeneric = genericQuery.keywords.joinToString("|") { it.word }
-        return if (referenceQuery != null) {
-            referenceQuery.keywords.joinToString(" ") { it.word } +
+        return if (nearCursorQuery != null) {
+            nearCursorQuery.keywords.joinToString(" ") { it.word } +
                 " (\"\"|$questionFromGeneric) java"
         } else {
             "($questionFromGeneric) java"
         }
     }
 
-    private fun generateQueryIfInPsiReferenceExpression(): Query? {
+    private fun generateQueryAroundPsiElement(): Query? {
+        val keywords = mutableListOf<Keyword>()
+        if (psiElement is PsiNewExpression) {
+            val createReference = psiElement.classReference?.resolve() ?: return null
+            val type = getRelevantTypeName(createReference)?.let { Type(it) }
+            if (type != null) {
+                keywords.add(Keyword("new", 1))
+                keywords.add(Keyword(type.parts.joinToString("."), 1))
+                return Query(keywords)
+            }
+        }
         val reference = findReferenceParent(psiElement) ?: return null
-        val leftType = getLeftPartReferenceType(reference.firstChild) ?: return null
+        val leftType = getLeftPartReferenceType(reference.firstChild)
         val rightIdentifier = reference.children.find { it is PsiIdentifier } ?: return null
         val rightIdentifierParts = rightIdentifier.text.splitByUppercase()
-        val keywords = mutableListOf<Keyword>()
-        keywords.add(Keyword(leftType.parts.joinToString("."), 1))
-        rightIdentifierParts.forEach {
-            keywords.add(Keyword(it, 1))
+        if (leftType != null) {
+            keywords.add(Keyword(leftType.parts.joinToString("."), 1))
         }
-        return Query(
-            keywords,
-            "How to ${rightIdentifierParts.joinToString(" ")} ${leftType.simpleName}")
+        rightIdentifierParts.forEach { keywords.add(Keyword(it, 1)) }
+        return Query(keywords)
     }
 
     private fun findReferenceParent(psiElement: PsiElement?): PsiElement? {

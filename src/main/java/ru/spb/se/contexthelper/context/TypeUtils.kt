@@ -10,7 +10,7 @@ class Keyword(word: String, val weight: Int) {
 }
 
 /** Represents the context by keywords. */
-data class Query(val keywords: List<Keyword>, val defaultQuestion: String)
+data class Query(val keywords: List<Keyword>)
 
 fun getRelevantTypeName(psiElement: PsiElement): String? =
     when (psiElement) {

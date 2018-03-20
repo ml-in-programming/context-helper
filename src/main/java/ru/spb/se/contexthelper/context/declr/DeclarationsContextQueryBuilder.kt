@@ -21,14 +21,12 @@ class DeclarationsContextQueryBuilder(private val declarationsContext: Declarati
             relevantTypes.isEmpty() -> throw NotEnoughContextException()
             relevantTypes.size == 1 -> {
                 Query(listOf(
-                    Keyword(relevantTypes[0].parts.joinToString("."), 1)),
-                    "")
+                    Keyword(relevantTypes[0].parts.joinToString("."), 1)))
             }
             else -> {
                 Query(listOf(
                     Keyword(relevantTypes[0].parts.joinToString("."), 1),
-                    Keyword(relevantTypes[1].parts.joinToString("."), 1)),
-                    "")
+                    Keyword(relevantTypes[1].parts.joinToString("."), 1)))
             }
         }
     }

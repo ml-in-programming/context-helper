@@ -18,6 +18,7 @@ import ru.spb.se.contexthelper.context.NotEnoughContextException
 import ru.spb.se.contexthelper.lookup.GoogleCustomSearchClient
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
+import ru.spb.se.contexthelper.lookup.ThreadsRecommenderClient
 import ru.spb.se.contexthelper.reporting.LocalUsageCollector
 import ru.spb.se.contexthelper.reporting.StatsCollector
 import ru.spb.se.contexthelper.ui.ContextHelperPanel
@@ -30,6 +31,7 @@ import kotlin.concurrent.thread
 class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     val stackExchangeClient = StackExchangeClient(STACK_EXCHANGE_API_KEY, STACK_EXCHANGE_SITE)
     private val googleSearchClient = GoogleCustomSearchClient(GOOGLE_SEARCH_API_KEY)
+    private val threadsRecommenderClient = ThreadsRecommenderClient()
 
     private val statsCollector: StatsCollector = StatsCollector()
 
@@ -89,7 +91,8 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 contextHelperPanel.setQueryingStatus(true)
             }
             try {
-                val questionIds = googleSearchClient.lookupQuestionIds(query)
+                // val questionIds = googleSearchClient.lookupQuestionIds(query)
+                val questionIds = threadsRecommenderClient.askForRecommendedThreads(query)
                 if (questionIds.isEmpty()) {
                     SwingUtilities.invokeLater {
                         showInfoDialog("No help available for the selected context.", project)

@@ -39,17 +39,17 @@ class LocalUsageCollector(private val hostName: String) {
     }
 
     private fun sendAsynchronously(portNumber: Int, printRoutine: (PrintWriter) -> Unit) {
-        thread {
-            try {
-                Socket(hostName, portNumber).use { socket ->
-                    PrintWriter(socket.getOutputStream(), true).use { printWriter ->
-                        printRoutine(printWriter)
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+//        thread {
+//            try {
+//                Socket(hostName, portNumber).use { socket ->
+//                    PrintWriter(socket.getOutputStream(), true).use { printWriter ->
+//                        printRoutine(printWriter)
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//        }
     }
 
     companion object {

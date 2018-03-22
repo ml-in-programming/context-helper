@@ -155,7 +155,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
         /** Last part of the name for {@link NamedComponent}. */
         private const val COMPONENT_NAME = "ContextHelperProjectComponent"
-        private const val ICON_PATH_TOOL_WINDOW = "/icons/se-icon-13.png"
+        private const val ICON_PATH_TOOL_WINDOW = "/icons/se-icon-16.png"
 
         private const val STACK_EXCHANGE_API_KEY = "F)x9bhGombhjqpnXt)5Mwg(("
         private val STACK_EXCHANGE_SITE = StackExchangeSite.STACK_OVERFLOW

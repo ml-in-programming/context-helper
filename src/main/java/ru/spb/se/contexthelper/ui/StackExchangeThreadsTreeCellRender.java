@@ -1,6 +1,7 @@
 package ru.spb.se.contexthelper.ui;
 
 import com.google.code.stackexchange.schema.Answer;
+import com.google.code.stackexchange.schema.Comment;
 import com.google.code.stackexchange.schema.Question;
 import com.google.common.annotations.VisibleForTesting;
 import com.intellij.openapi.util.IconLoader;
@@ -23,16 +24,18 @@ public class StackExchangeThreadsTreeCellRender implements TreeCellRenderer {
     JLabel label = new JLabel();
     if (renderedObject instanceof Question) {
       Question question = (Question) renderedObject;
-      label.setText("<html>" + question.getTitle() + "</html>");
+      label.setText("<html>["
+          + convertScoreToString(question.getScore()) + "] "
+          + question.getTitle() +
+          "</html>");
       label.setIcon(IconLoader.getIcon(QUESTION_ICON_PATH));
     } else if (renderedObject instanceof Answer) {
       Answer answer = (Answer) renderedObject;
-      label.setText(
-          "<html>" +
-          "[" + convertScoreToString(answer.getScore()) + "]" +
-          " by " + answer.getOwner().getDisplayName() +
-          " on " + answer.getCreationDate() +
-          "</html>");
+      label.setText("<html>[" + convertScoreToString(answer.getScore()) + "] answer </html>");
+      label.setIcon(IconLoader.getIcon(ANSWER_ICON_PATH));
+    } else if (renderedObject instanceof Comment) {
+      Comment comment = (Comment) renderedObject;
+      label.setText("<html>[" + convertScoreToString(comment.getScore()) + "] comment </html>");
       label.setIcon(IconLoader.getIcon(ANSWER_ICON_PATH));
     }
     return label;

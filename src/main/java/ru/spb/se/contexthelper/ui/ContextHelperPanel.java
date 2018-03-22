@@ -50,9 +50,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
 
   public ContextHelperPanel(ContextHelperProjectComponent contextHelperProjectComponent) {
     this.contextHelperProjectComponent = contextHelperProjectComponent;
-    this.treeModel =
-        new StackExchangeThreadsTreeModel(
-            contextHelperProjectComponent.getStackExchangeClient(), null);
+    this.treeModel = new StackExchangeThreadsTreeModel(null);
     this.progressBar = new JProgressBar();
     this.queryJTextField = new JTextField();
     this.tree = new StackExchangeThreadsTree(this, treeModel);
@@ -130,9 +128,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
         .map(Question::getQuestionId)
         .collect(Collectors.toList()));
     queryJTextField.setText(queryResults.getQueryContent());
-    treeModel =
-        new StackExchangeThreadsTreeModel(
-            contextHelperProjectComponent.getStackExchangeClient(), queryResults.getQuestions());
+    treeModel = new StackExchangeThreadsTreeModel(queryResults.getQuestions());
     tree.setModel(treeModel);
     treeScrollPane.getVerticalScrollBar().setValue(0);
     showPanel();
@@ -151,9 +147,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
       progressBar.setIndeterminate(true);
       queryJTextField.setText("");
       checkBox.setVisible(false);
-      treeModel =
-          new StackExchangeThreadsTreeModel(
-              contextHelperProjectComponent.getStackExchangeClient(), null);
+      treeModel = new StackExchangeThreadsTreeModel(null);
       tree.setModel(treeModel);
       renderPrettifiedHtml("");
     } else {

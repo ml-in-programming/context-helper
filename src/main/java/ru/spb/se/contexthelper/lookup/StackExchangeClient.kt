@@ -53,6 +53,7 @@ class StackExchangeClient(
          * Included fields: answer.(answer_id, body, comments, is_accepted, score), .wrapper.items,
          * comment.(body, score), question.(answers, body, comments, question_id, score, title).
          */
+        // TODO(niksaz): Client need private_scope to access answer.is_accepted.
         private const val QUESTIONS_FILTER = "!E-PL9L5uXc2mRG4-jWQtpb(HdXTeXFtXj.5JHu"
         private const val PAGE_SIZE = 100
     }

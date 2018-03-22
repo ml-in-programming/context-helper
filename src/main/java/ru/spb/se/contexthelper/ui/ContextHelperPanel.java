@@ -149,7 +149,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
       checkBox.setVisible(false);
       treeModel = new StackExchangeThreadsTreeModel(null);
       tree.setModel(treeModel);
-      renderPrettifiedHtml("");
+      renderHtml("");
     } else {
       progressBar.setIndeterminate(false);
     }
@@ -160,22 +160,21 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   }
 
   @Override
-  public void renderPrettifiedHtml(String htmlText) {
+  public void renderHtml(String bodyHtml) {
     Platform.runLater(() -> {
       URL url = this.getClass().getResource("/prettify.js");
       WebEngine engine = webView.getEngine();
-      engine.loadContent(
-          "<html>\n"
+      engine.loadContent("<html>\n"
           + "<head>\n"
-          + "  <script type=\"text/javascript\" src=\"" + url.toString() + "\"></script>\n"
+          + "<script type=\"text/javascript\" src=\"" + url.toString() + "\"></script>\n"
           + "</head>\n"
           + "<body>\n"
-          + htmlText
-            .replace("<code>", "<pre class=\"prettyprint\">")
-            .replace("</code>", "</pre>")
+          + bodyHtml
+              .replace("<code>", "<pre class=\"prettyprint\">")
+              .replace("</code>", "</pre>")
           + "</body>\n"
-          + "</html>"
-        , "text/html"
+          + "</html>",
+          "text/html"
       );
     });
   }

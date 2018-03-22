@@ -19,14 +19,14 @@ class StackExchangeThreadsTree(
             when (component) {
                 is Question -> {
                     treeListener.questionClicked(component)
-                    treeListener.renderPrettifiedHtml(component.body)
+                    treeListener.renderHtml("<h3>${component.title}</h3>${component.body}")
                 }
                 is Answer -> {
                     treeListener.answerClicked(component)
-                    treeListener.renderPrettifiedHtml(component.body)
+                    treeListener.renderHtml(component.body)
                 }
                 is Comment -> {
-                    treeListener.renderPrettifiedHtml(component.body)
+                    treeListener.renderHtml(component.body)
                 }
             }
         }

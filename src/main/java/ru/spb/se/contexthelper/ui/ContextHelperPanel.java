@@ -7,10 +7,6 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
-import java.awt.BorderLayout;
-import java.awt.event.ItemEvent;
-import java.net.URL;
-import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -18,15 +14,17 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.prompt.PromptSupport;
 import ru.spb.se.contexthelper.ContextHelperConstants;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.net.URL;
+import java.util.stream.Collectors;
 
 /** ContextHelper's side panel. */
 public class ContextHelperPanel extends JPanel implements Runnable, StackExchangeTreeListener {
@@ -75,6 +73,8 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     JFXPanel jfxPanel = new JFXPanel();
     Platform.runLater(() -> {
       webView = new WebView();
+      webView.getEngine().setUserStyleSheetLocation(
+          getClass().getResource("/style.css").toString());
       webView.addEventFilter(KeyEvent.KEY_RELEASED, (KeyEvent e) -> {
         if (e.getCode() == KeyCode.ADD || e.getCode() == KeyCode.EQUALS
           || e.getCode() == KeyCode.PLUS) {
@@ -112,7 +112,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     bottomPanel.add(jfxPanel, BorderLayout.CENTER);
     queryJTextField.addActionListener(actionEvent -> {
       contextHelperProjectComponent.enterNewSession();
-      contextHelperProjectComponent.processQuery(queryJTextField.getText());
+      contextHelperProjectComponent.processTextQuery(queryJTextField.getText());
     });
     @SuppressWarnings("SuspiciousNameCombination")
     JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, treeScrollPane, bottomPanel);
@@ -161,15 +161,21 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
 
   @Override
   public void renderHtml(String bodyHtml) {
+    String[] words = queryJTextField.getText().split("\\s+");
     Platform.runLater(() -> {
       URL url = this.getClass().getResource("/prettify.js");
       WebEngine engine = webView.getEngine();
+      String highlightedHtml = bodyHtml;
+      for (String word : words) {
+        highlightedHtml = highlightedHtml.replaceAll(
+            word, "<span class='highlight'>" + word + "</span>");
+      }
       engine.loadContent("<html>\n"
           + "<head>\n"
           + "<script type=\"text/javascript\" src=\"" + url.toString() + "\"></script>\n"
           + "</head>\n"
           + "<body>\n"
-          + bodyHtml
+          + highlightedHtml
               .replace("<code>", "<pre class=\"prettyprint\">")
               .replace("</code>", "</pre>")
           + "</body>\n"

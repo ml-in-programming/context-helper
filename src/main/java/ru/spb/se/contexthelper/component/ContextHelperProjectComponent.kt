@@ -15,6 +15,7 @@ import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
 import ru.spb.se.contexthelper.context.ContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
+import ru.spb.se.contexthelper.context.Query
 import ru.spb.se.contexthelper.lookup.GoogleCustomSearchClient
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
 import ru.spb.se.contexthelper.lookup.ThreadsRecommenderClient
@@ -83,16 +84,27 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         processQuery(query)
     }
 
-    fun processQuery(query: String) {
-        LOG.info("processQuery($query)")
+    fun processTextQuery(query: String) {
+        process(query) {
+            googleSearchClient.lookupQuestionIds(query)
+        }
+    }
+
+    private fun processQuery(query: Query) {
+        process(query.keywords.joinToString(" ") { it.word }) {
+            threadsRecommenderClient.askForRecommendedThreads(query)
+        }
+    }
+
+    private fun process(textQuery: String, idProducers: () -> List<Long>) {
+        LOG.info("processQuery($textQuery)")
         val contextHelperPanel = viewerPanel
         thread(isDaemon = true) {
             SwingUtilities.invokeLater {
                 contextHelperPanel.setQueryingStatus(true)
             }
             try {
-                // val questionIds = googleSearchClient.lookupQuestionIds(query)
-                val questionIds = threadsRecommenderClient.askForRecommendedThreads(query)
+                val questionIds = idProducers()
                 if (questionIds.isEmpty()) {
                     SwingUtilities.invokeLater {
                         showInfoDialog("No help available for the selected context.", project)
@@ -102,7 +114,8 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                     // May return to StackExchange search in the future.
                     // StackExchangeQuestionResults queryResults =
                     //     stackExchangeClient.requestRelevantQuestions(query);
-                    val queryResults = stackExchangeClient.getQuestionsWithIds(query, questionIds)
+                    val queryResults =
+                        stackExchangeClient.getQuestionsWithIds(textQuery, questionIds)
                     if (queryResults.questions.isEmpty()) {
                         SwingUtilities.invokeLater {
                             showInfoDialog("No help available for the selected context.", project)

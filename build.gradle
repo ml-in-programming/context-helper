@@ -60,7 +60,7 @@ jar {
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    baseName = "context-helper-2.1"
+    baseName = "context-helper-2.2"
 }
 
 dependencies {

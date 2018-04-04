@@ -7,7 +7,10 @@ import ru.spb.se.contexthelper.context.trie.Type
 
 class ContextProcessor(initPsiElement: PsiElement) {
     private val psiElement =
-        if (initPsiElement is PsiJavaToken) initPsiElement.prevSibling else initPsiElement
+        if (initPsiElement is PsiJavaToken && initPsiElement.prevSibling != null)
+            initPsiElement.prevSibling
+        else
+            initPsiElement
 
     fun generateQuery(): String {
         val queryBuilder = ArrayList<String>()

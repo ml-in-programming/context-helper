@@ -12,8 +12,7 @@ class QuestionRecommenderTest {
         val query = Query(
             listOf(
                 Keyword("string", 2),
-                Keyword("split", 1)),
-            "Test query")
+                Keyword("split", 1)))
         val questions = recommender.getRelevantQuestions(query, 5)
         assert(questions.contains("Split letter string in java"))
         assert(questions.contains("Split string from url pattern"))
@@ -27,8 +26,7 @@ class QuestionRecommenderTest {
             listOf(
                 Keyword("http", 2),
                 Keyword("get", 2),
-                Keyword("add", 1)),
-            "Test query")
+                Keyword("add", 1)))
         val questions = recommender.getRelevantQuestions(query, 5)
         assert(questions.contains("Add header to httpget request"))
         assert(questions.contains("Add date header to httpget"))

@@ -40,6 +40,20 @@
             description="Suggest help based on the available declarations">
       <keyboard-shortcut first-keystroke="shift alt H" keymap="$default"/>
     </action>
+
+    <action id="RunTests"
+            class="ru.spb.se.contexthelper.testing.RunTests"
+            text="Runs the test for accessing the quality"
+            icon="/icons/quality.png"
+            description="Runs the planned tests for accessing the method quality"/>
+
+    <group id="ASTExplorerGroup">
+      <separator/>
+
+      <reference ref="RunTests"/>
+
+      <add-to-group group-id="MainToolBar" relative-to-action="SearchEverywhere" anchor="after"/>
+    </group>
   </actions>
 
 </idea-plugin>

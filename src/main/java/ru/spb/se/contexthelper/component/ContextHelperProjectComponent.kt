@@ -37,6 +37,21 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     private val usageCollector: LocalUsageCollector = LocalUsageCollector(localSeverHostName)
 
     private var viewerPanel: ContextHelperPanel = ContextHelperPanel(this)
+    private val questionResultsListeners: ArrayList<QuestionResultsListener> = arrayListOf()
+
+    init {
+        addResultsListener(object : QuestionResultsListener {
+            override fun receiveResults(questionResults: StackExchangeQuestionResults) {
+                SwingUtilities.invokeLater {
+                    viewerPanel.updatePanelWithQueryResults(questionResults)
+                }
+            }
+        })
+    }
+
+    fun addResultsListener(questionResultsListener: QuestionResultsListener) {
+        questionResultsListeners.add(questionResultsListener)
+    }
 
     override fun getComponentName(): String = "$PLUGIN_NAME.$COMPONENT_NAME"
 
@@ -105,10 +120,8 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                             showInfoDialog("No help available for the selected context.", project)
                         }
                     } else {
-                        val queryResults = StackExchangeQuestionResults(query, questions)
-                        SwingUtilities.invokeLater {
-                            contextHelperPanel.updatePanelWithQueryResults(queryResults)
-                        }
+                        val questionResults = StackExchangeQuestionResults(query, questions)
+                        questionResultsListeners.forEach { it.receiveResults(questionResults) }
                     }
                 }
             } catch (e: Exception) {

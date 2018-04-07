@@ -3,14 +3,11 @@ package ru.spb.se.contexthelper.ui;
 import com.google.code.stackexchange.schema.Answer;
 import com.google.code.stackexchange.schema.Question;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
-import java.awt.BorderLayout;
-import java.awt.event.ItemEvent;
-import java.net.URL;
-import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -18,15 +15,17 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.prompt.PromptSupport;
 import ru.spb.se.contexthelper.ContextHelperConstants;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.net.URL;
+import java.util.stream.Collectors;
 
 /** ContextHelper's side panel. */
 public class ContextHelperPanel extends JPanel implements Runnable, StackExchangeTreeListener {
@@ -69,6 +68,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     JPanel topPanel = new JPanel();
     topPanel.setLayout(new VerticalLayout());
     topPanel.add(progressBar);
+    topPanel.add(buildComboBox());
     topPanel.add(queryJTextField);
 
     setLayout(new BorderLayout());
@@ -120,6 +120,13 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, treeScrollPane, bottomPanel);
     splitPane.setDividerLocation(SPLIT_DIVIDER_POSITION);
     add(splitPane, BorderLayout.CENTER);
+  }
+
+  private ComboBox buildComboBox() {
+    String[] options = {"Google Custom Search", "Indexed class names"};
+    ComboBox<String> comboBox = new ComboBox<>(options);
+    comboBox.setSelectedIndex(0);
+    return comboBox;
   }
 
   /** Updates the underlying data model and JTree element. */

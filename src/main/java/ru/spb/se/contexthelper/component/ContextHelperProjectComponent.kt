@@ -1,20 +1,15 @@
 package ru.spb.se.contexthelper.component
 
-import com.google.code.stackexchange.schema.Question
 import com.google.code.stackexchange.schema.StackExchangeSite
 import com.intellij.openapi.application.PermanentInstallationID
 import com.intellij.openapi.components.ProjectComponent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.WindowWrapper
-import com.intellij.openapi.ui.WindowWrapperBuilder
 import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiElement
-import com.intellij.ui.components.JBList
-import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.ContentFactory
 import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
@@ -28,11 +23,7 @@ import ru.spb.se.contexthelper.reporting.StatsCollector
 import ru.spb.se.contexthelper.ui.ContextHelperPanel
 import ru.spb.se.contexthelper.util.showErrorDialog
 import ru.spb.se.contexthelper.util.showInfoDialog
-import java.awt.Dimension
-import javax.swing.JComponent
-import javax.swing.ListModel
 import javax.swing.SwingUtilities
-import javax.swing.event.ListDataListener
 import kotlin.concurrent.thread
 
 /** Component which is called to initialize ContextHelper plugin for each [Project]. */
@@ -50,50 +41,16 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
     init {
         addResultsListener(object : QuestionResultsListener {
-            override fun receiveResults(questionResults: StackExchangeQuestionResults) {
+            override fun receiveResults(questionResults: StackExchangeQuestionResults): Boolean {
                 SwingUtilities.invokeLater {
                     viewerPanel.updatePanelWithQueryResults(questionResults)
                 }
-            }
-        })
-        // Used for quality assurance.
-        addResultsListener(object : QuestionResultsListener {
-            override fun receiveResults(questionResults: StackExchangeQuestionResults) {
-                SwingUtilities.invokeLater {
-                    showModalDialog(questionResults.questions, project)
-                }
+                return true
             }
         })
     }
 
-    fun showModalDialog(questions: List<Question>, project: Project) {
-        val wrapperDialog =
-            WindowWrapperBuilder(
-                WindowWrapper.Mode.MODAL, packTextIntoJComponent(questions.map {it.questionId }))
-                    .setProject(project)
-                    .setTitle("Quality measurements")
-                    .build()
-        wrapperDialog.show()
-    }
-
-    private fun packTextIntoJComponent(ids: List<Long>): JComponent {
-        val model = object : ListModel<String> {
-            override fun getElementAt(index: Int): String = ids[index].toString()
-
-            override fun getSize(): Int = ids.size
-
-            override fun addListDataListener(l: ListDataListener?) {
-            }
-
-            override fun removeListDataListener(l: ListDataListener?) {
-            }
-        }
-        val list = JBList<String>(model)
-        list.minimumSize = Dimension(720, 480)
-        return list
-    }
-
-    private fun addResultsListener(questionResultsListener: QuestionResultsListener) {
+    fun addResultsListener(questionResultsListener: QuestionResultsListener) {
         questionResultsListeners.add(questionResultsListener)
     }
 
@@ -165,7 +122,13 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                         }
                     } else {
                         val questionResults = StackExchangeQuestionResults(query, questions)
-                        questionResultsListeners.forEach { it.receiveResults(questionResults) }
+                        val iterator = questionResultsListeners.iterator()
+                        while (iterator.hasNext()) {
+                            val isInterested = iterator.next().receiveResults(questionResults)
+                            if (!isInterested) {
+                                iterator.remove()
+                            }
+                        }
                     }
                 }
             } catch (e: Exception) {

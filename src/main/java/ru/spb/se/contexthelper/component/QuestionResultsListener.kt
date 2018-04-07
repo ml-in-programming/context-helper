@@ -4,5 +4,6 @@ import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
 
 /** An entity that wants to listen for suggested [[StackExchangeQuestionResults]]. */
 interface QuestionResultsListener {
-    fun receiveResults(questionResults: StackExchangeQuestionResults)
+    /** Returns false if it is not interested in listening to updates anymore. */
+    fun receiveResults(questionResults: StackExchangeQuestionResults): Boolean
 }

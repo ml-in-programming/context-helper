@@ -142,7 +142,8 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     Project project = contextHelperProjectComponent.getProject();
     ToolWindow toolWindow =
         ToolWindowManager.getInstance(project).getToolWindow(ContextHelperConstants.ID_TOOL_WINDOW);
-    toolWindow.activate(this);
+    //TODO(niksaz): Activate this window, but return focus in QualityMeasurements
+    //toolWindow.activate(this);
   }
 
   public void setQueryingStatus(boolean isQuerying) {

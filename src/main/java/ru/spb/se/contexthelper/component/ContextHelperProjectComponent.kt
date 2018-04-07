@@ -15,9 +15,10 @@ import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
 import ru.spb.se.contexthelper.context.ContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
+import ru.spb.se.contexthelper.context.Query
 import ru.spb.se.contexthelper.lookup.GoogleCustomSearchClient
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
-import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
+import ru.spb.se.contexthelper.lookup.ThreadsRecommenderClient
 import ru.spb.se.contexthelper.reporting.LocalUsageCollector
 import ru.spb.se.contexthelper.reporting.StatsCollector
 import ru.spb.se.contexthelper.ui.ContextHelperPanel
@@ -28,8 +29,10 @@ import kotlin.concurrent.thread
 
 /** Component which is called to initialize ContextHelper plugin for each [Project]. */
 class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
-    val stackExchangeClient = StackExchangeClient(STACK_EXCHANGE_API_KEY, STACK_EXCHANGE_SITE)
     private val googleSearchClient = GoogleCustomSearchClient(GOOGLE_SEARCH_API_KEY)
+    private val stackExchangeClient =
+        StackExchangeClient(STACK_EXCHANGE_API_KEY, STACK_EXCHANGE_SITE)
+    private val threadsRecommenderClient = ThreadsRecommenderClient()
 
     private val statsCollector: StatsCollector = StatsCollector()
 
@@ -128,6 +131,60 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                             if (!isInterested) {
                                 iterator.remove()
                             }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                SwingUtilities.invokeLater {
+                    showErrorDialog("Unable to process the query.", project)
+                }
+                LOG.error(e)
+            }
+            SwingUtilities.invokeLater {
+                contextHelperPanel.setQueryingStatus(false)
+            }
+        }
+    }
+
+    fun processTextQuery(query: String) {
+        process(query) {
+            googleSearchClient.lookupQuestionIds(query)
+        }
+    }
+
+    private fun processQuery(query: Query) {
+        process(query.keywords.joinToString(" ") { it.word }) {
+            threadsRecommenderClient.askForRecommendedThreads(query)
+        }
+    }
+
+    private fun process(textQuery: String, idProducers: () -> List<Long>) {
+        LOG.info("processQuery($textQuery)")
+        val contextHelperPanel = viewerPanel
+        thread(isDaemon = true) {
+            SwingUtilities.invokeLater {
+                contextHelperPanel.setQueryingStatus(true)
+            }
+            try {
+                val questionIds = idProducers()
+                if (questionIds.isEmpty()) {
+                    SwingUtilities.invokeLater {
+                        showInfoDialog("No help available for the selected context.", project)
+                    }
+                } else {
+                    // Currently using Google Custom Search. But it has 100 queries per day limit.
+                    // May return to StackExchange search in the future.
+                    // StackExchangeQuestionResults queryResults =
+                    //     stackExchangeClient.requestRelevantQuestions(query);
+                    val queryResults =
+                        stackExchangeClient.getQuestionsWithIds(textQuery, questionIds)
+                    if (queryResults.questions.isEmpty()) {
+                        SwingUtilities.invokeLater {
+                            showInfoDialog("No help available for the selected context.", project)
+                        }
+                    } else {
+                        SwingUtilities.invokeLater {
+                            contextHelperPanel.updatePanelWithQueryResults(queryResults)
                         }
                     }
                 }

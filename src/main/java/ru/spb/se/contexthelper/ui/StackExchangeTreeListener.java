@@ -5,7 +5,7 @@ import com.google.code.stackexchange.schema.Question;
 
 /** An entity that can listen to events which occur in {@link StackExchangeThreadsTree} */
 public interface StackExchangeTreeListener {
-  void renderPrettifiedHtml(String htmlText);
+  void renderHtml(String bodyHtml);
 
   void questionClicked(Question question);
 

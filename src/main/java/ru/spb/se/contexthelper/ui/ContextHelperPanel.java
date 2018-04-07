@@ -49,9 +49,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
 
   public ContextHelperPanel(ContextHelperProjectComponent contextHelperProjectComponent) {
     this.contextHelperProjectComponent = contextHelperProjectComponent;
-    this.treeModel =
-        new StackExchangeThreadsTreeModel(
-            contextHelperProjectComponent.getStackExchangeClient(), null);
+    this.treeModel = new StackExchangeThreadsTreeModel(null);
     this.progressBar = new JProgressBar();
     this.queryJTextField = new JTextField();
     this.tree = new StackExchangeThreadsTree(this, treeModel);
@@ -77,6 +75,8 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     JFXPanel jfxPanel = new JFXPanel();
     Platform.runLater(() -> {
       webView = new WebView();
+      webView.getEngine().setUserStyleSheetLocation(
+          getClass().getResource("/style.css").toString());
       webView.addEventFilter(KeyEvent.KEY_RELEASED, (KeyEvent e) -> {
         if (e.getCode() == KeyCode.ADD || e.getCode() == KeyCode.EQUALS
           || e.getCode() == KeyCode.PLUS) {
@@ -114,7 +114,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     bottomPanel.add(jfxPanel, BorderLayout.CENTER);
     queryJTextField.addActionListener(actionEvent -> {
       contextHelperProjectComponent.enterNewSession();
-      contextHelperProjectComponent.processQuery(queryJTextField.getText());
+      contextHelperProjectComponent.processTextQuery(queryJTextField.getText());
     });
     @SuppressWarnings("SuspiciousNameCombination")
     JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, treeScrollPane, bottomPanel);
@@ -137,9 +137,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
         .map(Question::getQuestionId)
         .collect(Collectors.toList()));
     queryJTextField.setText(queryResults.getQueryContent());
-    treeModel =
-        new StackExchangeThreadsTreeModel(
-            contextHelperProjectComponent.getStackExchangeClient(), queryResults.getQuestions());
+    treeModel = new StackExchangeThreadsTreeModel(queryResults.getQuestions());
     tree.setModel(treeModel);
     treeScrollPane.getVerticalScrollBar().setValue(0);
     showPanel();
@@ -159,11 +157,9 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
       progressBar.setIndeterminate(true);
       queryJTextField.setText("");
       checkBox.setVisible(false);
-      treeModel =
-          new StackExchangeThreadsTreeModel(
-              contextHelperProjectComponent.getStackExchangeClient(), null);
+      treeModel = new StackExchangeThreadsTreeModel(null);
       tree.setModel(treeModel);
-      renderPrettifiedHtml("");
+      renderHtml("");
     } else {
       progressBar.setIndeterminate(false);
     }
@@ -174,22 +170,27 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   }
 
   @Override
-  public void renderPrettifiedHtml(String htmlText) {
+  public void renderHtml(String bodyHtml) {
+    String[] words = queryJTextField.getText().split("\\s+");
     Platform.runLater(() -> {
       URL url = this.getClass().getResource("/prettify.js");
       WebEngine engine = webView.getEngine();
-      engine.loadContent(
-          "<html>\n"
+      String highlightedHtml = bodyHtml;
+      for (String word : words) {
+        highlightedHtml = highlightedHtml.replaceAll(
+            word, "<span class='highlight'>" + word + "</span>");
+      }
+      engine.loadContent("<html>\n"
           + "<head>\n"
-          + "  <script type=\"text/javascript\" src=\"" + url.toString() + "\"></script>\n"
+          + "<script type=\"text/javascript\" src=\"" + url.toString() + "\"></script>\n"
           + "</head>\n"
           + "<body>\n"
-          + htmlText
-            .replace("<code>", "<pre class=\"prettyprint\">")
-            .replace("</code>", "</pre>")
+          + highlightedHtml
+              .replace("<code>", "<pre class=\"prettyprint\">")
+              .replace("</code>", "</pre>")
           + "</body>\n"
-          + "</html>"
-        , "text/html"
+          + "</html>",
+          "text/html"
       );
     });
   }

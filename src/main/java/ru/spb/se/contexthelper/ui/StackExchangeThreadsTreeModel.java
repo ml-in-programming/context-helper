@@ -1,29 +1,20 @@
 package ru.spb.se.contexthelper.ui;
 
 import com.google.code.stackexchange.schema.Answer;
+import com.google.code.stackexchange.schema.Comment;
 import com.google.code.stackexchange.schema.Question;
-import java.util.Comparator;
-import ru.spb.se.contexthelper.lookup.StackExchangeClient;
 
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /** {@link TreeModel} which provides data for StackExchange threads. */
 public class StackExchangeThreadsTreeModel implements TreeModel {
 
-  private final StackExchangeClient stackExchangeClient;
-
   private final List<Question> questions;
 
-  private final Map<Question, List<Answer>> questionToAnswers = new HashMap<>();
-
-  StackExchangeThreadsTreeModel(
-    StackExchangeClient stackExchangeClient, List<Question> questions) {
-    this.stackExchangeClient = stackExchangeClient;
+  StackExchangeThreadsTreeModel(List<Question> questions) {
     this.questions = questions;
   }
 
@@ -39,8 +30,14 @@ public class StackExchangeThreadsTreeModel implements TreeModel {
       return list.get(index);
     } else if (parent instanceof Question) {
       Question question = (Question) parent;
-      List<Answer> answers = getOrRequestAnswersFor(question);
-      return answers.get(index);
+      List<Comment> comments = question.getComments();
+      // TODO(niksaz): Earlier the answers were sorted by their scores.
+      return index < comments.size()
+          ? comments.get(index)
+          : question.getAnswers().get(index - comments.size());
+    } else if (parent instanceof Answer) {
+      Answer answer = (Answer) parent;
+      return answer.getComments().get(index);
     } else {
       return null;
     }
@@ -53,9 +50,13 @@ public class StackExchangeThreadsTreeModel implements TreeModel {
       return list.size();
     } else if (parent instanceof Question) {
       Question question = (Question) parent;
+      // TODO(niksaz): Look into it!
       // Since the answer count could be larger than the number of fetched answers, we will display,
       // the child count should not be larger than the displayed number.
-      return Math.min((int) question.getAnswerCount(), StackExchangeClient.ANSWERS_PAGE_SIZE);
+      return question.getComments().size() + question.getAnswers().size();
+    } else if (parent instanceof Answer) {
+      Answer answer = (Answer) parent;
+      return answer.getComments().size();
     } else {
       return 0;
     }
@@ -63,15 +64,7 @@ public class StackExchangeThreadsTreeModel implements TreeModel {
 
   @Override
   public boolean isLeaf(Object node) {
-    if (node instanceof List) {
-      List list = (List) node;
-      return list.isEmpty();
-    } else if (node instanceof Question) {
-      Question question = (Question) node;
-      return question.getAnswerCount() == 0;
-    } else {
-      return true;
-    }
+    return getChildCount(node) == 0;
   }
 
   @Override
@@ -90,15 +83,5 @@ public class StackExchangeThreadsTreeModel implements TreeModel {
 
   @Override
   public void removeTreeModelListener(TreeModelListener l) {
-  }
-
-  private List<Answer> getOrRequestAnswersFor(Question question) {
-    List<Answer> cachedAnswers = questionToAnswers.get(question);
-    if (cachedAnswers == null) {
-      cachedAnswers = stackExchangeClient.requestAnswersFor(question.getQuestionId());
-      cachedAnswers.sort(Comparator.comparingLong(Answer::getScore).reversed());
-      questionToAnswers.put(question, cachedAnswers);
-    }
-    return cachedAnswers;
   }
 }

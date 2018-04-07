@@ -9,7 +9,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.WindowWrapper
 import com.intellij.openapi.ui.WindowWrapperBuilder
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.ui.components.JBList
+import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.table.JBTable
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent
 import ru.spb.se.contexthelper.component.QuestionResultsListener
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
@@ -19,9 +20,9 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.stream.Collectors.toList
-import javax.swing.ListModel
 import javax.swing.SwingUtilities
-import javax.swing.event.ListDataListener
+import javax.swing.table.AbstractTableModel
+import javax.swing.table.TableModel
 
 class TestContextsIterator(private val project: Project, private val editor: Editor) : QuestionResultsListener {
     private val contextToResults: HashMap<Int, StackExchangeQuestionResults> = hashMapOf()
@@ -86,36 +87,65 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
     }
 
     private fun showQualityMeasurements() {
+        val tableModel = buildTableModel()
+        val table = JBTable(tableModel)
+        table.minimumSize = Dimension(720, 480)
+        val wrapperDialog =
+            WindowWrapperBuilder(WindowWrapper.Mode.MODAL, JBScrollPane(table))
+                .setProject(project)
+                .setTitle("Quality measurements")
+                .build()
+        wrapperDialog.show()
+    }
+
+    private fun buildTableModel(): TableModel {
         val contextToRelevant = ids.map { contextId ->
             val path = Paths.get("$TESTDATA_PATH/relevant/$contextId")
             val relevant = Files.readAllLines(path)[0].toInt()
             Pair(contextId, relevant)
         }.toMap()
-        val model = object : ListModel<String> {
-            override fun getElementAt(index: Int): String {
-                val contextId = ids[index]
-                val results = contextToResults[contextId]!!
-                val relevant = contextToRelevant[contextId]!!
-                return contextId.toString() + ":" +
-                    results.questions.joinToString(",", "[", "]") { it.questionId.toString() } +
-                    "!$relevant"
+        val contextToRelevantIndex = ids.map { contextId ->
+            val relevant = contextToRelevant[contextId]!!
+            val results = contextToResults[contextId]!!
+            val questionIds = results.questions.map { it.questionId }
+            val relevantIndex = questionIds.indexOf(relevant.toLong())
+            Pair(contextId, relevantIndex)
+        }.toMap()
+        val mrr = contextToRelevantIndex.map { contextRelevantIndex ->
+            val relevantIndex = contextRelevantIndex.value
+            if (relevantIndex == -1) 0.0 else 1.0 / (relevantIndex + 1)
+        }.sum() / ids.size
+        return object : AbstractTableModel() {
+            override fun getRowCount(): Int = ids.size + 1
+            override fun getColumnCount(): Int = 4
+            override fun getColumnName(column: Int): String = when (column) {
+                0 -> "ContextId"
+                1 -> "RelevantId"
+                2 -> "QuestionIds"
+                3 -> "ReciprocalRank"
+                else -> "?"
             }
-
-            override fun getSize(): Int = ids.size
-
-            override fun addListDataListener(l: ListDataListener?) {
-            }
-
-            override fun removeListDataListener(l: ListDataListener?) {
+            override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
+                if (rowIndex == ids.size) {
+                    return if (columnIndex == 3) mrr else ""
+                }
+                val contextId = ids[rowIndex]
+                return when (columnIndex) {
+                    0 -> contextId
+                    1 -> contextToRelevant[contextId]!!
+                    2 -> {
+                        val results = contextToResults[contextId]!!
+                        results.questions
+                            .joinToString(",", "[", "]") { it.questionId.toString() }
+                    }
+                    3 -> {
+                        val relevantIndex = contextToRelevantIndex[contextId]!!
+                        if (relevantIndex == -1) "0" else "1/${relevantIndex + 1}"
+                    }
+                    else -> "?"
+                }
             }
         }
-        val list = JBList<String>(model)
-        list.minimumSize = Dimension(720, 480)
-        val wrapperDialog = WindowWrapperBuilder(WindowWrapper.Mode.MODAL, list)
-            .setProject(project)
-            .setTitle("Quality measurements")
-            .build()
-        wrapperDialog.show()
     }
 
     companion object {

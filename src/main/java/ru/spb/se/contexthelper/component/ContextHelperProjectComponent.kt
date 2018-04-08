@@ -13,8 +13,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.ui.content.ContentFactory
 import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
-import ru.spb.se.contexthelper.context.GCSContextProcessor
-import ru.spb.se.contexthelper.context.IndexedTypesContextProcessor
+import ru.spb.se.contexthelper.context.processor.GCSContextProcessor
+import ru.spb.se.contexthelper.context.processor.IndexedTypesContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
 import ru.spb.se.contexthelper.context.Query
 import ru.spb.se.contexthelper.lookup.GoogleCustomSearchClient

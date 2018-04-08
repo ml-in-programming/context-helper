@@ -1,48 +1,59 @@
-package ru.spb.se.contexthelper.context
+package ru.spb.se.contexthelper.context.processor
 
 import com.intellij.psi.*
+import ru.spb.se.contexthelper.context.*
 import ru.spb.se.contexthelper.context.declr.DeclarationsContextExtractor
 import ru.spb.se.contexthelper.context.declr.DeclarationsContextTypesExtractor
 import ru.spb.se.contexthelper.context.trie.Type
 
-class IndexedTypesContextProcessor(initPsiElement: PsiElement) {
+class GCSContextProcessor(initPsiElement: PsiElement) {
     private val psiElement =
         if (initPsiElement is PsiJavaToken && initPsiElement.prevSibling != null)
             initPsiElement.prevSibling
         else
             initPsiElement
 
-    fun generateQuery(): Query {
-        val keywords = ArrayList<Keyword>()
+    fun generateQuery(): String {
+        val queryBuilder = ArrayList<String>()
         val nearCursorQuery = composeQueryAroundPsiElement()
-        keywords.addAll(nearCursorQuery.keywords)
+        if (nearCursorQuery != null) {
+            queryBuilder.add(nearCursorQuery.keywords.joinToString(" ") { it.word })
+        }
         val genericQuery = composeGenericQuery()
-        keywords.addAll(genericQuery.keywords)
-        if (keywords.isEmpty()) {
+        if (genericQuery != null) {
+            val questionFromGeneric = genericQuery.keywords.joinToString("|") { it.word }
+            if (queryBuilder.isNotEmpty()) {
+                queryBuilder.add("(\"\"|$questionFromGeneric)")
+            } else {
+                queryBuilder.add("($questionFromGeneric)")
+            }
+        }
+        if (queryBuilder.isEmpty()) {
             throw NotEnoughContextException()
         }
-        return Query(keywords)
+        queryBuilder.add("java")
+        return queryBuilder.joinToString(" ")
     }
 
-    private fun composeQueryAroundPsiElement(): Query {
+    private fun composeQueryAroundPsiElement(): Query? {
         val keywords = mutableListOf<Keyword>()
         if (psiElement is PsiNewExpression) {
-            val createReference = psiElement.classReference?.resolve() ?: return Query(emptyList())
+            val createReference = psiElement.classReference?.resolve() ?: return null
             val type = getRelevantTypeName(createReference)?.let { Type(it) }
             if (type != null) {
-                keywords.add(Keyword(type.simpleName, 1))
+                keywords.add(Keyword("new", 1))
+                keywords.add(Keyword(type.parts.joinToString("."), 1))
                 return Query(keywords)
             }
         }
-        val reference = findReferenceParent(psiElement) ?: return Query(emptyList())
+        val reference = findReferenceParent(psiElement) ?: return null
         val leftType = getLeftPartReferenceType(reference.firstChild)
+        val rightIdentifier = reference.children.find { it is PsiIdentifier } ?: return null
+        val rightIdentifierParts = rightIdentifier.text.splitByUppercase()
         if (leftType != null) {
-            keywords.add(Keyword(leftType.simpleName, 1))
+            keywords.add(Keyword(leftType.parts.joinToString("."), 1))
         }
-//        val rightIdentifier = reference.children.find { it is PsiIdentifier }
-//        if (rightIdentifier != null) {
-//            keywords.add(Keyword(rightIdentifier.text, 1))
-//        }
+        rightIdentifierParts.forEach { keywords.add(Keyword(it, 1)) }
         return Query(keywords)
     }
 
@@ -76,11 +87,12 @@ class IndexedTypesContextProcessor(initPsiElement: PsiElement) {
         return null
     }
 
-    private fun composeGenericQuery(): Query {
+    private fun composeGenericQuery(): Query? {
         val declarationsContextExtractor = DeclarationsContextExtractor(psiElement)
         val context = declarationsContextExtractor.context
         val typesExtractor = DeclarationsContextTypesExtractor(context)
         val relevantTypes = typesExtractor.getRelevantTypes(2)
-        return Query(relevantTypes.map { Keyword(it.simpleName, 1) }.toList())
+        val keywords = relevantTypes.map { Keyword(it.parts.joinToString("."), 1) }
+        return if (keywords.isEmpty()) null else Query(keywords)
     }
 }

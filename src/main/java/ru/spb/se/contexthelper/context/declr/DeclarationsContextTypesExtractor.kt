@@ -4,8 +4,8 @@ import ru.spb.se.contexthelper.context.*
 import ru.spb.se.contexthelper.context.trie.Type
 import ru.spb.se.contexthelper.context.trie.TypeContextTrie
 
-class DeclarationsContextQueryBuilder(private val declarationsContext: DeclarationsContext) {
-    fun buildQuery(): Query {
+class DeclarationsContextTypesExtractor(private val declarationsContext: DeclarationsContext) {
+    fun getRelevantTypes(typesToConsider: Long): List<Type> {
         val contextTrie = TypeContextTrie()
         declarationsContext.declarations
             .forEach {
@@ -16,8 +16,7 @@ class DeclarationsContextQueryBuilder(private val declarationsContext: Declarati
                     contextTrie.addType(type, it.parentLevel)
                 }
             }
-        val relevantTypes = contextTrie.getRelevantTypes(3)
-        return Query(relevantTypes.map { Keyword(it.simpleName, 1) }.toList())
+        return contextTrie.getRelevantTypes(typesToConsider)
     }
 
     companion object {

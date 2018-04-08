@@ -2,10 +2,10 @@ package ru.spb.se.contexthelper.context
 
 import com.intellij.psi.*
 import ru.spb.se.contexthelper.context.declr.DeclarationsContextExtractor
-import ru.spb.se.contexthelper.context.declr.DeclarationsContextQueryBuilder
+import ru.spb.se.contexthelper.context.declr.DeclarationsContextTypesExtractor
 import ru.spb.se.contexthelper.context.trie.Type
 
-class ContextProcessor(initPsiElement: PsiElement) {
+class IndexedTypesContextProcessor(initPsiElement: PsiElement) {
     private val psiElement =
         if (initPsiElement is PsiJavaToken && initPsiElement.prevSibling != null)
             initPsiElement.prevSibling
@@ -39,10 +39,10 @@ class ContextProcessor(initPsiElement: PsiElement) {
         if (leftType != null) {
             keywords.add(Keyword(leftType.simpleName, 1))
         }
-        val rightIdentifier = reference.children.find { it is PsiIdentifier }
-        if (rightIdentifier != null) {
-            keywords.add(Keyword(rightIdentifier.text, 1))
-        }
+//        val rightIdentifier = reference.children.find { it is PsiIdentifier }
+//        if (rightIdentifier != null) {
+//            keywords.add(Keyword(rightIdentifier.text, 1))
+//        }
         return Query(keywords)
     }
 
@@ -79,7 +79,8 @@ class ContextProcessor(initPsiElement: PsiElement) {
     private fun composeGenericQuery(): Query {
         val declarationsContextExtractor = DeclarationsContextExtractor(psiElement)
         val context = declarationsContextExtractor.context
-        val queryBuilder = DeclarationsContextQueryBuilder(context)
-        return queryBuilder.buildQuery()
+        val typesExtractor = DeclarationsContextTypesExtractor(context)
+        val relevantTypes = typesExtractor.getRelevantTypes(2)
+        return Query(relevantTypes.map { Keyword(it.simpleName, 1) }.toList())
     }
 }

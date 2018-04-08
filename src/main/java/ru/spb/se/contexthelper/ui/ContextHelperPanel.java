@@ -25,6 +25,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.net.URL;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /** ContextHelper's side panel. */
@@ -123,9 +124,14 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   }
 
   private ComboBox buildComboBox() {
-    String[] options = {"Google Custom Search", "Indexed class names"};
-    ComboBox<String> comboBox = new ComboBox<>(options);
+    String[] methods = {"Google Custom Search", "Indexed class names"};
+    ComboBox<String> comboBox = new ComboBox<>(methods);
+    // TODO(niksaz): Add IntelliJ ListCellRendererWrapper<>().
     comboBox.setSelectedIndex(0);
+    comboBox.addActionListener(e -> {
+      String method = (String) comboBox.getSelectedItem();
+      contextHelperProjectComponent.setMethodType(Objects.requireNonNull(method));
+    });
     return comboBox;
   }
 
@@ -180,7 +186,8 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
         highlightedHtml = highlightedHtml.replaceAll(
             word, "<span class='highlight'>" + word + "</span>");
       }
-      engine.loadContent("<html>\n"
+      engine.loadContent(
+          "<html>\n"
           + "<head>\n"
           + "<script type=\"text/javascript\" src=\"" + url.toString() + "\"></script>\n"
           + "</head>\n"
@@ -190,8 +197,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
               .replace("</code>", "</pre>")
           + "</body>\n"
           + "</html>",
-          "text/html"
-      );
+          "text/html");
     });
   }
 

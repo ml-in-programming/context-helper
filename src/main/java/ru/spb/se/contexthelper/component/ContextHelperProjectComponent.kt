@@ -13,11 +13,13 @@ import com.intellij.psi.PsiElement
 import com.intellij.ui.content.ContentFactory
 import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
-import ru.spb.se.contexthelper.context.ContextProcessor
+import ru.spb.se.contexthelper.context.GCSContextProcessor
+import ru.spb.se.contexthelper.context.IndexedTypesContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
 import ru.spb.se.contexthelper.context.Query
 import ru.spb.se.contexthelper.lookup.GoogleCustomSearchClient
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
+import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
 import ru.spb.se.contexthelper.lookup.ThreadsRecommenderClient
 import ru.spb.se.contexthelper.reporting.LocalUsageCollector
 import ru.spb.se.contexthelper.reporting.StatsCollector
@@ -41,6 +43,9 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
     private var viewerPanel: ContextHelperPanel = ContextHelperPanel(this)
     private val questionResultsListeners: ArrayList<QuestionResultsListener> = arrayListOf()
+
+    // TODO(niksaz): Use classes instead of string labels.
+    var methodType: String = "Google Custom Search"
 
     init {
         addResultsListener(object : QuestionResultsListener {
@@ -90,64 +95,27 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
 
     fun assistAround(psiElement: PsiElement) {
-        val contextProcessor = ContextProcessor(psiElement)
-        val query = try {
-            contextProcessor.generateQuery()
+        try {
+            if (methodType == "Google Custom Search") {
+                val gcsContextProcessor = GCSContextProcessor(psiElement)
+                val textQuery = gcsContextProcessor.generateQuery()
+                processTextQuery(textQuery)
+            } else {
+                val indexedTypesContextProcessor = IndexedTypesContextProcessor(psiElement)
+                val query = indexedTypesContextProcessor.generateQuery()
+                processQuery(query)
+            }
         } catch (ignored: NotEnoughContextException) {
             showInfoDialog("Unable to describe the context.", project)
-            return
-        }
-        processQuery(query)
-    }
-
-    fun processQuery(query: String) {
-        LOG.info("processQuery($query)")
-        val contextHelperPanel = viewerPanel
-        thread(isDaemon = true) {
-            SwingUtilities.invokeLater {
-                contextHelperPanel.setQueryingStatus(true)
-            }
-            try {
-                val questionIds = googleSearchClient.lookupQuestionIds(query)
-                if (questionIds.isEmpty()) {
-                    SwingUtilities.invokeLater {
-                        showInfoDialog("No help available for the selected context.", project)
-                    }
-                } else {
-                    // Currently using Google Custom Search. But it has 100 queries per day limit.
-                    // May return to StackExchange search in the future.
-                    // StackExchangeQuestionResults queryResults =
-                    //     stackExchangeClient.requestRelevantQuestions(query);
-                    val questions = stackExchangeClient.requestQuestionsWith(questionIds)
-                    if (questions.isEmpty()) {
-                        SwingUtilities.invokeLater {
-                            showInfoDialog("No help available for the selected context.", project)
-                        }
-                    } else {
-                        val questionResults = StackExchangeQuestionResults(query, questions)
-                        val iterator = questionResultsListeners.iterator()
-                        while (iterator.hasNext()) {
-                            val isInterested = iterator.next().receiveResults(questionResults)
-                            if (!isInterested) {
-                                iterator.remove()
-                            }
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                SwingUtilities.invokeLater {
-                    showErrorDialog("Unable to process the query.", project)
-                }
-                LOG.error(e)
-            }
-            SwingUtilities.invokeLater {
-                contextHelperPanel.setQueryingStatus(false)
-            }
         }
     }
 
     fun processTextQuery(query: String) {
         process(query) {
+            // Currently using Google Custom Search. But it has 100 queries per day limit.
+            // May return to StackExchange search in the future.
+            // StackExchangeQuestionResults queryResults =
+            //     stackExchangeClient.requestRelevantQuestions(query);
             googleSearchClient.lookupQuestionIds(query)
         }
     }
@@ -172,19 +140,20 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                         showInfoDialog("No help available for the selected context.", project)
                     }
                 } else {
-                    // Currently using Google Custom Search. But it has 100 queries per day limit.
-                    // May return to StackExchange search in the future.
-                    // StackExchangeQuestionResults queryResults =
-                    //     stackExchangeClient.requestRelevantQuestions(query);
                     val queryResults =
                         stackExchangeClient.getQuestionsWithIds(textQuery, questionIds)
                     if (queryResults.questions.isEmpty()) {
                         SwingUtilities.invokeLater {
-                            showInfoDialog("No help available for the selected context.", project)
+                            showInfoDialog(
+                                "No matching StackOverflow questions were found.", project)
                         }
                     } else {
-                        SwingUtilities.invokeLater {
-                            contextHelperPanel.updatePanelWithQueryResults(queryResults)
+                        val iterator = questionResultsListeners.iterator()
+                        while (iterator.hasNext()) {
+                            val isInterested = iterator.next().receiveResults(queryResults)
+                            if (!isInterested) {
+                                iterator.remove()
+                            }
                         }
                     }
                 }

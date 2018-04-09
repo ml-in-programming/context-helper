@@ -3,6 +3,8 @@ package ru.spb.se.contexthelper.testing
 import com.intellij.ide.DataManager
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
@@ -20,7 +22,6 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.stream.Collectors.toList
-import javax.swing.SwingUtilities
 import javax.swing.table.AbstractTableModel
 import javax.swing.table.TableModel
 
@@ -58,9 +59,8 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
     override fun receiveResults(questionResults: StackExchangeQuestionResults): Boolean {
         contextToResults[ids[lastIdIndex]] = questionResults
         lastIdIndex += 1
-        SwingUtilities.invokeLater {
-            processNext()
-        }
+        val application = ApplicationManager.getApplication()
+        application.invokeLater({ processNext() }, ModalityState.NON_MODAL)
         return lastIdIndex != ids.size
     }
 

@@ -149,6 +149,6 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
     }
 
     companion object {
-        private const val TESTDATA_PATH = "/Users/niksaz/R&D/context-helper/testdata"
+        private const val TESTDATA_PATH = "/Users/niksaz/RnD/context-helper/testdata"
     }
 }

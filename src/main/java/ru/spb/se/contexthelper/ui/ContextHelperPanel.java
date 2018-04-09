@@ -19,6 +19,7 @@ import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.prompt.PromptSupport;
 import ru.spb.se.contexthelper.ContextHelperConstants;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
+import ru.spb.se.contexthelper.context.processor.ContextProcessorMethod;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
 
 import javax.swing.*;
@@ -124,13 +125,13 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   }
 
   private ComboBox buildComboBox() {
-    String[] methods = {"Google Custom Search", "Indexed class names"};
-    ComboBox<String> comboBox = new ComboBox<>(methods);
+    ContextProcessorMethod[] methods = ContextProcessorMethod.values();
     // TODO(niksaz): Add IntelliJ ListCellRendererWrapper<>().
+    ComboBox<ContextProcessorMethod> comboBox = new ComboBox<>(methods);
     comboBox.setSelectedIndex(0);
     comboBox.addActionListener(e -> {
-      String method = (String) comboBox.getSelectedItem();
-      contextHelperProjectComponent.setMethodType(Objects.requireNonNull(method));
+      ContextProcessorMethod method = (ContextProcessorMethod) comboBox.getSelectedItem();
+      contextHelperProjectComponent.changeProcessorMethodTo(Objects.requireNonNull(method));
     });
     return comboBox;
   }

@@ -3,6 +3,7 @@ package ru.spb.se.contexthelper
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent
+import ru.spb.se.contexthelper.context.NotEnoughContextException
 import ru.spb.se.contexthelper.util.getEditorFor
 import ru.spb.se.contexthelper.util.getProjectFor
 import ru.spb.se.contexthelper.util.getPsiFileFor
@@ -32,6 +33,10 @@ class DeclarationsContextHelpAction : AnAction() {
             showInfoDialog("No PSI for the element found", project)
             return
         }
-        helperComponent.assistAround(psiElement)
+        try {
+            helperComponent.assistAround(psiElement)
+        } catch (ignored: NotEnoughContextException) {
+            showInfoDialog("Unable to describe the context.", project)
+        }
     }
 }

@@ -13,10 +13,11 @@ import com.intellij.psi.PsiElement
 import com.intellij.ui.content.ContentFactory
 import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
-import ru.spb.se.contexthelper.context.processor.GCSContextProcessor
-import ru.spb.se.contexthelper.context.processor.IndexedTypesContextProcessor
 import ru.spb.se.contexthelper.context.NotEnoughContextException
 import ru.spb.se.contexthelper.context.Query
+import ru.spb.se.contexthelper.context.processor.ContextProcessorMethod
+import ru.spb.se.contexthelper.context.processor.GCSContextProcessor
+import ru.spb.se.contexthelper.context.processor.TypeNodeIndexContextProcessor
 import ru.spb.se.contexthelper.lookup.GoogleCustomSearchClient
 import ru.spb.se.contexthelper.lookup.StackExchangeClient
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
@@ -44,8 +45,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     private var viewerPanel: ContextHelperPanel = ContextHelperPanel(this)
     private val questionResultsListeners: ArrayList<QuestionResultsListener> = arrayListOf()
 
-    // TODO(niksaz): Use classes instead of string labels.
-    var methodType: String = "Google Custom Search"
+    private var processorMethod: ContextProcessorMethod = ContextProcessorMethod.values().first()
 
     init {
         addResultsListener(object : QuestionResultsListener {
@@ -60,6 +60,10 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
     fun addResultsListener(questionResultsListener: QuestionResultsListener) {
         questionResultsListeners.add(questionResultsListener)
+    }
+
+    fun changeProcessorMethodTo(processorMethod: ContextProcessorMethod) {
+        this.processorMethod = processorMethod
     }
 
     override fun getComponentName(): String = "$PLUGIN_NAME.$COMPONENT_NAME"
@@ -93,20 +97,17 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     private fun isToolWindowRegistered(): Boolean =
         ToolWindowManager.getInstance(project).getToolWindow(ID_TOOL_WINDOW) != null
 
-
-    fun assistAround(psiElement: PsiElement) {
-        try {
-            if (methodType == "Google Custom Search") {
-                val gcsContextProcessor = GCSContextProcessor(psiElement)
-                val textQuery = gcsContextProcessor.generateQuery()
-                processTextQuery(textQuery)
-            } else {
-                val indexedTypesContextProcessor = IndexedTypesContextProcessor(psiElement)
-                val query = indexedTypesContextProcessor.generateQuery()
-                processQuery(query)
-            }
-        } catch (ignored: NotEnoughContextException) {
-            showInfoDialog("Unable to describe the context.", project)
+    /** @throws NotEnoughContextException if the context is not rich enough for the help. */
+    fun assistAround(psiElement: PsiElement): Unit = when (processorMethod) {
+        ContextProcessorMethod.GCSMethod -> {
+            val gcsContextProcessor = GCSContextProcessor(psiElement)
+            val textQuery = gcsContextProcessor.generateQuery()
+            processTextQuery(textQuery)
+        }
+        ContextProcessorMethod.TypeNodeIndexMethod -> {
+            val indexedTypesContextProcessor = TypeNodeIndexContextProcessor(psiElement)
+            val query = indexedTypesContextProcessor.generateQuery()
+            processQuery(query)
         }
     }
 

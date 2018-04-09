@@ -9,7 +9,7 @@ import ru.spb.se.contexthelper.context.declr.DeclarationsContextTypesExtractor
 import ru.spb.se.contexthelper.context.getRelevantTypeName
 import ru.spb.se.contexthelper.context.trie.Type
 
-class IndexedTypesContextProcessor(initPsiElement: PsiElement) {
+class TypeNodeIndexContextProcessor(initPsiElement: PsiElement) {
     private val psiElement =
         if (initPsiElement is PsiJavaToken && initPsiElement.prevSibling != null)
             initPsiElement.prevSibling

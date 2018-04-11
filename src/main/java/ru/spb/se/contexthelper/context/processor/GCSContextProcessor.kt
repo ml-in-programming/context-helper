@@ -47,12 +47,12 @@ class GCSContextProcessor(initPsiElement: PsiElement) {
             }
         }
         val reference = findReferenceParent(psiElement) ?: return null
-        val leftType = getLeftPartReferenceType(reference.firstChild)
-        val rightIdentifier = reference.children.find { it is PsiIdentifier } ?: return null
-        val rightIdentifierParts = rightIdentifier.text.splitByUppercase()
+        val leftType = reference.children.map { getLeftPartReferenceType(it) }.firstOrNull()
         if (leftType != null) {
             keywords.add(Keyword(leftType.parts.joinToString("."), 1))
         }
+        val rightIdentifier = reference.children.find { it is PsiIdentifier } ?: return null
+        val rightIdentifierParts = rightIdentifier.text.splitByUppercase()
         rightIdentifierParts.forEach { keywords.add(Keyword(it, 1)) }
         return Query(keywords)
     }

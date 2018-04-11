@@ -45,7 +45,7 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
             return
         }
         val everyCorrectPresent = ids.all {
-            Files.exists(Paths.get("$TESTDATA_PATH/relevant/${ids[lastIdIndex]}"))
+            Files.exists(Paths.get("$TESTDATA_PATH/relevant/$it"))
         }
         if (!everyCorrectPresent) {
             showInfoDialog("Not every relevant answer for the context is present", project)

@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
 import javafx.application.Platform;
@@ -125,10 +126,19 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   }
 
   private ComboBox buildComboBox() {
-    ContextProcessorMethod[] methods = ContextProcessorMethod.values();
-    // TODO(niksaz): Add IntelliJ ListCellRendererWrapper<>().
-    ComboBox<ContextProcessorMethod> comboBox = new ComboBox<>(methods);
+    ContextProcessorMethod[] processorMethods = ContextProcessorMethod.values();
+    ComboBox<ContextProcessorMethod> comboBox = new ComboBox<>(processorMethods);
+    Font font = getFont();
+    Font boldFont = new Font(font.getName(), font.getStyle(), (int) (font.getSize() * 0.8));
     comboBox.setSelectedIndex(0);
+    comboBox.setFont(boldFont);
+    comboBox.setRenderer(new ListCellRendererWrapper<ContextProcessorMethod>() {
+      @Override
+      public void customize(JList list, ContextProcessorMethod value, int index, boolean selected, boolean hasFocus) {
+        setText(value.getMethodName());
+        setFont(boldFont);
+      }
+    });
     comboBox.addActionListener(e -> {
       ContextProcessorMethod method = (ContextProcessorMethod) comboBox.getSelectedItem();
       contextHelperProjectComponent.changeProcessorMethodTo(Objects.requireNonNull(method));

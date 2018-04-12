@@ -53,9 +53,30 @@ class GCSContextProcessor(initPsiElement: PsiElement) {
                 if (leftType == null) {
                     val resolved = element.resolve()
                     if (resolved != null) {
-                        getRelevantTypeName(resolved)?.let {
-                            val type = Type(it)
-                            return Query(listOf(Keyword(type.fullName(), 1)))
+                        when (resolved) {
+                            is PsiField -> {
+                                getRelevantTypeName(resolved.parent)?.let {
+                                    return Query(listOf(
+                                        Keyword(Type(it).fullName(), 1),
+                                        Keyword(resolved.name, 1)
+                                    ))
+                                }
+                            }
+                            is PsiMethod -> {
+                                getRelevantTypeName(resolved.parent)?.let {
+                                    val keywords = mutableListOf(Keyword(Type(it).fullName(), 1))
+                                    resolved.name.splitByUppercase().forEach {
+                                        keywords.add(Keyword(it.toLowerCase(), 1))
+                                    }
+                                    return Query(keywords.toList())
+                                }
+                            }
+                            else -> {
+                                getRelevantTypeName(resolved)?.let {
+                                    val type = Type(it)
+                                    return Query(listOf(Keyword(type.fullName(), 1)))
+                                }
+                            }
                         }
                     }
                 } else {

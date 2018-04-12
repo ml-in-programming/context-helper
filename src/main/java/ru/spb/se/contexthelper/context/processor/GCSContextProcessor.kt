@@ -7,16 +7,24 @@ import ru.spb.se.contexthelper.context.declr.DeclarationsContextTypesExtractor
 import ru.spb.se.contexthelper.context.trie.Type
 
 class GCSContextProcessor(initPsiElement: PsiElement) {
-    private val psiElement =
-        if (initPsiElement is PsiJavaToken && initPsiElement.prevSibling != null)
-            initPsiElement.prevSibling
-        else
-            initPsiElement
+    private val psiElement: PsiElement
+
+    init {
+        val prevSibling = initPsiElement.prevSibling
+        val isAlphanumeric = initPsiElement.text.chars().allMatch(Character::isLetterOrDigit)
+        psiElement = if (isAlphanumeric || prevSibling == null) initPsiElement else prevSibling
+    }
 
     fun generateQuery(): String {
         val queryBuilder = ArrayList<String>()
-        val nearCursorQuery = composeQueryAroundPsiElement()
-        if (nearCursorQuery != null) {
+        var nearCursorQuery = composeQueryAroundElement(psiElement)
+        if (nearCursorQuery.keywords.isEmpty()) {
+            val text = psiElement.text
+            if (text.chars().allMatch(Character::isLetterOrDigit)) {
+                nearCursorQuery = Query(listOf(Keyword(text, 1)))
+            }
+        }
+        if (nearCursorQuery.keywords.isNotEmpty()) {
             queryBuilder.add(nearCursorQuery.keywords.joinToString(" ") { it.word })
         }
         val genericQuery = composeGenericQuery()
@@ -35,26 +43,62 @@ class GCSContextProcessor(initPsiElement: PsiElement) {
         return queryBuilder.joinToString(" ")
     }
 
-    private fun composeQueryAroundPsiElement(): Query? {
-        val keywords = mutableListOf<Keyword>()
-        if (psiElement is PsiNewExpression) {
-            val createReference = psiElement.classReference?.resolve() ?: return null
-            val type = getRelevantTypeName(createReference)?.let { Type(it) }
-            if (type != null) {
-                keywords.add(Keyword("new", 1))
-                keywords.add(Keyword(type.parts.joinToString("."), 1))
+    private fun composeQueryAroundElement(element: PsiElement?): Query {
+        if (element == null) {
+            return Query(emptyList())
+        }
+        when (element) {
+            is PsiReferenceExpression -> {
+                val leftType = getReferenceObjectType(element.firstChild)
+                if (leftType == null) {
+                    val resolved = element.resolve()
+                    if (resolved != null) {
+                        getRelevantTypeName(resolved)?.let {
+                            val type = Type(it)
+                            return Query(listOf(Keyword(type.fullName(), 1)))
+                        }
+                    }
+                } else {
+                    val keywords = mutableListOf<Keyword>()
+                    keywords.add(Keyword(leftType.fullName(), 1))
+                    val rightIdentifier = element.children.find { it is PsiIdentifier }
+                    rightIdentifier?.text?.splitByUppercase()?.map { it.toLowerCase() }?.forEach {
+                        keywords.add(Keyword(it, 1))
+                    }
+                    return Query(keywords)
+                }
+            }
+            is PsiMethodCallExpression -> {
+                val keywords = mutableListOf<Keyword>()
+                val expression = element.methodExpression
+                val leftType = getReferenceObjectType(expression.firstChild)
+                if (leftType != null) {
+                    keywords.add(Keyword(leftType.fullName(), 1))
+                }
+                val rightIdentifier = expression.children.find { it is PsiIdentifier }
+                rightIdentifier?.text?.splitByUppercase()?.map { it.toLowerCase() }?.forEach {
+                    keywords.add(Keyword(it, 1))
+                }
                 return Query(keywords)
             }
+            is PsiNewExpression -> {
+                val createReference = element.classReference?.resolve()
+                if (createReference != null) {
+                    val type = getRelevantTypeName(createReference)?.let { Type(it) }
+                    if (type != null) {
+                        return Query(
+                            listOf(Keyword("new", 1), Keyword(type.fullName(), 1)))
+                    }
+                }
+            }
+            is PsiTypeElement -> {
+                element.innermostComponentReferenceElement?.let {
+                    val type = Type(it.qualifiedName)
+                    return Query(listOf(Keyword(type.fullName(), 1)))
+                }
+            }
         }
-        val reference = findReferenceParent(psiElement) ?: return null
-        val leftType = reference.children.map { getLeftPartReferenceType(it) }.firstOrNull()
-        if (leftType != null) {
-            keywords.add(Keyword(leftType.parts.joinToString("."), 1))
-        }
-        val rightIdentifier = reference.children.find { it is PsiIdentifier } ?: return null
-        val rightIdentifierParts = rightIdentifier.text.splitByUppercase()
-        rightIdentifierParts.forEach { keywords.add(Keyword(it, 1)) }
-        return Query(keywords)
+        return composeQueryAroundElement(element.parent)
     }
 
     private fun findReferenceParent(psiElement: PsiElement?): PsiElement? {
@@ -66,33 +110,12 @@ class GCSContextProcessor(initPsiElement: PsiElement) {
         }
     }
 
-    private fun getLeftPartReferenceType(element: PsiElement): Type? {
-        if (element is PsiReferenceExpression) {
-            val resolvedFirstChild = element.resolve()
-            if (resolvedFirstChild != null) {
-                getRelevantTypeName(resolvedFirstChild)?.let {
-                    return Type(it)
-                }
-            }
-        } else if (element is PsiMethodCallExpression) {
-            val resolvedMethod = element.resolveMethod()
-            resolvedMethod?.returnType?.let {
-                return Type(it.canonicalText)
-            }
-        } else if (element is PsiNewExpression) {
-            element.classReference?.let {
-                return Type(it.qualifiedName)
-            }
-        }
-        return null
-    }
-
     private fun composeGenericQuery(): Query? {
         val declarationsContextExtractor = DeclarationsContextExtractor(psiElement)
         val context = declarationsContextExtractor.context
         val typesExtractor = DeclarationsContextTypesExtractor(context)
         val relevantTypes = typesExtractor.getRelevantTypes(2)
-        val keywords = relevantTypes.map { Keyword(it.parts.joinToString("."), 1) }
+        val keywords = relevantTypes.map { Keyword(it.fullName(), 1) }
         return if (keywords.isEmpty()) null else Query(keywords)
     }
 }

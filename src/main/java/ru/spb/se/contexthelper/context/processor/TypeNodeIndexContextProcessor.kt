@@ -34,19 +34,15 @@ class TypeNodeIndexContextProcessor(initPsiElement: PsiElement) {
             val createReference = psiElement.classReference?.resolve() ?: return Query(emptyList())
             val type = getRelevantTypeName(createReference)?.let { Type(it) }
             if (type != null) {
-                keywords.add(Keyword(type.simpleName, 1))
+                keywords.add(Keyword(type.simpleName(), 1))
                 return Query(keywords)
             }
         }
         val reference = findReferenceParent(psiElement) ?: return Query(emptyList())
         val leftType = getLeftPartReferenceType(reference.firstChild)
         if (leftType != null) {
-            keywords.add(Keyword(leftType.simpleName, 1))
+            keywords.add(Keyword(leftType.simpleName(), 1))
         }
-//        val rightIdentifier = reference.children.find { it is PsiIdentifier }
-//        if (rightIdentifier != null) {
-//            keywords.add(Keyword(rightIdentifier.text, 1))
-//        }
         return Query(keywords)
     }
 
@@ -85,6 +81,6 @@ class TypeNodeIndexContextProcessor(initPsiElement: PsiElement) {
         val context = declarationsContextExtractor.context
         val typesExtractor = DeclarationsContextTypesExtractor(context)
         val relevantTypes = typesExtractor.getRelevantTypes(2)
-        return Query(relevantTypes.map { Keyword(it.simpleName, 1) }.toList())
+        return Query(relevantTypes.map { Keyword(it.simpleName(), 1) }.toList())
     }
 }

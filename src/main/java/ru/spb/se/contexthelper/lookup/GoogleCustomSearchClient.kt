@@ -6,8 +6,8 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.customsearch.Customsearch
 import com.intellij.openapi.diagnostic.Logger
 
-class GoogleCustomSearchClient(private val apiKey: String) {
-    fun lookupQuestionIds(query: String): List<Long> {
+class GoogleCustomSearchClient(private val apiKey: String) : QuestionLookupClient {
+    override fun lookupQuestionIds(query: String): List<Long> {
         val builder = Customsearch.Builder(
             NetHttpTransport(),
             JacksonFactory(),

@@ -18,10 +18,7 @@ import ru.spb.se.contexthelper.context.Query
 import ru.spb.se.contexthelper.context.processor.ContextProcessorMethod
 import ru.spb.se.contexthelper.context.processor.GCSContextProcessor
 import ru.spb.se.contexthelper.context.processor.TypeNodeIndexContextProcessor
-import ru.spb.se.contexthelper.lookup.GoogleCustomSearchClient
-import ru.spb.se.contexthelper.lookup.StackExchangeClient
-import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
-import ru.spb.se.contexthelper.lookup.ThreadsRecommenderClient
+import ru.spb.se.contexthelper.lookup.*
 import ru.spb.se.contexthelper.reporting.LocalUsageCollector
 import ru.spb.se.contexthelper.reporting.StatsCollector
 import ru.spb.se.contexthelper.ui.ContextHelperPanel
@@ -32,7 +29,8 @@ import kotlin.concurrent.thread
 
 /** Component which is called to initialize ContextHelper plugin for each [Project]. */
 class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
-    private val googleSearchClient = GoogleCustomSearchClient(GOOGLE_SEARCH_API_KEY)
+    private val questionLookupClient: QuestionLookupClient = GoogleSearchCrawler()
+//        GoogleCustomSearchClient(GOOGLE_SEARCH_API_KEY)
     private val stackExchangeClient =
         StackExchangeClient(STACK_EXCHANGE_API_KEY, STACK_EXCHANGE_SITE)
     private val threadsRecommenderClient = ThreadsRecommenderClient()
@@ -99,7 +97,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
     /** @throws NotEnoughContextException if the context is not rich enough for the help. */
     fun assistAround(psiElement: PsiElement): Unit = when (processorMethod) {
-        ContextProcessorMethod.GCSMethod -> {
+        ContextProcessorMethod.GoogleSearchMethod -> {
             val gcsContextProcessor = GCSContextProcessor(psiElement)
             val textQuery = gcsContextProcessor.generateQuery()
             processTextQuery(textQuery)
@@ -117,7 +115,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
             // May return to StackExchange search in the future.
             // StackExchangeQuestionResults queryResults =
             //     stackExchangeClient.requestRelevantQuestions(query);
-            googleSearchClient.lookupQuestionIds(query)
+            questionLookupClient.lookupQuestionIds(query)
         }
     }
 

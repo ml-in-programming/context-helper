@@ -127,8 +127,9 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
     private fun process(textQuery: String, idProducers: () -> List<Long>) {
         LOG.info("processQuery($textQuery)")
-        val contextHelperPanel = viewerPanel
         thread(isDaemon = true) {
+            val contextHelperPanel = viewerPanel
+            var queryResults = StackExchangeQuestionResults("", emptyList())
             SwingUtilities.invokeLater {
                 contextHelperPanel.setQueryingStatus(true)
             }
@@ -139,20 +140,11 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                         showInfoDialog("No help available for the selected context.", project)
                     }
                 } else {
-                    val queryResults =
-                        stackExchangeClient.getQuestionsWithIds(textQuery, questionIds)
+                    queryResults = stackExchangeClient.getQuestionsWithIds(textQuery, questionIds)
                     if (queryResults.questions.isEmpty()) {
                         SwingUtilities.invokeLater {
                             showInfoDialog(
                                 "No matching StackOverflow questions were found.", project)
-                        }
-                    } else {
-                        val iterator = questionResultsListeners.iterator()
-                        while (iterator.hasNext()) {
-                            val isInterested = iterator.next().receiveResults(queryResults)
-                            if (!isInterested) {
-                                iterator.remove()
-                            }
                         }
                     }
                 }
@@ -161,6 +153,13 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                     showErrorDialog("Unable to process the query.", project)
                 }
                 LOG.error(e)
+            }
+            val iterator = questionResultsListeners.iterator()
+            while (iterator.hasNext()) {
+                val isInterested = iterator.next().receiveResults(queryResults)
+                if (!isInterested) {
+                    iterator.remove()
+                }
             }
             SwingUtilities.invokeLater {
                 contextHelperPanel.setQueryingStatus(false)

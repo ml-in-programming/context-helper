@@ -6,31 +6,47 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.URL
 import java.net.URLEncoder
+import java.util.*
 import java.util.regex.Pattern
 
-class GoogleSearchCrawler : QuestionLookupClient {
+class GoogleSearchStackoverflowCrawler : QuestionLookupClient {
+    private val randGenerator = Random(System.currentTimeMillis())
+
     override fun lookupQuestionIds(query: String): List<Long> {
+        val resultIds = mutableListOf<Long>()
         try {
-            val stackoverflowQuery = "site:stackoverflow.com $query"
-            val encodedQuery = URLEncoder.encode(stackoverflowQuery, "UTF-8")
-            val urlQuery = "https://www.google.com/search?q=$encodedQuery&num=10&hl=en&gl=en"
-            val pageContent = getSearchContent(urlQuery)
-            val links = parseLinks(pageContent)
-            return links.mapNotNull {
-                // Format: https://stackoverflow.com/questions/id/...
-                val urlParts = it.split(Regex("/"))
-                try {
-                    val questionIdText = urlParts[4]
-                    questionIdText.toLong()
-                } catch (e: Exception) {
-                    LOG.warn(e.message)
-                    null
-                }
-            }.toList()
+            var queryIndex = 0
+            while (queryIndex < MAX_QUERIES) {
+                val questionsIds =
+                    lookupQuestionIdsStartingFrom(query, queryIndex * RESULTS_PER_PAGE)
+                resultIds.addAll(questionsIds)
+                queryIndex += 1
+            }
         } catch (e: Exception) {
             e.printStackTrace()
-            return emptyList()
         }
+        return resultIds.toList()
+    }
+
+    private fun lookupQuestionIdsStartingFrom(query: String, start: Int): List<Long> {
+        Thread.sleep(WAIT_TIME_MIN_MS + randGenerator.nextInt(WAIT_TIME_SPREAD_MS))
+        val stackoverflowQuery = "site:stackoverflow.com $query"
+        val encodedQuery = URLEncoder.encode(stackoverflowQuery, "UTF-8")
+        val urlQuery = "https://www.google.com/search?q=$encodedQuery" +
+            "&num=$RESULTS_PER_PAGE&hl=en&gl=en${if (start != 0) "&start=$start" else ""}"
+        val pageContent = getSearchContent(urlQuery)
+        val links = parseLinks(pageContent)
+        return links.mapNotNull {
+            // Format: https://stackoverflow.com/questions/id/...
+            val urlParts = it.split(Regex("/"))
+            try {
+                val questionIdText = urlParts[4]
+                questionIdText.toLong()
+            } catch (e: Exception) {
+                LOG.warn(e.message)
+                null
+            }
+        }.toList()
     }
 
     private fun getSearchContent(urlQuery: String): String {
@@ -70,6 +86,13 @@ class GoogleSearchCrawler : QuestionLookupClient {
     }
 
     companion object {
-        private val LOG = Logger.getInstance("ru.spb.se.contexthelper.lookup.GoogleSearchCrawler")
+        private val LOG =
+            Logger.getInstance("ru.spb.se.contexthelper.lookup.GoogleSearchStackoverflowCrawler")
+
+        private const val MAX_QUERIES = 1
+        private const val RESULTS_PER_PAGE = 10
+
+        private const val WAIT_TIME_MIN_MS = 5000L
+        private const val WAIT_TIME_SPREAD_MS = 1000
     }
 }

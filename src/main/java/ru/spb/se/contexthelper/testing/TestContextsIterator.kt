@@ -64,7 +64,6 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
     }
 
     private fun processNext() {
-        Thread.sleep(1000)
         if (lastIdIndex == ids.size) {
             showQualityMeasurements()
             return

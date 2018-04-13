@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 /** ContextHelper's side panel. */
 public class ContextHelperPanel extends JPanel implements Runnable, StackExchangeTreeListener {
 
-  private static final int SPLIT_DIVIDER_POSITION = 200;
+  private static final int SPLIT_DIVIDER_POSITION = 205;
 
   private final ContextHelperProjectComponent contextHelperProjectComponent;
 

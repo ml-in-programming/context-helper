@@ -29,12 +29,6 @@ allprojects {
     }
 }
 
-repositories {
-    maven {
-        url 'https://oss.sonatype.org/content/repositories/releases/'
-    }
-}
-
 intellij {
     version ideaVersion
     pluginName 'Context Helper'

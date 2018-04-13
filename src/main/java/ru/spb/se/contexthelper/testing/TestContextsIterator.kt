@@ -17,6 +17,10 @@ import ru.spb.se.contexthelper.component.ContextHelperProjectComponent
 import ru.spb.se.contexthelper.component.QuestionResultsListener
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults
 import ru.spb.se.contexthelper.util.showInfoDialog
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -86,22 +90,32 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
     }
 
     private fun showQualityMeasurements() {
-        val tableModelMRR = buildTableModel()
-        val table = JBTable(tableModelMRR.first)
+        val tableModel = buildTableModel()
+        val table = JBTable(tableModel)
         table.autoResizeMode = JBTable.AUTO_RESIZE_ALL_COLUMNS
         table.columnModel.getColumn(0).preferredWidth = 128
         table.columnModel.getColumn(1).preferredWidth = 256
-        table.columnModel.getColumn(2).preferredWidth = 256
-        table.columnModel.getColumn(3).preferredWidth = 128
+        table.columnModel.getColumn(2).preferredWidth = 384
+        table.columnModel.getColumn(3).preferredWidth = 256
+        table.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(event: MouseEvent) {
+                val row = table.rowAtPoint(event.point)
+                val column = table.columnAtPoint(event.point)
+                val stringSelection = StringSelection(table.getValueAt(row, column).toString())
+                val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+                clipboard.setContents(stringSelection, null)
+
+            }
+        })
         val wrapperDialog =
             WindowWrapperBuilder(WindowWrapper.Mode.MODAL, JBScrollPane(table))
                 .setProject(project)
-                .setTitle("Quality measurements are ${tableModelMRR.second}")
+                .setTitle("Quality measurements")
                 .build()
         wrapperDialog.show()
     }
 
-    private fun buildTableModel(): Pair<TableModel, Double> {
+    private fun buildTableModel(): TableModel {
         val contextToRelevant = ids.map { contextId ->
             val path = Paths.get("$TESTDATA_PATH/relevant/$contextId")
             val relevant = Files.readAllLines(path).map { it.toLong() }.toList()
@@ -121,8 +135,8 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
             val relevantIndex = contextRelevantIndex.value
             if (relevantIndex == null) 0.0 else 1.0 / (relevantIndex + 1)
         }.sum() / ids.size
-        val tableModel = object : AbstractTableModel() {
-            override fun getRowCount(): Int = ids.size
+        return object : AbstractTableModel() {
+            override fun getRowCount(): Int = ids.size + 1
             override fun getColumnCount(): Int = 4
             override fun getColumnName(column: Int): String = when (column) {
                 0 -> "ContextId"
@@ -132,6 +146,9 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
                 else -> "?"
             }
             override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
+                if (rowIndex == ids.size) {
+                    return if (columnIndex == 3) "%.8f".format(mrr) else ""
+                }
                 val contextId = ids[rowIndex]
                 return when (columnIndex) {
                     0 -> contextId
@@ -149,7 +166,6 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
                 }
             }
         }
-        return Pair(tableModel, mrr)
     }
 
     companion object {

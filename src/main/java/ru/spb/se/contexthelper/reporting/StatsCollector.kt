@@ -21,11 +21,6 @@ class StatsCollector {
         size = 0
         lastSendingThread = thread {
             StatsSender.send(reportsToSent.joinToString(System.lineSeparator()))
-            // TODO(niksaz): Remove debug output.
-            println(reportsToSent.joinToString(
-                System.lineSeparator(),
-                "/*" + System.lineSeparator(),
-                System.lineSeparator() + "*/"))
         }
     }
 

@@ -29,8 +29,8 @@ import kotlin.concurrent.thread
 
 /** Component which is called to initialize ContextHelper plugin for each [Project]. */
 class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
-    private val questionLookupClient: QuestionLookupClient = GoogleSearchStackoverflowCrawler()
-//        GoogleCustomSearchClient(GOOGLE_SEARCH_API_KEY)
+    private val questionLookupClient: QuestionLookupClient = //GoogleSearchStackoverflowCrawler()
+        GoogleCustomSearchClient(GOOGLE_SEARCH_API_KEY)
     private val stackExchangeClient =
         StackExchangeClient(STACK_EXCHANGE_API_KEY, STACK_EXCHANGE_SITE)
     private val threadsRecommenderClient = ThreadsRecommenderClient()

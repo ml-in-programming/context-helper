@@ -147,7 +147,7 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
             }
             override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
                 if (rowIndex == ids.size) {
-                    return if (columnIndex == 3) "%.8f".format(mrr) else ""
+                    return if (columnIndex == 3) "%.10f".format(mrr) else ""
                 }
                 val contextId = ids[rowIndex]
                 return when (columnIndex) {

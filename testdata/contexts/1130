@@ -1,0 +1,103 @@
+a590add0-f56f-4053-8b65-b27fe89c239d
+a590add0-f56f-4053-8b65-b27fe89c239d-1522684512631
+2028
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.GridLayout;
+import java.awt.KeyboardFocusManager;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JComponent;
+import javax.swing.JDesktopPane;
+import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
+public class Swing {
+
+    private List<JTextField> list = new ArrayList<JTextField>();
+    private JPanel panel = new JPanel();
+    private JScrollPane sp = new JScrollPane(panel);
+
+    public static void main(String args[]) {
+        EventQueue.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                Swing id = new Swing();
+                id.create("My Project");
+            }
+        });
+    }
+
+    private void addField(String name) {
+        JTextField jtf = new JTextField(16);
+        panel.add(new JLabel(name, JLabel.LEFT));
+        panel.add(jtf);
+        list.add(jtf);
+    }
+
+    private void create(String strProjectName) {
+        panel.setLayout(new GridLayout(0, 1));
+        addField("First Name:");
+        addField("Last Name:");
+        addField("Address:");
+        addField("City:");
+        addField("Zip Code:");
+        addField("Phone:");
+        addField("Email Id:");
+        KeyboardFocusManager.getCurrentKeyboardFocusManager()
+                .addPropertyChangeListener("permanentFocusOwner",
+                        new FocusDrivenScroller(panel));
+        // Show half the fields
+        sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        sp.validate();
+        Dimension d = sp.getPreferredSize();
+        d.setSize(d.width, d.height / 2);
+        sp.setPreferredSize(d);
+
+        JInternalFrame internaFrame = new JInternalFrame();
+        internaFrame.add(sp);
+        internaFrame.pack();
+        internaFrame.setVisible(true);
+
+        JDesktopPane desktopPane = new JDesktopPane();
+        desktopPane.add(internaFrame);
+
+        JFrame frmtest = new JFrame();
+        frmtest.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frmtest.add(desktopPane);
+        frmtest.pack();
+        // User's preference should be read from java.util.prefs.Preferences
+        frmtest.setSize(400, 300);
+        frmtest.setLocationRelativeTo(null);
+        frmtest.setVisible(true);
+        list.get(0).requestFocusInWindow();
+    }
+
+    private static class FocusDrivenScroller implements PropertyChangeListener {
+
+        private JComponent parent;
+
+        public FocusDrivenScroller(JComponent parent) {
+            this.parent = parent;
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            Component focused = (Component) evt.getNewValue();
+            if (focused != null
+                    && SwingUtilities.isDescendingFrom(focused, parent)) {
+                parent.scrollRectToVisible(focused.getBounds());
+            }
+        }
+    }
+}
+

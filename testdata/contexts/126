@@ -1,0 +1,186 @@
+e9ed2c7d-7eab-4cb7-8dea-e76a0504ab72
+e9ed2c7d-7eab-4cb7-8dea-e76a0504ab72-1521987828195
+5873
+package org.ml_methods_group.algorithm.entity;
+
+import com.intellij.analysis.AnalysisScope;
+import com.intellij.openapi.progress.EmptyProgressIndicator;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.psi.*;
+import com.sixrr.metrics.metricModel.MetricsRun;
+import org.apache.log4j.Logger;
+import org.ml_methods_group.algorithm.properties.finder_strategy.FinderStrategy;
+import org.ml_methods_group.algorithm.properties.finder_strategy.RmmrStrategy;
+import org.ml_methods_group.config.Logging;
+import org.ml_methods_group.utils.PSIUtil;
+
+import java.util.*;
+
+import static org.ml_methods_group.utils.PsiSearchUtil.getHumanReadableName;
+
+public class RmmrEntitySearcher {
+    private static final Logger LOGGER = Logging.getLogger(EntitySearcher.class);
+
+    private final Map<String, PsiClass> classForName = new HashMap<>();
+    private final Map<PsiElement, Entity> entities = new HashMap<>();
+    private final AnalysisScope scope;
+    private final long startTime;
+    private final FinderStrategy strategy;
+    private final ProgressIndicator indicator;
+
+    private RmmrEntitySearcher(AnalysisScope scope) {
+        this.scope = scope;
+        strategy = RmmrStrategy.getInstance();
+        startTime = System.currentTimeMillis();
+        if (ProgressManager.getInstance().hasProgressIndicator()) {
+            indicator = ProgressManager.getInstance().getProgressIndicator();
+        } else {
+            indicator = new EmptyProgressIndicator();
+        }
+    }
+
+    public static EntitySearchResult analyze(AnalysisScope scope) {
+        final RmmrEntitySearcher finder = new RmmrEntitySearcher(scope);
+        return finder.runCalculations();
+    }
+
+    private EntitySearchResult runCalculations() {
+        indicator.pushState();
+        indicator.setText("Searching entities");
+        indicator.setIndeterminate(true);
+        LOGGER.info("Indexing entities...");
+        scope.accept(new UnitsFinder());
+        indicator.setIndeterminate(false);
+        LOGGER.info("Calculating properties...");
+        indicator.setText("Calculating properties");
+        scope.accept(new PropertiesCalculator());
+        indicator.popState();
+        return prepareResult();
+    }
+
+    private EntitySearchResult prepareResult() {
+        LOGGER.info("Preparing results...");
+        final List<ClassEntity> classes = new ArrayList<>();
+        final List<MethodEntity> methods = new ArrayList<>();
+        for (Entity entity : entities.values()) {
+            indicator.checkCanceled();
+            switch (entity.getCategory()) {
+                case Class:
+                    classes.add((ClassEntity) entity);
+                    break;
+                case Method:
+                    methods.add((MethodEntity) entity);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected entity during preparing entity search results for RMMR.");
+            }
+        }
+        LOGGER.info("Properties calculated");
+        LOGGER.info("Generated " + classes.size() + " class entities");
+        LOGGER.info("Generated " + methods.size() + " method entities");
+        LOGGER.info("Generated " + 0 + " field entities. Fields are not supported.");
+        // TODO: empty ArrayList of fields or null?
+        return new EntitySearchResult(classes, methods, new ArrayList<>(), System.currentTimeMillis() - startTime);
+    }
+
+
+    private class UnitsFinder extends JavaRecursiveElementVisitor {
+        @Override
+        public void visitFile(PsiFile file) {
+            indicator.checkCanceled();
+            if (strategy.acceptFile(file)) {
+                LOGGER.info("Indexing " + file.getName());
+                super.visitFile(file);
+            }
+        }
+
+        @Override
+        public void visitClass(PsiClass aClass) {
+            indicator.checkCanceled();
+            classForName.put(getHumanReadableName(aClass), aClass);
+            if (!strategy.acceptClass(aClass)) {
+                return;
+            }
+            entities.put(aClass, new ClassEntity(aClass));
+            super.visitClass(aClass);
+        }
+
+        @Override
+        public void visitField(PsiField field) {
+            indicator.checkCanceled();
+            if (!strategy.acceptField(field)) {
+                return;
+            }
+            entities.put(field, new FieldEntity(field));
+            super.visitField(field);
+        }
+
+        @Override
+        public void visitMethod(PsiMethod method) {
+            indicator.checkCanceled();
+            if (!strategy.acceptMethod(method)) {
+                return;
+            }
+            entities.put(method, new MethodEntity(method));
+            super.visitMethod(method);
+        }
+    }
+
+
+    private class PropertiesCalculator extends JavaRecursiveElementVisitor {
+        private int propertiesCalculated = 0;
+
+        private PsiMethod currentMethod;
+
+        @Override
+        public void visitFile(PsiFile file) {
+            indicator.checkCanceled();
+            if (strategy.acceptFile(file)) {
+                super.visitFile(file);
+            }
+        }
+
+        @Override
+        public void visitClass(PsiClass aClass) {
+            indicator.checkCanceled();
+            if (strategy.acceptClass(aClass)) {
+                super.visitClass(aClass);
+            }
+        }
+
+        @Override
+        public void visitMethod(PsiMethod method) {
+            indicator.checkCanceled();
+            final Entity entity = entities.get(method);
+            if (entity == null) {
+                super.visitMethod(method);
+                return;
+            }
+            final RelevantProperties methodProperties = entity.getRelevantProperties();
+            if (currentMethod == null) {
+                currentMethod = method;
+            }
+
+            method.getParameterList()
+            for (PsiTypeParameter attribute : method.getTypeParameters()) {
+                attribute.getContainingClass();
+            }
+            if (strategy.processSupers()) {
+                PSIUtil.getAllSupers(method).stream()
+                        .map(entities::get)
+                        .filter(Objects::nonNull)
+                        .forEach(superMethod -> superMethod
+                                .getRelevantProperties()
+                                .addOverrideMethod(method, strategy.getWeight(superMethod, method)));
+            }
+            reportPropertiesCalculated();
+            super.visitMethod(method);
+            if (currentMethod == method) {
+                currentMethod = null;
+            }
+        }
+    }
+}
+
+

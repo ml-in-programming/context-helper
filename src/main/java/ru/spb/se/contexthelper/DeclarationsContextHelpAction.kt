@@ -28,7 +28,7 @@ class DeclarationsContextHelpAction : AnAction() {
             showInfoDialog("No enclosing file found", project)
             return
         }
-        val psiElement = psiFile.findElementAt(editor.caretModel.offset - 1)
+        val psiElement = psiFile.findElementAt(caretOffset - 1)
         if (psiElement == null) {
             showInfoDialog("No PSI for the element found", project)
             return

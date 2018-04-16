@@ -1,0 +1,58 @@
+27b9028f-98e8-40c5-8ebc-3343bf46d25d
+27b9028f-98e8-40c5-8ebc-3343bf46d25d-1523302481641
+1652
+/*
+ * Copyright 2018 Machine Learning Methods in Software Engineering Group of JetBrains Research
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.sixrr.stockmetrics.projectCalculators;
+
+import com.intellij.psi.*;
+import com.sixrr.stockmetrics.dependency.DependencyMap;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
+
+public class CohesionAmongMethodsOfClassProjectCalculator extends ProjectCalculator {
+    private double totalCohesion = 0;
+    private int numClasses = 0;
+
+    @Override
+    protected PsiElementVisitor createVisitor() {
+        return new Visitor();
+    }
+    private class Visitor extends JavaRecursiveElementVisitor {
+        @Override
+        public void visitClass(PsiClass aClass) {
+            numClasses++;
+            Set<PsiType> parameters = new HashSet<>();
+            for(PsiMethod method : aClass.getMethods()){
+                HashSet<PsiType> parametersInMethod = new HashSet<>();
+                Stream.of(method.getParameterList()).
+                        flatMap(x -> Stream.of(x.getParameters())).
+                        map(PsiVariable::getType).collect()
+            }
+        }
+    }
+
+    @Override
+    public void endMetricsRun() {
+        final int denominator = (numClasses * (numClasses - 1)) / 2;
+        postMetric(numerator, denominator);
+    }
+}
+
+

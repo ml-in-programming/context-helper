@@ -1,0 +1,74 @@
+52f482f8-37f0-4e40-a28b-a328dcdf25a3
+52f482f8-37f0-4e40-a28b-a328dcdf25a3-1523296798417
+380
+package group144.shervashidze;
+
+import java.io.PrintStream;
+import java.util.Scanner;
+
+public class ExpressionTreeNode {
+    private char operation;
+
+    private int leftValue;
+    private ExpressionTreeNode leftNode;
+
+    private int rightValue;
+    private ExpressionTreeNode rightNode;
+
+    ExpressionTreeNode(Scanner in) throws WrongTreeException {
+        String input = in.next();
+        operation = input.charAt(input.length() - 1);
+        if (operation != '+' && operation != '-' && operation != '*' && operation != '/') {
+            throw new WrongTreeException();
+        }
+
+        if (in.hasNextInt()) {
+            leftValue = Integer.parseInt(in.next());
+        } else {
+            ExpressionTreeNode left = new ExpressionTreeNode(in);
+            leftNode = left;
+            leftValue = left.calculate();
+        }
+
+        if (in.hasNextInt()) {
+            rightValue = Integer.parseInt(in.next());
+        } else {
+            ExpressionTreeNode right = new ExpressionTreeNode(in);
+            rightNode = right;
+            rightValue = right.calculate();
+        }
+    }
+
+    public int calculate() {
+        switch(operation) {
+            case '+':
+                return leftValue + rightValue;
+            case '-':
+                return leftValue - rightValue;
+            case '*':
+                return leftValue * rightValue;
+            case '/':
+                return leftValue / rightValue;
+            default:
+                return 0;
+        }
+    }
+
+    public void print(PrintStream out) {
+        out.print('(' + operation);
+
+        if (leftNode != null) {
+            leftNode.print(out);
+        } else {
+            out.print(' ' + leftValue);
+        }
+
+        if (rightNode != null) {
+            rightNode.print(out);
+        } else {
+            out.print(' ' + rightValue);
+        }
+    }
+}
+
+

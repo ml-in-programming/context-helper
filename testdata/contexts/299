@@ -1,0 +1,68 @@
+52f482f8-37f0-4e40-a28b-a328dcdf25a3
+52f482f8-37f0-4e40-a28b-a328dcdf25a3-1523372694624
+468
+package group144.shervashidze;
+
+import org.junit.Test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.Scanner;
+
+import static org.junit.Assert.*;
+
+public class ExpressionTreeTest {
+    @Test
+    public void calculate(){
+        ExpressionTree tree = null;
+        try {
+            tree = new ExpressionTree(new Scanner("(+ 11 (/ (* 2 6) 3))"));
+        } catch (WrongTreeException e) {
+            fail();
+        }
+        assertEquals(15, tree.calculate());
+    }
+
+    @Test
+    public void calculateNegative() {
+        ExpressionTree tree = null;
+        try {
+            tree = new ExpressionTree(new Scanner("(+ -1 (* -4 (+ 2 4)))"));
+        } catch (WrongTreeException e) {
+            fail();
+        }
+        assertEquals(-25, tree.calculate());
+    }
+
+    @Test(expected = WrongTreeException.class)
+    public void wrongTree() throws WrongTreeException {
+        ExpressionTree tree = new ExpressionTree(new Scanner("(+ (-2 (- -4 6))"));
+        tree.calculate();
+    }
+
+    @Test(expected = WrongTreeException.class)
+    public void anotherWrongTree() throws WrongTreeException {
+        ExpressionTree tree = new ExpressionTree(new Scanner("12 3 4"));
+        tree.calculate();
+    }
+
+    @Test(expected = WrongTreeException.class)
+    public void moreWrongTrees() throws WrongTreeException {
+        ExpressionTree tree = new ExpressionTree(new Scanner("(+ 1) (2 3)"));
+        tree.calculate();
+    }
+
+    @Test
+    public void printTest() {
+        ExpressionTree tree = null;
+        try {
+            tree = new ExpressionTree(new Scanner("(+ -5 (* -4 (+ 7 9)))"));
+        } catch (WrongTreeException e) {
+            fail();
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        tree.print(new PrintStream(out));
+        assertEquals("(+ -5 (* -4 (+ 7 9)))", out.toString());
+    }
+}
+

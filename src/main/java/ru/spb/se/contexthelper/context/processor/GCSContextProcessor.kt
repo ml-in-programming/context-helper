@@ -122,15 +122,6 @@ class GCSContextProcessor(initPsiElement: PsiElement) {
         return composeQueryAroundElement(element.parent)
     }
 
-    private fun findReferenceParent(psiElement: PsiElement?): PsiElement? {
-        return when (psiElement) {
-            null -> null
-            is PsiReferenceExpression -> psiElement
-            is PsiMethodCallExpression -> psiElement.methodExpression
-            else -> findReferenceParent(psiElement.parent)
-        }
-    }
-
     private fun composeGenericQuery(): Query? {
         val declarationsContextExtractor = DeclarationsContextExtractor(psiElement)
         val context = declarationsContextExtractor.context

@@ -8,14 +8,18 @@ import com.google.code.stackexchange.schema.StackExchangeSite
 /** Contains results that are extracted by [[StackExchangeClient]]. */
 data class StackExchangeQuestionResults(
     val queryContent: String,
-    val questions: List<Question>)
+    val questions: List<Question>) {
+    companion object {
+        val EMPTY = StackExchangeQuestionResults("", emptyList())
+    }
+}
 
 /** Client for extracting threads from StackExchange API. */
 class StackExchangeClient(
     private val apiKey: String,
     private val stackExchangeSite: StackExchangeSite
 ) {
-    fun getQuestionsWithIds(query: String, questionIds: List<Long>): StackExchangeQuestionResults {
+    fun getQuestionsWithIds(questionIds: List<Long>, query: String): StackExchangeQuestionResults {
         val paging = Paging(1, PAGE_SIZE)
         val questions: List<Question> =
             getQueryFactory().newQuestionApiQuery()

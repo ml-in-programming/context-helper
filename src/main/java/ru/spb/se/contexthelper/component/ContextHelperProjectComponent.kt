@@ -57,7 +57,21 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     }
 
     fun addResultsListener(questionResultsListener: QuestionResultsListener) {
-        questionResultsListeners.add(questionResultsListener)
+        synchronized(questionResultsListener) {
+            questionResultsListeners.add(questionResultsListener)
+        }
+    }
+
+    private fun notifyResultsListeners(questionResults: StackExchangeQuestionResults) {
+        synchronized(questionResultsListeners) {
+            val iterator = questionResultsListeners.iterator()
+            while (iterator.hasNext()) {
+                val isInterested = iterator.next().receiveResults(questionResults)
+                if (!isInterested) {
+                    iterator.remove()
+                }
+            }
+        }
     }
 
     fun changeProcessorMethodTo(processorMethod: ContextProcessorMethod) {
@@ -96,16 +110,23 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         ToolWindowManager.getInstance(project).getToolWindow(ID_TOOL_WINDOW) != null
 
     /** @throws NotEnoughContextException if the context is not rich enough for the help. */
-    fun assistAround(psiElement: PsiElement): Unit = when (processorMethod) {
-        ContextProcessorMethod.GoogleSearchMethod -> {
-            val gcsContextProcessor = GCSContextProcessor(psiElement)
-            val textQuery = gcsContextProcessor.generateQuery()
-            processTextQuery(textQuery)
-        }
-        ContextProcessorMethod.TypeNodeIndexMethod -> {
-            val indexedTypesContextProcessor = TypeNodeIndexContextProcessor(psiElement)
-            val query = indexedTypesContextProcessor.generateQuery()
-            processQuery(query)
+    fun assistAround(psiElement: PsiElement): Unit {
+        try {
+            when (processorMethod) {
+                ContextProcessorMethod.GoogleSearchMethod -> {
+                    val gcsContextProcessor = GCSContextProcessor(psiElement)
+                    val textQuery = gcsContextProcessor.generateQuery()
+                    processTextQuery(textQuery)
+                }
+                ContextProcessorMethod.TypeNodeIndexMethod -> {
+                    val indexedTypesContextProcessor = TypeNodeIndexContextProcessor(psiElement)
+                    val query = indexedTypesContextProcessor.generateQuery()
+                    processQuery(query)
+                }
+            }
+        } catch (e: Exception) {
+            notifyResultsListeners(StackExchangeQuestionResults.EMPTY)
+            throw e
         }
     }
 
@@ -129,7 +150,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         LOG.info("processQuery($textQuery)")
         thread(isDaemon = true) {
             val contextHelperPanel = viewerPanel
-            var queryResults = StackExchangeQuestionResults("", emptyList())
+            var queryResults = StackExchangeQuestionResults.EMPTY
             SwingUtilities.invokeLater {
                 contextHelperPanel.setQueryingStatus(true)
             }
@@ -140,7 +161,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                         showInfoDialog("No help available for the selected context.", project)
                     }
                 } else {
-                    queryResults = stackExchangeClient.getQuestionsWithIds(textQuery, questionIds)
+                    queryResults = stackExchangeClient.getQuestionsWithIds(questionIds, textQuery)
                     if (queryResults.questions.isEmpty()) {
                         SwingUtilities.invokeLater {
                             showInfoDialog(
@@ -154,13 +175,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 }
                 LOG.error(e)
             }
-            val iterator = questionResultsListeners.iterator()
-            while (iterator.hasNext()) {
-                val isInterested = iterator.next().receiveResults(queryResults)
-                if (!isInterested) {
-                    iterator.remove()
-                }
-            }
+            notifyResultsListeners(queryResults)
             SwingUtilities.invokeLater {
                 contextHelperPanel.setQueryingStatus(false)
             }

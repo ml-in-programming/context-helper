@@ -151,7 +151,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         LOG.info("processQuery: $query")
         thread(isDaemon = true) {
             val contextHelperPanel = viewerPanel
-            var queryResults = StackExchangeQuestionResults.EMPTY
+            var queryResults = StackExchangeQuestionResults(query, emptyList())
             SwingUtilities.invokeLater {
                 contextHelperPanel.setQueryingStatus(true)
             }
@@ -159,23 +159,22 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 val questionIds = idProducers()
                 if (questionIds.isEmpty()) {
                     SwingUtilities.invokeLater {
-                        val message =
-                            "No help available for the selected context. Query was $query"
-                        showInfoDialog(message, project)
+                        showInfoDialog("No help available for the selected context.", project)
                     }
                 } else {
-                    queryResults = stackExchangeClient.getQuestionsWithIds(questionIds, query)
-                    if (queryResults.questions.isEmpty()) {
+                    val questions = stackExchangeClient.getQuestionsWithIds(questionIds)
+                    if (questions.isEmpty()) {
                         SwingUtilities.invokeLater {
-                            val message =
-                                "No matching StackOverflow questions were found. Query was $query"
-                            showInfoDialog(message, project)
+                            showInfoDialog(
+                                "No matching StackOverflow questions were found.", project)
                         }
+                    } else {
+                        queryResults = StackExchangeQuestionResults(query, questions)
                     }
                 }
             } catch (e: Exception) {
                 SwingUtilities.invokeLater {
-                    showErrorDialog("Unable to process the query. Query was $query", project)
+                    showErrorDialog("Unable to process the query.", project)
                 }
                 LOG.error(e)
             }

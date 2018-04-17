@@ -28,11 +28,11 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.net.URL;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /** ContextHelper's side panel. */
 public class ContextHelperPanel extends JPanel implements Runnable, StackExchangeTreeListener {
-
   private static final int SPLIT_DIVIDER_POSITION = 205;
 
   private final ContextHelperProjectComponent contextHelperProjectComponent;
@@ -157,7 +157,6 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     treeModel = new StackExchangeThreadsTreeModel(queryResults.getQuestions());
     tree.setModel(treeModel);
     treeScrollPane.getVerticalScrollBar().setValue(0);
-    renderHtml("");
     showPanel();
   }
 
@@ -172,6 +171,11 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     showPanel();
     if (isQuerying) {
       progressBar.setIndeterminate(true);
+      queryJTextField.setText("");
+      checkBox.setVisible(false);
+      treeModel = new StackExchangeThreadsTreeModel(null);
+      tree.setModel(treeModel);
+      renderHtml("");
     } else {
       progressBar.setIndeterminate(false);
     }
@@ -183,28 +187,31 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
 
   @Override
   public void renderHtml(String bodyHtml) {
+    String highlightedHtml = highlightHtml(bodyHtml);
+    WebEngine engine = webView.getEngine();
+    URL prettifyUrl = this.getClass().getResource("/prettify.js");
+    Platform.runLater(() -> engine.loadContent(
+        "<html>\n"
+        + "<head>\n"
+        + "<script type=\"text/javascript\" src=\"" + prettifyUrl.toString() + "\"></script>\n"
+        + "</head>\n"
+        + "<body>\n"
+        + highlightedHtml
+            .replace("<code>", "<pre class=\"prettyprint\">")
+            .replace("</code>", "</pre>")
+        + "</body>\n"
+        + "</html>",
+        "text/html"));
+  }
+
+  private String highlightHtml(String bodyHtml) {
     String[] words = queryJTextField.getText().split("\\s+");
-    Platform.runLater(() -> {
-      URL url = this.getClass().getResource("/prettify.js");
-      WebEngine engine = webView.getEngine();
-      String highlightedHtml = bodyHtml;
-      for (String word : words) {
-        highlightedHtml = highlightedHtml.replaceAll(
-            word, "<span class='highlight'>" + word + "</span>");
-      }
-      engine.loadContent(
-          "<html>\n"
-          + "<head>\n"
-          + "<script type=\"text/javascript\" src=\"" + url.toString() + "\"></script>\n"
-          + "</head>\n"
-          + "<body>\n"
-          + highlightedHtml
-              .replace("<code>", "<pre class=\"prettyprint\">")
-              .replace("</code>", "</pre>")
-          + "</body>\n"
-          + "</html>",
-          "text/html");
-    });
+    String highlightedHtml = bodyHtml;
+    for (String word : words) {
+      highlightedHtml = highlightedHtml.replaceAll(
+          Pattern.quote(word), "<span class='highlight'>" + word + "</span>");
+    }
+    return highlightedHtml;
   }
 
   @Override

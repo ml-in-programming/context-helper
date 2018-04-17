@@ -19,7 +19,7 @@ class StackExchangeClient(
     private val apiKey: String,
     private val stackExchangeSite: StackExchangeSite
 ) {
-    fun getQuestionsWithIds(questionIds: List<Long>, query: String): StackExchangeQuestionResults {
+    fun getQuestionsWithIds(questionIds: List<Long>): List<Question> {
         val paging = Paging(1, PAGE_SIZE)
         val questions: List<Question> =
             getQueryFactory().newQuestionApiQuery()
@@ -28,9 +28,7 @@ class StackExchangeClient(
                 .withPaging(paging)
                 .list()
         // StackExchangeApi does not guarantee returning the questions in the same order.
-        val sortedQuestions =
-            questions.sortedBy { question -> questionIds.indexOf(question.questionId) }
-        return StackExchangeQuestionResults(query, sortedQuestions)
+        return questions.sortedBy { question -> questionIds.indexOf(question.questionId) }
     }
 
     private fun getQueryFactory(): StackExchangeApiQueryFactory {

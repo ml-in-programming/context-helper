@@ -1,0 +1,30 @@
+52f482f8-37f0-4e40-a28b-a328dcdf25a3
+52f482f8-37f0-4e40-a28b-a328dcdf25a3-1523526311415
+470
+package group144.shervashidze;
+
+import javafx.event.Event;
+import javafx.fxml.FXML;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Slider;
+import javafx.scene.input.MouseEvent;
+
+public class Controllers {
+
+    @FXML
+    private Slider slider;
+
+    @FXML
+    private ProgressBar progressBar;
+
+    /**
+     * Initialization method
+     *
+     * Sets the action when slider's value changing
+     */
+    public void initialize() {
+        slider.valueProperty().addListener((observable, oldValue, newValue) -> progressBar.progressProperty().setValue(newValue));
+    }
+}
+
+

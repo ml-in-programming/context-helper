@@ -1,0 +1,83 @@
+a590add0-f56f-4053-8b65-b27fe89c239d
+a590add0-f56f-4053-8b65-b27fe89c239d-1523968842468
+357
+package init;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
+import java.util.Enumeration;
+import java.util.Hashtable;
+
+class CustomTreeModel extends DefaultTreeModel {
+    public CustomTreeModel(TreeNode node) {
+        super(node);
+        objects.put("CSM",
+                new HardwareObject("CSM", "images/csmicon.gif"));
+        objects.put("LM",
+                new HardwareObject("LM", "images/lemicon.gif"));
+    }
+
+    public void valueForPathChanged(TreePath path,
+                                    Object newValue) {
+        DefaultMutableTreeNode node =
+                DefaultMutableTreeNode)path.getLastPathComponent();
+        String value = (String)newValue;
+        // Use the string to locate a suitable HardwareObject.
+        // If there isn't one, just use the string as the
+        // user object
+        HardwareObject object = getObjectForName(value);
+        if (object != null) {
+            node.setUserObject(object);
+        } else {
+            node.setUserObject(value);
+        }
+        nodeChanged(node);
+    }
+    // Get the HardwareObject for a given name, or
+    // null if unknown
+    public HardwareObject getObjectForName(String name) {
+        return (HardwareObject)objects.get(name);
+    }
+
+    // Create the set of objects that can populate
+    // the leaf nodes
+    protected static class HardwareObject
+            implements NodeWithIcon {
+        protected HardwareObject(String text,
+                                 String imageName) {
+            this.text = text;
+            this.icon = new ImageIcon(getClass().getResource(
+                    imageName));
+        }
+
+        // Return text for display
+        public String toString() {
+            return text;
+        }
+
+        // Return the icon
+        public Icon getIcon() {
+            return icon;
+        }
+
+        protected String text;
+        protected Icon icon;
+    }
+
+    // Get the possible hardware types in a combo box
+    public JComboBox getNamesAsCombo() {
+        DefaultComboBoxModel model =
+                new DefaultComboBoxModel();
+        Enumeration e = objects.keys();
+
+        while (e.hasMoreElements()) {
+            model.addElement(e.nextElement());
+        }
+        return new JComboBox(model);
+    }
+    protected static Hashtable objects = new Hashtable();
+}
+

@@ -1,0 +1,61 @@
+27b9028f-98e8-40c5-8ebc-3343bf46d25d
+27b9028f-98e8-40c5-8ebc-3343bf46d25d-1523629347177
+1607
+package ru.spbau202.lupuleac.md5FileCalculator;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.RecursiveTask;
+
+public class Md5FileForkJoinCalculator extends Md5FileCalculator {
+    @Override
+    protected byte[] calculateHash(@NotNull File file) {
+
+        assert messageDigest != null;
+        return messageDigest.digest();
+    }
+
+    private static class RecursiveMd5CalculatorTask extends RecursiveTask<List<Byte>> {
+        private File file;
+
+        private RecursiveMd5CalculatorTask(File file){
+            this.file = file;
+        }
+
+        /**
+         * The main computation performed by this task.
+         *
+         * @return the result of the computation
+         */
+        @Override
+        protected List<Byte> compute() {
+            MessageDigest messageDigest = null;
+            try{
+                messageDigest = MessageDigest.getInstance("MD5");
+                List<RecursiveMd5CalculatorTask> subTasks = new ArrayList<>();
+                if(file.isDirectory()){
+                    messageDigest.update(file.getName().getBytes());
+                    for(File subFile : file.listFiles()){
+                        RecursiveMd5CalculatorTask task = new RecursiveMd5CalculatorTask(subFile);
+                        task.fork();
+                        subTasks.add(task);
+                    }
+                    for(RecursiveMd5CalculatorTask task : subTasks){
+                        messageDigest.update(Arrays.toArray(task.join()));
+                    }
+                }
+                else {
+                    messageDigest.update(hashFromFile(file));
+                }
+            }
+            catch (Exception ignored){}
+        }
+    }
+}
+
+

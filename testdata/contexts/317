@@ -1,0 +1,40 @@
+52f482f8-37f0-4e40-a28b-a328dcdf25a3
+52f482f8-37f0-4e40-a28b-a328dcdf25a3-1523489919747
+63
+package group144.shervashidze;
+
+public class UniqueList<T> extends List<T> {
+    /**
+     * Adds element to list
+     *
+     * @param value added value
+     * @throws ElementAlreadyAddedException if element is already added
+     */
+    @Override
+    public void add(T value) throws ElementAlreadyAddedException {
+        if (super.find(value) != -1) {
+            throw new ElementAlreadyAddedException();
+        }
+
+        super.add(value);
+    }
+
+    /**
+     * Add new element to list with certain index
+     *
+     * @param value to add in list.
+     * @param index - index of element after which new one will be added
+     * @throws IndexOutOfBoundsException if index out of range
+     * @throws ElementAlreadyAddedException if element is already added
+     */
+    public void add(T value, int index) throws IndexOutOfBoundsException, ElementAlreadyAddedException{
+        if (super.find(value) != -1) {
+            throw new ElementAlreadyAddedException();
+        }
+
+        super.add(value, index);
+    }
+
+}
+
+

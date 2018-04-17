@@ -32,8 +32,10 @@ class GoogleSearchStackoverflowCrawler : QuestionLookupClient {
         Thread.sleep(WAIT_TIME_MIN_MS + randGenerator.nextInt(WAIT_TIME_SPREAD_MS))
         val stackoverflowQuery = "site:stackoverflow.com $query"
         val encodedQuery = URLEncoder.encode(stackoverflowQuery, "UTF-8")
-        val urlQuery = "https://www.google.com/search?q=$encodedQuery" +
-            "&num=$RESULTS_PER_PAGE&hl=en&gl=en${if (start != 0) "&start=$start" else ""}"
+        val urlQuery =
+            "https://www.google.com/search?q=$encodedQuery&hl=en&gl=en" +
+                if (start != 0) "&start=$start" else ""
+        LOG.info("crawler issued urlQuery: $urlQuery")
         val pageContent = getSearchContent(urlQuery)
         val links = parseLinks(pageContent)
         return links.mapNotNull {
@@ -93,6 +95,6 @@ class GoogleSearchStackoverflowCrawler : QuestionLookupClient {
         private const val RESULTS_PER_PAGE = 10
 
         private const val WAIT_TIME_MIN_MS = 5000L
-        private const val WAIT_TIME_SPREAD_MS = 1000
+        private const val WAIT_TIME_SPREAD_MS = 5000
     }
 }

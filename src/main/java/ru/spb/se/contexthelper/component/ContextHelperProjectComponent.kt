@@ -110,27 +110,25 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         ToolWindowManager.getInstance(project).getToolWindow(ID_TOOL_WINDOW) != null
 
     /** @throws NotEnoughContextException if the context is not rich enough for the help. */
-    fun assistAround(psiElement: PsiElement): Unit {
-        try {
-            when (processorMethod) {
-                ContextProcessorMethod.GoogleSearchMethod -> {
-                    val gcsContextProcessor = GCSContextProcessor(psiElement)
-                    val textQuery = gcsContextProcessor.generateQuery()
-                    processTextQuery(textQuery)
-                }
-                ContextProcessorMethod.TypeNodeIndexMethod -> {
-                    val indexedTypesContextProcessor = TypeNodeIndexContextProcessor(psiElement)
-                    val query = indexedTypesContextProcessor.generateQuery()
-                    processQuery(query)
-                }
+    fun assistAround(psiElement: PsiElement): Unit = try {
+        when (processorMethod) {
+            ContextProcessorMethod.GoogleSearchMethod -> {
+                val gcsContextProcessor = GCSContextProcessor(psiElement)
+                val textQuery = gcsContextProcessor.generateQuery()
+                processTextQuery(textQuery)
             }
-        } catch (e: Exception) {
-            notifyResultsListeners(StackExchangeQuestionResults.EMPTY)
-            throw e
+            ContextProcessorMethod.TypeNodeIndexMethod -> {
+                val indexedTypesContextProcessor = TypeNodeIndexContextProcessor(psiElement)
+                val query = indexedTypesContextProcessor.generateQuery()
+                processQuery(query)
+            }
         }
+    } catch (e: Exception) {
+        notifyResultsListeners(StackExchangeQuestionResults.EMPTY)
+        throw e
     }
 
-    fun processTextQuery(query: String) {
+    fun processTextQuery(query: String): Unit =
         process(query) {
             // Currently using Google Custom Search. But it has 100 queries per day limit.
             // May return to StackExchange search in the future.
@@ -138,16 +136,14 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
             //     stackExchangeClient.requestRelevantQuestions(query);
             questionLookupClient.lookupQuestionIds(query)
         }
-    }
 
-    private fun processQuery(query: Query) {
+    private fun processQuery(query: Query): Unit =
         process(query.keywords.joinToString(" ") { it.word }) {
             threadsRecommenderClient.askForRecommendedThreads(query)
         }
-    }
 
-    private fun process(textQuery: String, idProducers: () -> List<Long>) {
-        LOG.info("processQuery($textQuery)")
+    private fun process(query: String, idProducers: () -> List<Long>): Unit {
+        LOG.info("processQuery: $query")
         thread(isDaemon = true) {
             val contextHelperPanel = viewerPanel
             var queryResults = StackExchangeQuestionResults.EMPTY
@@ -158,20 +154,23 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 val questionIds = idProducers()
                 if (questionIds.isEmpty()) {
                     SwingUtilities.invokeLater {
-                        showInfoDialog("No help available for the selected context.", project)
+                        val message =
+                            "No help available for the selected context. Query was $query"
+                        showInfoDialog(message, project)
                     }
                 } else {
-                    queryResults = stackExchangeClient.getQuestionsWithIds(questionIds, textQuery)
+                    queryResults = stackExchangeClient.getQuestionsWithIds(questionIds, query)
                     if (queryResults.questions.isEmpty()) {
                         SwingUtilities.invokeLater {
-                            showInfoDialog(
-                                "No matching StackOverflow questions were found.", project)
+                            val message =
+                                "No matching StackOverflow questions were found. Query was $query"
+                            showInfoDialog(message, project)
                         }
                     }
                 }
             } catch (e: Exception) {
                 SwingUtilities.invokeLater {
-                    showErrorDialog("Unable to process the query.", project)
+                    showErrorDialog("Unable to process the query. Query was $query", project)
                 }
                 LOG.error(e)
             }

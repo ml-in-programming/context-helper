@@ -29,8 +29,8 @@ import kotlin.concurrent.thread
 
 /** Component which is called to initialize ContextHelper plugin for each [Project]. */
 class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
-    private val questionLookupClient: QuestionLookupClient = //GoogleSearchStackoverflowCrawler()
-        GoogleCustomSearchClient(GOOGLE_SEARCH_API_KEY)
+    private val questionLookupClient: QuestionLookupClient = GoogleSearchStackoverflowCrawler()
+//        GoogleCustomSearchClient(GOOGLE_SEARCH_API_KEY)
     private val stackExchangeClient =
         StackExchangeClient(STACK_EXCHANGE_API_KEY, STACK_EXCHANGE_SITE)
     private val threadsRecommenderClient = ThreadsRecommenderClient()
@@ -111,16 +111,21 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
     /** @throws NotEnoughContextException if the context is not rich enough for the help. */
     fun assistAround(psiElement: PsiElement): Unit = try {
-        when (processorMethod) {
-            ContextProcessorMethod.GoogleSearchMethod -> {
-                val gcsContextProcessor = GCSContextProcessor(psiElement)
-                val textQuery = gcsContextProcessor.generateQuery()
-                processTextQuery(textQuery)
-            }
-            ContextProcessorMethod.TypeNodeIndexMethod -> {
-                val indexedTypesContextProcessor = TypeNodeIndexContextProcessor(psiElement)
-                val query = indexedTypesContextProcessor.generateQuery()
-                processQuery(query)
+        val elementLanguage = psiElement.language
+        if (elementLanguage.id != "JAVA") {
+            processTextQuery("${psiElement.text} ${elementLanguage.displayName.toLowerCase()}")
+        } else {
+            when (processorMethod) {
+                ContextProcessorMethod.GoogleSearchMethod -> {
+                    val gcsContextProcessor = GCSContextProcessor(psiElement)
+                    val textQuery = gcsContextProcessor.generateQuery()
+                    processTextQuery(textQuery)
+                }
+                ContextProcessorMethod.TypeNodeIndexMethod -> {
+                    val indexedTypesContextProcessor = TypeNodeIndexContextProcessor(psiElement)
+                    val query = indexedTypesContextProcessor.generateQuery()
+                    processQuery(query)
+                }
             }
         }
     } catch (e: Exception) {
@@ -142,7 +147,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
             threadsRecommenderClient.askForRecommendedThreads(query)
         }
 
-    private fun process(query: String, idProducers: () -> List<Long>): Unit {
+    private fun process(query: String, idProducers: () -> List<Long>) {
         LOG.info("processQuery: $query")
         thread(isDaemon = true) {
             val contextHelperPanel = viewerPanel

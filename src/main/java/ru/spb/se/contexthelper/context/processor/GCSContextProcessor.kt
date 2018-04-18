@@ -29,12 +29,13 @@ class GCSContextProcessor(initPsiElement: PsiElement) {
         }
         val genericQuery = composeGenericQuery()
         if (genericQuery != null) {
-            val questionFromGeneric = genericQuery.keywords.joinToString("|") { it.word }
+            val contextTerms = genericQuery.keywords.map { it.word }.toMutableList()
             if (queryBuilder.isNotEmpty()) {
-                queryBuilder.add("(\"\"|$questionFromGeneric)")
-            } else {
-                queryBuilder.add("($questionFromGeneric)")
+                // Meaning there is something more important that we want to ask. So we allow Google
+                // Search to omit the context.
+                contextTerms.add("")
             }
+            queryBuilder.add(contextTerms.joinToString("|", "(", ")") { "\"$it\""})
         }
         if (queryBuilder.isEmpty()) {
             throw NotEnoughContextException()

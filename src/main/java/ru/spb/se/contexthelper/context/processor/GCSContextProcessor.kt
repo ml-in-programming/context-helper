@@ -6,15 +6,7 @@ import ru.spb.se.contexthelper.context.declr.DeclarationsContextExtractor
 import ru.spb.se.contexthelper.context.declr.DeclarationsContextTypesExtractor
 import ru.spb.se.contexthelper.context.trie.Type
 
-class GCSContextProcessor(initPsiElement: PsiElement) {
-    private val psiElement: PsiElement
-
-    init {
-        val prevSibling = initPsiElement.prevSibling
-        val isAlphanumeric = initPsiElement.text.chars().allMatch(Character::isLetterOrDigit)
-        psiElement = if (isAlphanumeric || prevSibling == null) initPsiElement else prevSibling
-    }
-
+class GCSContextProcessor(initPsiElement: PsiElement) : AbstractContextProcessor(initPsiElement) {
     fun generateQuery(): String {
         val queryBuilder = ArrayList<String>()
         var nearCursorQuery = composeQueryAroundElement(psiElement)

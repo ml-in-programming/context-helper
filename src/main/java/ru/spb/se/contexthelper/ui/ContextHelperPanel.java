@@ -20,7 +20,7 @@ import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.prompt.PromptSupport;
 import ru.spb.se.contexthelper.ContextHelperConstants;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
-import ru.spb.se.contexthelper.context.processor.ContextProcessorMethod;
+import ru.spb.se.contexthelper.context.processor.ProcessorMethodEnum;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
 
 import javax.swing.*;
@@ -126,21 +126,21 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   }
 
   private ComboBox buildComboBox() {
-    ContextProcessorMethod[] processorMethods = ContextProcessorMethod.values();
-    ComboBox<ContextProcessorMethod> comboBox = new ComboBox<>(processorMethods);
+    ProcessorMethodEnum[] processorMethods = ProcessorMethodEnum.values();
+    ComboBox<ProcessorMethodEnum> comboBox = new ComboBox<>(processorMethods);
     Font font = getFont();
-    Font boldFont = new Font(font.getName(), font.getStyle(), (int) (font.getSize() * 0.8));
+    Font boldFont = new Font(font.getName(), Font.BOLD, (int) (font.getSize() * 0.8));
     comboBox.setSelectedIndex(0);
     comboBox.setFont(boldFont);
-    comboBox.setRenderer(new ListCellRendererWrapper<ContextProcessorMethod>() {
+    comboBox.setRenderer(new ListCellRendererWrapper<ProcessorMethodEnum>() {
       @Override
-      public void customize(JList list, ContextProcessorMethod value, int index, boolean selected, boolean hasFocus) {
+      public void customize(JList list, ProcessorMethodEnum value, int index, boolean selected, boolean hasFocus) {
         setText(value.getMethodName());
         setFont(boldFont);
       }
     });
     comboBox.addActionListener(e -> {
-      ContextProcessorMethod method = (ContextProcessorMethod) comboBox.getSelectedItem();
+      ProcessorMethodEnum method = (ProcessorMethodEnum) comboBox.getSelectedItem();
       contextHelperProjectComponent.changeProcessorMethodTo(Objects.requireNonNull(method));
     });
     return comboBox;

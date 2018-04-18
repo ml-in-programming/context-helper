@@ -15,7 +15,8 @@ import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
 import ru.spb.se.contexthelper.context.NotEnoughContextException
 import ru.spb.se.contexthelper.context.Query
-import ru.spb.se.contexthelper.context.processor.ContextProcessorMethod
+import ru.spb.se.contexthelper.context.processor.GCSNaiveContextProcessor
+import ru.spb.se.contexthelper.context.processor.ProcessorMethodEnum
 import ru.spb.se.contexthelper.context.processor.GCSContextProcessor
 import ru.spb.se.contexthelper.context.processor.TypeNodeIndexContextProcessor
 import ru.spb.se.contexthelper.lookup.*
@@ -43,7 +44,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     private var viewerPanel: ContextHelperPanel = ContextHelperPanel(this)
     private val questionResultsListeners: ArrayList<QuestionResultsListener> = arrayListOf()
 
-    private var processorMethod: ContextProcessorMethod = ContextProcessorMethod.values().first()
+    private var processorMethod: ProcessorMethodEnum = ProcessorMethodEnum.values().first()
 
     init {
         addResultsListener(object : QuestionResultsListener {
@@ -74,7 +75,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         }
     }
 
-    fun changeProcessorMethodTo(processorMethod: ContextProcessorMethod) {
+    fun changeProcessorMethodTo(processorMethod: ProcessorMethodEnum) {
         this.processorMethod = processorMethod
     }
 
@@ -116,15 +117,20 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
             processTextQuery("${psiElement.text} ${elementLanguage.displayName.toLowerCase()}")
         } else {
             when (processorMethod) {
-                ContextProcessorMethod.GoogleSearchMethod -> {
+                ProcessorMethodEnum.GoogleSearchMethod -> {
                     val gcsContextProcessor = GCSContextProcessor(psiElement)
                     val textQuery = gcsContextProcessor.generateQuery()
                     processTextQuery(textQuery)
                 }
-                ContextProcessorMethod.TypeNodeIndexMethod -> {
+                ProcessorMethodEnum.TypeNodeIndexMethod -> {
                     val indexedTypesContextProcessor = TypeNodeIndexContextProcessor(psiElement)
                     val query = indexedTypesContextProcessor.generateQuery()
                     processQuery(query)
+                }
+                ProcessorMethodEnum.GoogleSearchNaiveMethod -> {
+                    val naiveContextProcessor = GCSNaiveContextProcessor(psiElement)
+                    val textQuery = naiveContextProcessor.generateQuery()
+                    processTextQuery(textQuery)
                 }
             }
         }

@@ -1,0 +1,25 @@
+a590add0-f56f-4053-8b65-b27fe89c239d
+a590add0-f56f-4053-8b65-b27fe89c239d-1524084573118
+621
+package init;
+
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+
+class GetQuestions {
+    public static void main(String args[]) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder parser = factory.newDocumentBuilder();
+            Document doc = parser.parse("questions.xml");
+            Element root = doc.getDocumentElement();
+            NodeList children = root.getChildNodes();  //get all children of root
+            for(int i = 0; i < children.getLength(); i++) {
+                Node node = children.item(i);
+                if(node.getNodeType() == Node.ELEMENT_NODE)
+                    System.out.println(node.getFirstChild().getNodeValue());
+            }
+        }catch(Exception e) { e.printStackTrace(); }
+    }
+}
+

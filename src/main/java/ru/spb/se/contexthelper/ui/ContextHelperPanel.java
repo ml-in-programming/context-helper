@@ -128,15 +128,15 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   private ComboBox buildComboBox() {
     ProcessorMethodEnum[] processorMethods = ProcessorMethodEnum.values();
     ComboBox<ProcessorMethodEnum> comboBox = new ComboBox<>(processorMethods);
-    Font font = getFont();
-    Font boldFont = new Font(font.getName(), Font.BOLD, (int) (font.getSize() * 0.8));
+    Font plainFont = getFont();
+    Font boldFont = new Font(plainFont.getName(), Font.BOLD, (int) (plainFont.getSize() * 0.8));
     comboBox.setSelectedIndex(0);
     comboBox.setFont(boldFont);
     comboBox.setRenderer(new ListCellRendererWrapper<ProcessorMethodEnum>() {
       @Override
       public void customize(JList list, ProcessorMethodEnum value, int index, boolean selected, boolean hasFocus) {
         setText(value.getMethodName());
-        setFont(boldFont);
+        setFont(plainFont);
       }
     });
     comboBox.addActionListener(e -> {

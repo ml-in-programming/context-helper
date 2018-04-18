@@ -1,0 +1,41 @@
+a590add0-f56f-4053-8b65-b27fe89c239d
+a590add0-f56f-4053-8b65-b27fe89c239d-1524080951738
+419
+package init;
+
+class MyThread extends Thread {
+    int[] a;
+    MyThread(int[] ar) {
+        a = ar;
+        start(); 
+    }
+    public void run() {
+        java.util.Arrays.sort(a);
+    }
+}
+
+public class JoinTest {
+    public static void main(String args[]) throws Exception {
+        int a[] = {2,3,4,0,1}, b[] = {6,9,8,7,5};
+        MyThread t1 = new MyThread(a);
+        MyThread t2 = new MyThread(b);
+        t1.join();
+        t2.join();
+        int result[] = merge(a,b);
+        for(int i=0;i<result.length;i++)
+        System.out.print(result[i]+" ");
+    }
+
+    static int[] merge(int[] a, int[] b) {
+        int i = 0, j = 0, k = 0;
+        int[] result = new int[a.length + b.length];
+        while (i < a.length && j < b.length) {
+            if (a[i] < b[j]) result[k++] = a[i++];
+            else result[k++] = b[j++];
+        }
+        while (i < a.length) result[k++] = a[i++];
+        while (j < b.length) result[k++] = b[j++];
+        return result;
+    }
+}
+

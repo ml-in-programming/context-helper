@@ -1,0 +1,19 @@
+a590add0-f56f-4053-8b65-b27fe89c239d
+a590add0-f56f-4053-8b65-b27fe89c239d-1524080530523
+45
+package init;
+
+public class SimpleThread extends Thread {
+    public void run() {
+        for(int i = 0; i < 4; i++)
+            System.out.println("In MyThread: "+i);
+    }
+    public static void main(String args[]) {
+        SimpleThread st = new SimpleThread();
+        st.start();
+        for(int i = 0; i < 6; i++)
+            System.out.println("In main thread: "+i);
+    }
+}
+
+

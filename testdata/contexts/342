@@ -1,0 +1,293 @@
+27b9028f-98e8-40c5-8ebc-3343bf46d25d
+27b9028f-98e8-40c5-8ebc-3343bf46d25d-1524022456004
+3310
+package ru.spbau202.lupuleac.TicTacToe;
+
+import javafx.application.Application;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
+import org.jetbrains.annotations.NotNull;
+import ru.spbau202.lupuleac.TicTacToe.Bot.Bot;
+import ru.spbau202.lupuleac.TicTacToe.Logic.Board;
+import ru.spbau202.lupuleac.TicTacToe.Logic.Statistics;
+
+/**
+ * Class which launches the application and represents the user interface.
+ */
+public class UI extends Application {
+    private Stage window;
+    private Board board = new Board();
+    private Bot bot;
+    private Pane root;
+    private Box[][] grid;
+    private Settings settings = new Settings();
+    private Statistics statistics = new Statistics();
+
+    /**
+     * The main entry point for all JavaFX applications.
+     * The start method is called after the init method has returned,
+     * and after the system is ready for the application to begin running.
+     * <p>
+     * <p>
+     * NOTE: This method is called on the JavaFX Application Thread.
+     * </p>
+     *
+     * @param primaryStage the primary stage for this application, onto which
+     *                     the application scene can be set. The primary stage will be embedded in
+     *                     the browser if the application was launched as an applet.
+     *                     Applications may create other stages, if needed, but they will not be
+     *                     primary stages and will not be embedded in the browser.
+     */
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        window = primaryStage;
+        window.setMinHeight(600);
+        window.setMinWidth(600);
+        primaryStage.setScene(choosePlayMode());
+        primaryStage.show();
+    }
+
+    /**
+     * Shows the first window where the player chooses a play mode.
+     *
+     * @return the scene which is set as a scene to a primary stage
+     */
+    @NotNull
+    private Scene choosePlayMode() {
+        window.setTitle("Choose play mode");
+        Pane pane = new Pane();
+        pane.setPrefSize(600, 600);
+        pane.setStyle("-fx-background-color: #0000ff");
+        Button hotSeat = new Button("Play with friend");
+        hotSeat.setLayoutX(250);
+        hotSeat.setLayoutY(130);
+        Button gameWithBot = new Button("Play with bot");
+        gameWithBot.setLayoutX(250);
+        gameWithBot.setLayoutY(90);
+        gameWithBot.setOnAction(e -> {
+            settings.setPlayMode(Settings.PlayMode.BOT);
+            window.setTitle("Choose bot level");
+            window.setScene(chooseBotLevel());
+        });
+        hotSeat.setOnAction(e -> {
+            settings.setPlayMode(Settings.PlayMode.HOT_SEAT);
+            window.setScene(mainScene());
+        });
+        Button showGameStatistics = new Button("Show game statistics");
+        showGameStatistics.setLayoutX(250);
+        showGameStatistics.setLayoutY(170);
+        showGameStatistics.setOnAction(e -> window.setScene(showStatistics()));
+        hotSeat.setMinWidth(showGameStatistics.getPrefWidth());
+        gameWithBot.setMinWidth(showGameStatistics.getPrefWidth());
+        pane.getChildren().addAll(gameWithBot, hotSeat, showGameStatistics);
+        return new Scene(pane);
+    }
+
+    /**
+     * Displays the window with the statistics: number of cross wins,
+     * number of nought wins, number of draws.
+     *
+     * @return the scene which is set as a scene to a primary stage
+     */
+    @NotNull
+    private Scene showStatistics() {
+        Pane root = new Pane();
+        root.setPrefSize(600, 600);
+        root.setStyle("-fx-background-color: #0000ff");
+        Label label = new Label(statistics.showStatistics());
+        Button newGame = new Button("New Game");
+        newGame.setAlignment(Pos.BOTTOM_CENTER);
+        newGame.setLayoutX(270);
+        newGame.setLayoutY(30);
+        newGame.setOnAction(e -> restart());
+        root.getChildren().addAll(label, newGame);
+        return new Scene(root);
+    }
+
+    /**
+     * Shows the window where the player chooses a game level.
+     *
+     * @return the scene which is set as a scene to a primary stage
+     */
+    @NotNull
+    private Scene chooseBotLevel() {
+        Pane root = new Pane();
+        root.setPrefSize(600, 600);
+        root.setStyle("-fx-background-color: #0000ff");
+        Button bot1 = new Button("Easy");
+        bot1.setLayoutX(40);
+        bot1.setLayoutY(70);
+        Button bot2 = new Button("Hard");
+        bot2.setLayoutX(40);
+        bot2.setLayoutY(30);
+        bot2.setOnAction(e -> {
+            settings.setBotLevel(2);
+            window.setScene(mainScene());
+        });
+        bot1.setOnAction(e -> {
+            settings.setBotLevel(1);
+            window.setScene(mainScene());
+        });
+        bot = settings.createBot();
+        root.getChildren().addAll(bot2, bot1);
+        return new Scene(root);
+    }
+
+    /**
+     * Creates the main scene where game happens.
+     *
+     * @return the scene which is set as a scene to a primary stage
+     */
+    @NotNull
+    private Scene mainScene() {
+        window.setTitle("Game");
+        root = new Pane();
+        root.setPrefSize(600, 600);
+        drawGrid();
+        Button restart = new Button("Restart");
+        restart.setOnAction(e -> restart());
+        root.getChildren().addAll(restart);
+        return new Scene(root);
+    }
+
+    /**
+     * Restarts the game.
+     */
+    private void restart() {
+        bot = null;
+        statistics.increment(board.getGameStatus());
+        board.clear();
+        window.setScene(choosePlayMode());
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    /**
+     * Draws the grid on the main scene.
+     */
+    private void drawGrid() {
+        grid = new Box[3][3];
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                grid[i][j] = new Box(j, i);
+                root.getChildren().addAll(grid[i][j]);
+            }
+        }
+    }
+
+    /**
+     * Class which represents a square of the game board.
+     */
+    private class Box extends StackPane {
+        private int x;
+        private int y;
+        private Text sign = new Text();
+
+        private Box(int x, int y) {
+            this.x = x;
+            this.y = y;
+            Rectangle border = new Rectangle(200, 200);
+            border.setFill(null);
+            border.setStroke(Color.BLACK);
+            sign.setFont(Font.font(80));
+            setAlignment(Pos.CENTER);
+            getChildren().addAll(border, sign);
+            setTranslateX(x * 200);
+            setTranslateY(y * 200);
+            setOnMouseClicked(event -> move());
+        }
+
+        /**
+         * Handles the player's move.
+         */
+        private void move() {
+            if (bot != null && bot.getPlayer() == board.getCurrentPlayer()
+                    || !board.verify(x, y)) {
+                return;
+            }
+            setSign(board.getCurrentPlayer());
+            board.makeMove(x, y);
+            if (board.getGameStatus() != Board.GameStatus.GAME_CONTINUES) {
+                UI.this.displayResult();
+            }
+            if (bot != null) {
+                botsMove(bot.makeMove(board));
+            }
+        }
+
+        private void botsMove(Bot.Move move) {
+            board.makeMove(move);
+            UI.this.grid[move.getY()][move.getX()].setSign(bot.getPlayer());
+            if (board.getGameStatus() != Board.GameStatus.GAME_CONTINUES) {
+                displayResult();
+            }
+        }
+
+        /**
+         * Draws the sign on square
+         *
+         * @param player is a player which sign is to be set
+         */
+        private void setSign(Board.Player player) {
+            if (player == Board.Player.CROSS) {
+                sign.setText("X");
+            } else {
+                sign.setText("O");
+            }
+        }
+    }
+
+    /**
+     * Highlights the squares which provided a win on board.
+     *
+     * @param squares is squares to be highlighted
+     */
+    private void highlight(Board.ComboWrapper squares) {
+        if (squares == null) {
+            return;
+        }
+        for (int i = 0; i < squares.getCoords().length; i += 2) {
+            grid[squares.getCoords()[i + 1]][squares.getCoords()[i]].setStyle("-fx-background-color: red;");
+        }
+    }
+
+    /**
+     * Displays result of this game.
+     */
+    private void displayResult() {
+        highlight(board.getWinningCombo());
+        root = new Pane();
+        root.setPrefSize(200, 200);
+        Label result = new Label();
+        result.setFont(Font.font(30));
+        if (board.getGameStatus() == Board.GameStatus.CROSS_WON) {
+            result.setText("CROSS WON!");
+        }
+        if (board.getGameStatus() == Board.GameStatus.NOUGHT_WON) {
+            result.setText("NOUGHT WON!");
+        }
+        if (board.getGameStatus() == Board.GameStatus.DRAW) {
+            result.setText("DRAW!");
+        }
+        result.setTextAlignment(TextAlignment.JUSTIFY);
+        root.getChildren().add(result);
+        Stage stage = new Stage();
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
+    }
+}
+
+

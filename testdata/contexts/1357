@@ -1,0 +1,27 @@
+a590add0-f56f-4053-8b65-b27fe89c239d
+a590add0-f56f-4053-8b65-b27fe89c239d-1524084629075
+805
+package init;
+
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+class View {
+    public static void main(String args[]) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder parser = factory.newDocumentBuilder();
+            Document doc = parser.parse("questions.xml");
+            Element root = doc.getDocumentElement();
+            TransformerFactory tFactory = TransformerFactory.newInstance();
+            Transformer transformer = tFactory.newTransformer();
+            DOMSource source = new DOMSource(root);
+            StreamResult result = new StreamResult(System.out);
+            transformer.transform(source, result);
+        }catch(Exception e) {e.printStackTrace();}
+    }
+}
+

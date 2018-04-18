@@ -1,0 +1,37 @@
+a590add0-f56f-4053-8b65-b27fe89c239d
+a590add0-f56f-4053-8b65-b27fe89c239d-1524081198923
+539
+package init;
+
+class MyThread extends Thread {
+    private final String r1, r2;
+    private final int id;
+    MyThread(int i, String s1, String s2) {
+        id = i;
+        r1 = s1;
+        r2 = s2;
+        start();
+    }
+    public void run() {
+        synchronized(r1) {
+            System.out.println("Thread "+id+" obtained a lock on "+r1);
+            try {
+                Thread.sleep(1000);
+            }catch(Exception e) {}
+            System.out.println("Thread "+id+" is waiting to obtain a lock on "+r2);
+            synchronized(r2) {
+                System.out.println("Thread "+id+" obtained a lock on "+r2);
+            }
+        }
+    }
+}
+
+public class DeadlockDemo {
+    public static void main(String args[]) throws Exception {
+        int a[] = {2, 6, 4, 0, 1, 5, 3};
+        String r1 = new String("R1"), r2 = new String("R2");
+        MyThread t1 = new MyThread(1, r1, r2);
+        MyThread t2 = new MyThread(2, r2, r1);
+    }
+}
+

@@ -1,0 +1,13 @@
+a590add0-f56f-4053-8b65-b27fe89c239d
+a590add0-f56f-4053-8b65-b27fe89c239d-1524080501297
+44
+package init;
+
+
+public class MyClass implements Runnable {
+    public void run() {
+        for (int i = 0; i < 4; i++)
+            System.out.println("In MyThread: " + i);
+    }
+}
+

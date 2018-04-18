@@ -1,0 +1,35 @@
+a590add0-f56f-4053-8b65-b27fe89c239d
+a590add0-f56f-4053-8b65-b27fe89c239d-1524084716437
+978
+package init;
+
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+class CopyQuestion {
+    public static void main(String args[]) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder parser = factory.newDocumentBuilder();
+            Document doc = parser.parse("questions.xml");
+            Element root = doc.getDocumentElement();
+            TransformerFactory tFactory = TransformerFactory.newInstance();
+            Transformer transformer = tFactory.newTransformer();
+            DOMSource source = new DOMSource(root);
+            StreamResult result = new StreamResult(System.out);
+            System.out.println("Before addition");
+            transformer.transform(source, result);
+            NodeList questions = doc.getElementsByTagName("question");
+            Node aCopy = questions.item(0).cloneNode(true);
+            ((Element)aCopy).setAttribute("id", "q3");
+            ((Text)aCopy.getFirstChild()).replaceWholeText("What is XML?");
+            root.appendChild(aCopy);
+            System.out.println("\nAfter addition");
+            transformer.transform(source, result);
+        }catch(Exception e) {e.printStackTrace();}
+    }
+}
+

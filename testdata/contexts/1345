@@ -1,0 +1,22 @@
+a590add0-f56f-4053-8b65-b27fe89c239d
+a590add0-f56f-4053-8b65-b27fe89c239d-1524080446533
+455
+package init;
+
+class ThreadInfo {
+    public static void main(String args[]) {
+        Thread t = Thread.currentThread();
+        System.out.println("Current Thread: "+t);
+        System.out.println("Name: "+t.getName());
+        System.out.println("Id: "+t.getId());
+        System.out.println("Priority: "+t.getPriority());
+        System.out.println("State: "+t.getState());
+        System.out.println("Changing name and priority...");
+        t.setName("Primary");
+        t.setPriority(8);
+        System.out.println("After name and priority change...");
+        System.out.println("Current Thread: "+t);
+        System.out.println("Name: "+t.getName());
+        System.out.println("Priority: "+t.getPriority());
+    } }
+

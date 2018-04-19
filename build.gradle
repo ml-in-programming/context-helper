@@ -86,10 +86,3 @@ allprojects {
         kotlinOptions.jvmTarget = javaVersion
     }
 }
-
-task copyTestResources(type: Copy) {
-    from "${projectDir}/data/tasks"
-    into "${buildDir}/classes/test/tasks"
-}
-
-processTestResources.dependsOn copyTestResources

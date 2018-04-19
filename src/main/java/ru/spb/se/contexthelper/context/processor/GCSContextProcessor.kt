@@ -9,14 +9,11 @@ import ru.spb.se.contexthelper.context.trie.Type
 class GCSContextProcessor(initPsiElement: PsiElement) : AbstractContextProcessor(initPsiElement) {
     fun generateQuery(): String {
         val queryBuilder = ArrayList<String>()
-        var nearCursorQuery = composeQueryAroundElement(psiElement)
+        val nearCursorQuery = composeQueryAroundElement(psiElement)
         if (nearCursorQuery.keywords.isEmpty()) {
-            val text = psiElement.text
-            if (text.chars().allMatch(Character::isLetterOrDigit)) {
-                nearCursorQuery = Query(listOf(Keyword(text, 1)))
-            }
-        }
-        if (nearCursorQuery.keywords.isNotEmpty()) {
+            // Following the naive approach.
+            queryBuilder.add(psiElement.text)
+        } else {
             queryBuilder.add(nearCursorQuery.keywords.joinToString(" ") { it.word })
         }
         val genericQuery = composeGenericQuery()

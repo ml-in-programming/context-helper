@@ -1,6 +1,8 @@
 package ru.spb.se.contexthelper.lookup
 
 import com.intellij.openapi.diagnostic.Logger
+import org.w3c.dom.Element
+import org.w3c.dom.Node
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -8,9 +10,37 @@ import java.net.URL
 import java.net.URLEncoder
 import java.util.*
 import java.util.regex.Pattern
+import javax.net.ssl.HttpsURLConnection
+import javax.xml.parsers.DocumentBuilderFactory
 
 class GoogleSearchStackoverflowCrawler : QuestionLookupClient {
     private val randGenerator = Random(System.currentTimeMillis())
+    private val cookies: String
+
+    init {
+        val cookieInputStream = javaClass.getResourceAsStream("/cookies.xml")
+        val cookieDoc =
+            DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(cookieInputStream)
+        cookieDoc.documentElement.normalize()
+        val cookieMap = mutableMapOf<String, String>()
+        val cookieList = cookieDoc.getElementsByTagName("cookie")
+        (0 until cookieList.length).forEach { i ->
+            val cookieNode: Node = cookieList.item(i)
+            if (cookieNode.nodeType == Node.ELEMENT_NODE) {
+                val elem = cookieNode as Element
+                val mMap = mutableMapOf<String, String>()
+                (0 until elem.attributes.length).forEach { j ->
+                    mMap.putIfAbsent(
+                        elem.attributes.item(j).nodeName, elem.attributes.item(j).nodeValue)
+                }
+                val cookieName = mMap["name"]!!
+                val cookieContent =
+                    elem.getElementsByTagName("content").item(0).textContent
+                cookieMap[cookieName] = cookieContent
+            }
+        }
+        cookies = cookieMap.entries.joinToString("; ") { "${it.key}=${it.value}" }
+    }
 
     override fun lookupQuestionIds(query: String): List<Long> {
         val resultIds = mutableListOf<Long>()
@@ -52,11 +82,12 @@ class GoogleSearchStackoverflowCrawler : QuestionLookupClient {
     }
 
     private fun getSearchContent(urlQuery: String): String {
-        val agent = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
         val url = URL(urlQuery)
-        val connection = url.openConnection()
+        val connection = url.openConnection() as HttpsURLConnection
+        val agent = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
         connection.setRequestProperty("User-Agent", agent)
-        val responseInputStream = connection.getInputStream()
+        connection.setRequestProperty("Cookie", cookies)
+        val responseInputStream = connection.inputStream
         return exhaustInputStream(responseInputStream)
     }
 
@@ -94,7 +125,7 @@ class GoogleSearchStackoverflowCrawler : QuestionLookupClient {
         private const val MAX_QUERIES = 1
         private const val RESULTS_PER_PAGE = 10
 
-        private const val WAIT_TIME_MIN_MS = 5000L
-        private const val WAIT_TIME_SPREAD_MS = 5000
+        private const val WAIT_TIME_MIN_MS = 15000L
+        private const val WAIT_TIME_SPREAD_MS = 30000
     }
 }

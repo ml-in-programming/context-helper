@@ -44,7 +44,8 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     private var viewerPanel: ContextHelperPanel = ContextHelperPanel(this)
     private val questionResultsListeners: ArrayList<QuestionResultsListener> = arrayListOf()
 
-    private var processorMethod: ProcessorMethodEnum = ProcessorMethodEnum.values().first()
+    var processorMethod: ProcessorMethodEnum = ProcessorMethodEnum.values().first()
+        private set
 
     init {
         addResultsListener(object : QuestionResultsListener {

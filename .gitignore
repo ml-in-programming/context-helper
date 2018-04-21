@@ -3,4 +3,6 @@
 build/
 out/
 *.iml
+
+testlogs/
 cookies.xml

@@ -29,6 +29,6 @@ class StatsCollector {
     }
 
     companion object {
-        private val BYTES_LIMIT = 250 * 1024
+        private const val BYTES_LIMIT = 250 * 1024
     }
 }

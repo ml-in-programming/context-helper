@@ -85,11 +85,15 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
             document.setText(meaningfulLines.joinToString("\n"))
         }
         editor.caretModel.moveToOffset(offset)
-        PsiDocumentManager.getInstance(project).commitDocument(document)
-        val dataContext = DataManager.getInstance().dataContextFromFocus
-        val contextHelpAction = ActionManager.getInstance().getAction("DeclarationsContextHelpAction")
-        contextHelpAction.actionPerformed(
-            AnActionEvent.createFromAnAction(contextHelpAction, null, "", dataContext.result))
+        val psiDocumentManager = PsiDocumentManager.getInstance(project)
+        psiDocumentManager.commitDocument(document)
+        psiDocumentManager.performWhenAllCommitted {
+            val dataContext = DataManager.getInstance().dataContextFromFocus
+            val contextHelpAction =
+                ActionManager.getInstance().getAction("DeclarationsContextHelpAction")
+            contextHelpAction.actionPerformed(
+                AnActionEvent.createFromAnAction(contextHelpAction, null, "", dataContext.resultSync))
+        }
         return
     }
 

@@ -186,7 +186,7 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
             val logName = SimpleDateFormat("'results-'yyyyMMddHHmm'.txt'").format(Date())
             val logFile = logDir.resolve(logName).toFile()
             logFile.printWriter().use { out ->
-                out.println("Method: ${helperComponent.processorMethod}")
+                out.println("Method: ${helperComponent.processorMethod.name}")
                 out.println("Contexts: ${tableModel.rowCount - 1}")
                 out.println()
                 for (row in 0 until tableModel.rowCount) {

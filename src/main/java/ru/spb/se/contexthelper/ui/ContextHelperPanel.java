@@ -135,7 +135,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     comboBox.setRenderer(new ListCellRendererWrapper<ProcessorMethodEnum>() {
       @Override
       public void customize(JList list, ProcessorMethodEnum value, int index, boolean selected, boolean hasFocus) {
-        setText(value.getMethodName());
+        setText(value.name());
         setFont(plainFont);
       }
     });

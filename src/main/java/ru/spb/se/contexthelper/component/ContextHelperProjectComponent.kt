@@ -118,20 +118,20 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
             processTextQuery("${psiElement.text} ${elementLanguage.displayName.toLowerCase()}")
         } else {
             when (processorMethod) {
-                ProcessorMethodEnum.GoogleSearchMethod -> {
+                ProcessorMethodEnum.GOOGLE_SEARCH_CONTEXT_METHOD -> {
                     val gcsContextProcessor = GCSContextProcessor(psiElement)
                     val textQuery = gcsContextProcessor.generateQuery()
                     processTextQuery(textQuery)
                 }
-                ProcessorMethodEnum.TypeNodeIndexMethod -> {
-                    val indexedTypesContextProcessor = TypeNodeIndexContextProcessor(psiElement)
-                    val query = indexedTypesContextProcessor.generateQuery()
-                    processQuery(query)
-                }
-                ProcessorMethodEnum.GoogleSearchNaiveMethod -> {
+                ProcessorMethodEnum.GOOGLE_SEARCH_NAIVE_METHOD -> {
                     val naiveContextProcessor = GCSNaiveContextProcessor(psiElement)
                     val textQuery = naiveContextProcessor.generateQuery()
                     processTextQuery(textQuery)
+                }
+                ProcessorMethodEnum.TYPE_NODE_INDEX_METHOD -> {
+                    val indexedTypesContextProcessor = TypeNodeIndexContextProcessor(psiElement)
+                    val query = indexedTypesContextProcessor.generateQuery()
+                    processQuery(query)
                 }
             }
         }

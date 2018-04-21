@@ -39,8 +39,7 @@ class GoogleCustomSearchClient(private val apiKey: String) : QuestionLookupClien
     }
 
     companion object {
-        private val LOG = Logger.getInstance(
-            "ru.spb.se.contexthelper.lookup.GoogleCustomSearchClient")
+        private val LOG = Logger.getInstance(GoogleCustomSearchClient::class.java)
 
         private const val SEARCH_ENGINE_ID = "004273159360178116673:j1srnoyrr-i"
 

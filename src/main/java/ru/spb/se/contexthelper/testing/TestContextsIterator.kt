@@ -204,7 +204,7 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
 
 
     companion object {
-        private val LOG = Logger.getInstance(TestContextsIterator::class.java.canonicalName)
+        private val LOG = Logger.getInstance(TestContextsIterator::class.java)
 
         private const val TESTDATA_PATH = "/Users/niksaz/RnD/context-helper/testdata"
         private const val TESTLOGS_PATH = "/Users/niksaz/RnD/context-helper/testlogs"

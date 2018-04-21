@@ -27,7 +27,7 @@ private object Utils {
 }
 
 object StatsSender {
-    private val infoUrl = "https://www.jetbrains.com/config/features-service-status.json"
+    private const val infoUrl = "https://www.jetbrains.com/config/features-service-status.json"
     private val LOG = Logger.getInstance(StatsSender::class.java)
 
     private fun requestServerUrl(): StatsServerInfo? {

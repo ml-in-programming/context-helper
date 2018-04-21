@@ -53,7 +53,7 @@ class GoogleSearchStackoverflowCrawler : QuestionLookupClient {
                 queryIndex += 1
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            LOG.error(e)
         }
         return resultIds.toList()
     }
@@ -119,8 +119,7 @@ class GoogleSearchStackoverflowCrawler : QuestionLookupClient {
     }
 
     companion object {
-        private val LOG =
-            Logger.getInstance("ru.spb.se.contexthelper.lookup.GoogleSearchStackoverflowCrawler")
+        private val LOG = Logger.getInstance(GoogleSearchStackoverflowCrawler::class.java)
 
         private const val MAX_QUERIES = 1
         private const val RESULTS_PER_PAGE = 10

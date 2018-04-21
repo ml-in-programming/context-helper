@@ -213,8 +213,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     }
 
     companion object {
-        private val LOG = Logger.getInstance(
-            "ru.spb.se.contexthelper.component.ContextHelperProjectComponent")
+        private val LOG = Logger.getInstance(ContextHelperProjectComponent::class.java)
 
         private const val localSeverHostName = "93.92.205.31"
 

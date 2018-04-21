@@ -1,5 +1,6 @@
 package ru.spb.se.contexthelper.reporting
 
+import com.intellij.openapi.diagnostic.Logger
 import java.io.PrintWriter
 import java.net.Socket
 import kotlin.concurrent.thread
@@ -47,12 +48,14 @@ class LocalUsageCollector(private val hostName: String) {
 //                    }
 //                }
 //            } catch (e: Exception) {
-//                e.printStackTrace()
+//                LOG.error(e)
 //            }
 //        }
     }
 
     companion object {
+        private val LOG = Logger.getInstance(LocalUsageCollector::class.java)
+
         private const val contextsPortNumber = 25001
         private const val questionsPortNumber = 25002
         private const val clicksPortNumber = 25003

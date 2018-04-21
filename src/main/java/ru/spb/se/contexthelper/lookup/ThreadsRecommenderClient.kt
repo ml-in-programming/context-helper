@@ -1,5 +1,6 @@
 package ru.spb.se.contexthelper.lookup
 
+import com.intellij.openapi.diagnostic.Logger
 import ru.spb.se.contexthelper.context.Query
 import java.io.PrintWriter
 import java.net.Socket
@@ -25,8 +26,12 @@ class ThreadsRecommenderClient {
                 printWriter.close()
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            LOG.error(e)
         }
         return threadIds
+    }
+
+    companion object {
+        private val LOG = Logger.getInstance(ThreadsRecommenderClient::class.java)
     }
 }

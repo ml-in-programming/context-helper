@@ -62,6 +62,8 @@ dependencies {
     compile group: 'org.swinglabs', name: 'swingx', version: '1.6.1'
     compile group: 'com.googlecode.stackexchange', name: 'stackoverflow-java-sdk-release', version: '2.2.0'
     compile group: 'com.google.apis', name: 'google-api-services-customsearch', version: 'v1-rev57-1.23.0'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.5'
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.11.3'
 }
 
 allprojects {

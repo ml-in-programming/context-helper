@@ -1,8 +1,9 @@
 package ru.spb.se.contexthelper.testing
 
-import com.intellij.ide.DataManager
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.WriteAction
@@ -31,7 +32,9 @@ import java.util.stream.Collectors.toList
 import javax.swing.table.AbstractTableModel
 import javax.swing.table.TableModel
 
-class TestContextsIterator(private val project: Project, private val editor: Editor) : QuestionResultsListener {
+class TestContextsIterator(private val dataContext: DataContext) : QuestionResultsListener {
+    private val project: Project = CommonDataKeys.PROJECT.getData(dataContext)!!
+    private val editor: Editor = CommonDataKeys.EDITOR.getData(dataContext)!!
     private val helperComponent = ContextHelperProjectComponent.getFor(project)
 
     private val contextToResults: HashMap<Int, StackExchangeQuestionResults> = hashMapOf()
@@ -88,11 +91,10 @@ class TestContextsIterator(private val project: Project, private val editor: Edi
         val psiDocumentManager = PsiDocumentManager.getInstance(project)
         psiDocumentManager.commitDocument(document)
         psiDocumentManager.performWhenAllCommitted {
-            val dataContext = DataManager.getInstance().dataContextFromFocus
             val contextHelpAction =
                 ActionManager.getInstance().getAction("DeclarationsContextHelpAction")
             contextHelpAction.actionPerformed(
-                AnActionEvent.createFromAnAction(contextHelpAction, null, "", dataContext.resultSync))
+                AnActionEvent.createFromAnAction(contextHelpAction, null, "", dataContext))
         }
         return
     }

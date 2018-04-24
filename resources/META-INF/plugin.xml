@@ -44,16 +44,7 @@
     <action id="TestContextsAction"
             class="ru.spb.se.contexthelper.testing.TestContextsAction"
             text="Runs the test for accessing the quality"
-            icon="/icons/quality.png"
             description="Runs the planned tests for accessing the method's quality"/>
-
-    <group id="ASTExplorerGroup">
-      <separator/>
-
-      <reference ref="TestContextsAction"/>
-
-      <add-to-group group-id="MainToolBar" relative-to-action="SearchEverywhere" anchor="after"/>
-    </group>
   </actions>
 
 </idea-plugin>

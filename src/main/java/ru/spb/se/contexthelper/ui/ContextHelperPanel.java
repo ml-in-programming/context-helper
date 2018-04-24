@@ -2,6 +2,10 @@ package ru.spb.se.contexthelper.ui;
 
 import com.google.code.stackexchange.schema.Answer;
 import com.google.code.stackexchange.schema.Question;
+import com.intellij.ide.DataManager;
+import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.wm.ToolWindow;
@@ -9,6 +13,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.components.panels.HorizontalBox;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -69,7 +74,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     JPanel topPanel = new JPanel();
     topPanel.setLayout(new VerticalLayout());
     topPanel.add(progressBar);
-    topPanel.add(buildComboBox());
+    topPanel.add(buildQualityBox());
     topPanel.add(queryJTextField);
 
     setLayout(new BorderLayout());
@@ -125,7 +130,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     add(splitPane, BorderLayout.CENTER);
   }
 
-  private ComboBox buildComboBox() {
+  private HorizontalBox buildQualityBox() {
     ProcessorMethodEnum[] processorMethods = ProcessorMethodEnum.values();
     ComboBox<ProcessorMethodEnum> comboBox = new ComboBox<>(processorMethods);
     Font plainFont = getFont();
@@ -143,7 +148,24 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
       ProcessorMethodEnum method = (ProcessorMethodEnum) comboBox.getSelectedItem();
       contextHelperProjectComponent.changeProcessorMethodTo(Objects.requireNonNull(method));
     });
-    return comboBox;
+
+    final HorizontalBox qualityBox = new HorizontalBox();
+    qualityBox.add(comboBox);
+    final JButton measureButton = new JButton("Measure quality");
+    measureButton.addActionListener(action -> {
+      Editor editor =
+          FileEditorManager.getInstance(contextHelperProjectComponent.getProject())
+              .getSelectedTextEditor();
+      if (editor != null) {
+        DataContext dataContext = DataManager.getInstance().getDataContext(editor.getComponent());
+        AnAction testContextsAction =
+            ActionManager.getInstance().getAction("TestContextsAction");
+        testContextsAction.actionPerformed(
+            AnActionEvent.createFromAnAction(testContextsAction, null, "", dataContext));
+      }
+    });
+    qualityBox.add(measureButton);
+    return qualityBox;
   }
 
   /** Updates the underlying data model and JTree element. */

@@ -14,7 +14,7 @@ class TestContextsAction : AnAction() {
             showInfoDialog("Editor is not selected for quality measurements", project)
             return
         }
-        val contextsIterator = TestContextsIterator(project, editor)
-        contextsIterator.run()
+        val testContextsIterator = TestContextsIterator(event.dataContext)
+        testContextsIterator.run()
     }
 }

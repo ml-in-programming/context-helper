@@ -6,8 +6,6 @@ data class Type(val parts: List<String>) {
 
     fun simpleName(): String = parts.last()
 
-    fun fullName(): String = parts.joinToString(".")
-
     companion object {
         private val DOT_SYMBOL_REGEX = Regex("\\.")
     }

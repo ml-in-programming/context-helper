@@ -47,14 +47,14 @@ class GCSContextProcessor(initPsiElement: PsiElement) : AbstractContextProcessor
                             is PsiField -> {
                                 getRelevantTypeName(resolved.parent)?.let {
                                     return Query(listOf(
-                                        Keyword(Type(it).fullName(), 1),
+                                        Keyword(Type(it).simpleName(), 1),
                                         Keyword(resolved.name, 1)
                                     ))
                                 }
                             }
                             is PsiMethod -> {
                                 getRelevantTypeName(resolved.parent)?.let {
-                                    val keywords = mutableListOf(Keyword(Type(it).fullName(), 1))
+                                    val keywords = mutableListOf(Keyword(Type(it).simpleName(), 1))
                                     resolved.name.splitByUppercase().forEach {
                                         keywords.add(Keyword(it.toLowerCase(), 1))
                                     }
@@ -64,14 +64,14 @@ class GCSContextProcessor(initPsiElement: PsiElement) : AbstractContextProcessor
                             else -> {
                                 getRelevantTypeName(resolved)?.let {
                                     val type = Type(it)
-                                    return Query(listOf(Keyword(type.fullName(), 1)))
+                                    return Query(listOf(Keyword(type.simpleName(), 1)))
                                 }
                             }
                         }
                     }
                 } else {
                     val keywords = mutableListOf<Keyword>()
-                    keywords.add(Keyword(leftType.fullName(), 1))
+                    keywords.add(Keyword(leftType.simpleName(), 1))
                     val rightIdentifier = element.children.find { it is PsiIdentifier }
                     rightIdentifier?.text?.splitByUppercase()?.map { it.toLowerCase() }?.forEach {
                         keywords.add(Keyword(it, 1))
@@ -84,7 +84,7 @@ class GCSContextProcessor(initPsiElement: PsiElement) : AbstractContextProcessor
                 val expression = element.methodExpression
                 val leftType = getReferenceObjectType(expression.firstChild)
                 if (leftType != null) {
-                    keywords.add(Keyword(leftType.fullName(), 1))
+                    keywords.add(Keyword(leftType.simpleName(), 1))
                 }
                 val rightIdentifier = expression.children.find { it is PsiIdentifier }
                 rightIdentifier?.text?.splitByUppercase()?.map { it.toLowerCase() }?.forEach {
@@ -98,14 +98,14 @@ class GCSContextProcessor(initPsiElement: PsiElement) : AbstractContextProcessor
                     val type = getRelevantTypeName(createReference)?.let { Type(it) }
                     if (type != null) {
                         return Query(
-                            listOf(Keyword("new", 1), Keyword(type.fullName(), 1)))
+                            listOf(Keyword("new", 1), Keyword(type.simpleName(), 1)))
                     }
                 }
             }
             is PsiTypeElement -> {
                 element.innermostComponentReferenceElement?.let {
                     val type = Type(it.qualifiedName)
-                    return Query(listOf(Keyword(type.fullName(), 1)))
+                    return Query(listOf(Keyword(type.simpleName(), 1)))
                 }
             }
         }
@@ -117,7 +117,7 @@ class GCSContextProcessor(initPsiElement: PsiElement) : AbstractContextProcessor
         val context = declarationsContextExtractor.context
         val typesExtractor = DeclarationsContextTypesExtractor(context)
         val relevantTypes = typesExtractor.getRelevantTypes(2)
-        val keywords = relevantTypes.map { Keyword(it.fullName(), 1) }
+        val keywords = relevantTypes.map { Keyword(it.simpleName(), 1) }
         return if (keywords.isEmpty()) null else Query(keywords)
     }
 }

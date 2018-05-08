@@ -2,9 +2,11 @@ package ru.spb.se.contexthelper.context.processor
 
 import com.intellij.psi.PsiElement
 
-class GCSNaiveContextProcessor(
-    initPsiElement: PsiElement) : AbstractContextProcessor(initPsiElement) {
-    fun generateQuery(): String {
+class NaiveContextProcessor(
+    initPsiElement: PsiElement
+) : TextQueryContextProcessor(initPsiElement) {
+
+    override fun generateTextQuery(): String {
         return "${psiElement.text} ${psiElement.language.displayName.toLowerCase()}"
     }
 }

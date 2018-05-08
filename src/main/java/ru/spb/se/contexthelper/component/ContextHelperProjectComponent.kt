@@ -15,10 +15,7 @@ import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
 import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
 import ru.spb.se.contexthelper.context.NotEnoughContextException
 import ru.spb.se.contexthelper.context.Query
-import ru.spb.se.contexthelper.context.processor.GCSNaiveContextProcessor
-import ru.spb.se.contexthelper.context.processor.ProcessorMethodEnum
-import ru.spb.se.contexthelper.context.processor.GCSContextProcessor
-import ru.spb.se.contexthelper.context.processor.TypeNodeIndexContextProcessor
+import ru.spb.se.contexthelper.context.processor.*
 import ru.spb.se.contexthelper.lookup.*
 import ru.spb.se.contexthelper.reporting.LocalUsageCollector
 import ru.spb.se.contexthelper.reporting.StatsCollector
@@ -112,26 +109,32 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         ToolWindowManager.getInstance(project).getToolWindow(ID_TOOL_WINDOW) != null
 
     /** @throws NotEnoughContextException if the context is not rich enough for the help. */
-    fun assistAround(psiElement: PsiElement): Unit = try {
+    fun assistAround(psiElement: PsiElement) = try {
         val elementLanguage = psiElement.language
         if (elementLanguage.id != "JAVA") {
             processTextQuery("${psiElement.text} ${elementLanguage.displayName.toLowerCase()}")
         } else {
             when (processorMethod) {
-                ProcessorMethodEnum.GOOGLE_SEARCH_CONTEXT_METHOD -> {
-                    val gcsContextProcessor = GCSContextProcessor(psiElement)
-                    val textQuery = gcsContextProcessor.generateQuery()
-                    processTextQuery(textQuery)
-                }
-                ProcessorMethodEnum.GOOGLE_SEARCH_NAIVE_METHOD -> {
-                    val naiveContextProcessor = GCSNaiveContextProcessor(psiElement)
-                    val textQuery = naiveContextProcessor.generateQuery()
-                    processTextQuery(textQuery)
-                }
-                ProcessorMethodEnum.TYPE_NODE_INDEX_METHOD -> {
+                ProcessorMethodEnum.TYPE_NODE_INDEX_CONTEXT_PROCESSOR -> {
                     val indexedTypesContextProcessor = TypeNodeIndexContextProcessor(psiElement)
                     val query = indexedTypesContextProcessor.generateQuery()
-                    processQuery(query)
+                    processBackendQuery(query)
+                }
+                else -> {
+                    val contextProcessor = when (processorMethod) {
+                        ProcessorMethodEnum.AST_CONTEXT_PROCESSOR ->
+                            ASTContextProcessor(psiElement)
+                        ProcessorMethodEnum.DECLARATIONS_CONTEXT_PROCESSOR ->
+                            DeclarationsContextProcessor(psiElement)
+                        ProcessorMethodEnum.NAIVE_CONTEXT_PROCESSOR ->
+                            NaiveContextProcessor(psiElement)
+                        else ->
+                            null
+                    }
+                    contextProcessor?.let {
+                        val textQuery = it.generateTextQuery()
+                        processTextQuery(textQuery)
+                    }
                 }
             }
         }
@@ -149,7 +152,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
             questionLookupClient.lookupQuestionIds(query)
         }
 
-    private fun processQuery(query: Query): Unit =
+    private fun processBackendQuery(query: Query): Unit =
         process(query.keywords.joinToString(" ") { it.word }) {
             threadsRecommenderClient.askForRecommendedThreads(query)
         }

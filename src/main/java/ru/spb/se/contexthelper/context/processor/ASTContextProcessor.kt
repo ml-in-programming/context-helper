@@ -3,41 +3,41 @@ package ru.spb.se.contexthelper.context.processor
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiJavaCodeReferenceElement
-import ru.spb.se.contexthelper.context.composeQueryAroundElement
+import com.intellij.psi.PsiMethod
+import ru.spb.se.contexthelper.context.Keyword
 import ru.spb.se.contexthelper.context.getRelevantTypeName
 import ru.spb.se.contexthelper.context.trie.Type
 
 class ASTContextProcessor(initPsiElement: PsiElement) : TextQueryContextProcessor(initPsiElement) {
     override fun generateTextQuery(): String {
-        printTreeUp(psiElement, 10)
         val references = mutableListOf<PsiJavaCodeReferenceElement>()
-        println("Found references: $references")
-        findCodeReferencesUp(psiElement, 4, references)
-        val referenceTypeNames = references.mapNotNull { reference ->
-            reference.resolve()?.let {
-                getRelevantTypeName(it)?.let {
-                    val type = Type(it)
-                    type.simpleName()
-                }
+        findCodeReferencesUp(psiElement, Int.MAX_VALUE, references)
+        val nearestReferences = references.mapNotNull { reference ->
+            reference.resolve()?.toKeyword()?.let { keyword ->
+                reference.textOffset to keyword
             }
-        }
+        }.sortedBy {
+            Math.abs(psiElement.textOffset - it.first)
+        }.take(PREFIX_KEYWORDS + CONTEXT_KEYWORDS)
         val queryBuilder = mutableListOf<String>()
-        val contextOptions = mutableListOf<String>()
-        val nearCursorQuery = composeQueryAroundElement(psiElement)
-        if (nearCursorQuery.keywords.isEmpty()) {
-            if (referenceTypeNames.isEmpty()) {
-                // Following the naive approach.
-                queryBuilder.add(psiElement.text)
-            } else {
-                queryBuilder.add(referenceTypeNames.first())
-                contextOptions.addAll(referenceTypeNames.drop(1))
-            }
+        if (nearestReferences.isEmpty()) {
+            queryBuilder.add(psiElement.text)
         } else {
-            queryBuilder.add(nearCursorQuery.keywords.joinToString(" ") { it.word })
-            contextOptions.addAll(referenceTypeNames)
+            val orderedPrefixKeywords =
+                nearestReferences.take(PREFIX_KEYWORDS)
+                    .sortedBy { it.first }
+                    .map { it.second }
+            val prefixOptions =
+                (0 until orderedPrefixKeywords.size).map { prefixLength ->
+                    orderedPrefixKeywords.take(prefixLength + 1).joinToString(" ") { it.word }
+                }.reversed()
+            queryBuilder.add(
+                prefixOptions.joinToString("|", "(", ")") { "\"$it\"" })
+            val contextOptions = mutableListOf<String>()
+            nearestReferences.drop(PREFIX_KEYWORDS).forEach { contextOptions.add(it.second.word) }
+            contextOptions.add("")
+            queryBuilder.add(contextOptions.joinToString("|", "(", ")") { "\"$it\"" })
         }
-        contextOptions.add("")
-        queryBuilder.add(contextOptions.joinToString("|", "(", ")") { "\"$it\"" })
         queryBuilder.add("java")
         return queryBuilder.joinToString(" ")
     }
@@ -55,14 +55,12 @@ class ASTContextProcessor(initPsiElement: PsiElement) : TextQueryContextProcesso
         }
         val parent = psiElement.parent
         if (parent != null && parent !is PsiDirectory) {
-            var index = parent.children.indexOfFirst { it === psiElement }
-            if (index != -1) {
-                index -= 1
-                while (index >= 0 && referencesLeftToFind > 0) {
+            val childIterator = parent.children.iterator()
+            while (childIterator.hasNext() && referencesLeftToFind > 0) {
+                val child = childIterator.next()
+                if (child !== psiElement) {
                     referencesLeftToFind =
-                        findCodeReferencesDown(
-                            parent.children[index], referencesLeftToFind, references)
-                    index -= 1
+                        findCodeReferencesDown(child, referencesLeftToFind, references)
                 }
             }
             if (referencesLeftToFind > 0) {
@@ -84,7 +82,7 @@ class ASTContextProcessor(initPsiElement: PsiElement) : TextQueryContextProcesso
             references.add(psiElement)
             referencesLeftToFind -= 1
         }
-        val childIterator = psiElement.children.reversed().iterator()
+        val childIterator = psiElement.children.iterator()
         while (childIterator.hasNext() && referencesLeftToFind > 0) {
             val child = childIterator.next()
             referencesLeftToFind = findCodeReferencesDown(child, referencesLeftToFind, references)
@@ -92,25 +90,18 @@ class ASTContextProcessor(initPsiElement: PsiElement) : TextQueryContextProcesso
         return referencesLeftToFind
     }
 
-    private fun printTreeUp(psiElement: PsiElement, climb: Int): Int {
-        val parent = psiElement.parent
-        return if (climb == 0 || parent == null || parent is PsiDirectory) {
-            println(psiElement)
-            0
-        } else {
-            val indent = printTreeUp(parent, climb - 1)
-            for (child in parent.children) {
-                print(" ".repeat(2 * indent))
-                print(child)
-                if (child === psiElement) {
-                    print(" <----")
+    companion object {
+        private const val PREFIX_KEYWORDS = 1
+        private const val CONTEXT_KEYWORDS = 4
+
+        private fun PsiElement.toKeyword(): Keyword? =
+            if (this is PsiMethod) {
+                Keyword(name)
+            } else {
+                getRelevantTypeName(this)?.let {
+                    val type = Type(it)
+                    Keyword(type.simpleName())
                 }
-                if (child === this.psiElement) {
-                    print(" [this]")
-                }
-                println()
             }
-            indent
-        } + 1
     }
 }

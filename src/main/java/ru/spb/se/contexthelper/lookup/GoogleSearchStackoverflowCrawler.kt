@@ -160,7 +160,7 @@ class GoogleSearchStackoverflowCrawler : QuestionLookupClient {
         private const val MAX_QUERIES = 1
         private const val RESULTS_PER_PAGE = 10
 
-        private const val WAIT_TIME_MIN_MS = 1 * 45 * 1000L
-        private const val WAIT_TIME_SPREAD_MS = 1 * 45 * 1000
+        private const val WAIT_TIME_MIN_MS = 1 * 40 * 1000L
+        private const val WAIT_TIME_SPREAD_MS = 1 * 40 * 1000
     }
 }

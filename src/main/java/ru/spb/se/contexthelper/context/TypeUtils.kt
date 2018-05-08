@@ -6,7 +6,7 @@ import ru.spb.se.contexthelper.context.trie.Type
 /** Exception is thrown if the query can not be built because of the lack of the context. */
 class NotEnoughContextException : RuntimeException()
 
-/** Class for representing the keywords extracted by ContextProcessors. */
+/** Class for representing the string that should be treated as a whole (i.e. keyword).*/
 data class Keyword(val word: String)
 
 /** Represents the context by keywords. */

@@ -3,7 +3,10 @@ package ru.spb.se.contexthelper.ui;
 import com.google.code.stackexchange.schema.Answer;
 import com.google.code.stackexchange.schema.Question;
 import com.intellij.ide.DataManager;
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
@@ -14,6 +17,13 @@ import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.panels.HorizontalBox;
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.event.ItemEvent;
+import java.net.URL;
+import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -21,20 +31,17 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javax.swing.JButton;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.prompt.PromptSupport;
-import ru.spb.se.contexthelper.ContextHelperConstants;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.context.processor.ProcessorMethodEnum;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.net.URL;
-import java.util.Objects;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /** ContextHelper's side panel. */
 public class ContextHelperPanel extends JPanel implements Runnable, StackExchangeTreeListener {
@@ -171,10 +178,10 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   /** Updates the underlying data model and JTree element. */
   public void updatePanelWithQueryResults(StackExchangeQuestionResults queryResults) {
     contextHelperProjectComponent.sendQuestionsMessage(
-      queryResults.getQueryContent(),
-      queryResults.getQuestions().stream()
-          .map(Question::getQuestionId)
-          .collect(Collectors.toList()));
+        queryResults.getQueryContent(),
+        queryResults.getQuestions().stream()
+            .map(Question::getQuestionId)
+            .collect(Collectors.toList()));
     queryJTextField.setText(queryResults.getQueryContent());
     treeModel = new StackExchangeThreadsTreeModel(queryResults.getQuestions());
     tree.setModel(treeModel);
@@ -185,7 +192,8 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   private void showPanel() {
     Project project = contextHelperProjectComponent.getProject();
     ToolWindow toolWindow =
-        ToolWindowManager.getInstance(project).getToolWindow(ContextHelperConstants.ID_TOOL_WINDOW);
+        ToolWindowManager.getInstance(project)
+            .getToolWindow(ContextHelperProjectComponent.ID_TOOL_WINDOW);
     toolWindow.show(this);
   }
 

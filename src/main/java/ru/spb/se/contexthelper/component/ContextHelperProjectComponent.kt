@@ -11,8 +11,6 @@ import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiElement
 import com.intellij.ui.content.ContentFactory
-import ru.spb.se.contexthelper.ContextHelperConstants.ID_TOOL_WINDOW
-import ru.spb.se.contexthelper.ContextHelperConstants.PLUGIN_NAME
 import ru.spb.se.contexthelper.context.NotEnoughContextException
 import ru.spb.se.contexthelper.context.Query
 import ru.spb.se.contexthelper.context.processor.*
@@ -216,6 +214,9 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     }
 
     companion object {
+        const val PLUGIN_NAME = "ContextHelper"
+        const val ID_TOOL_WINDOW = "Context Helper"
+
         private val LOG = Logger.getInstance(ContextHelperProjectComponent::class.java)
 
         private const val localSeverHostName = "93.92.205.31"

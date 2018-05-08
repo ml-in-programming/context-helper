@@ -7,7 +7,7 @@ import ru.spb.se.contexthelper.context.trie.Type
 class NotEnoughContextException : RuntimeException()
 
 /** Class for representing the keywords extracted by ContextProcessors. */
-class Keyword(val word: String)
+data class Keyword(val word: String)
 
 /** Represents the context by keywords. */
 data class Query(val keywords: List<Keyword>)

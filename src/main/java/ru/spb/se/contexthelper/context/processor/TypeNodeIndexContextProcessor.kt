@@ -15,7 +15,7 @@ class TypeNodeIndexContextProcessor(
 
     fun generateQuery(): Query {
         val keywords = ArrayList<Keyword>()
-        val nearCursorQuery = composeQueryAroundPsiElement()
+        val nearCursorQuery = composeTypeQueryAroundPsiElement()
         keywords.addAll(nearCursorQuery.keywords)
         val genericQuery = composeGenericQuery()
         keywords.addAll(genericQuery.keywords)
@@ -25,7 +25,7 @@ class TypeNodeIndexContextProcessor(
         return Query(keywords)
     }
 
-    private fun composeQueryAroundPsiElement(): Query {
+    private fun composeTypeQueryAroundPsiElement(): Query {
         val keywords = mutableListOf<Keyword>()
         if (psiElement is PsiNewExpression) {
             val createReference = psiElement.classReference?.resolve() ?: return Query(emptyList())

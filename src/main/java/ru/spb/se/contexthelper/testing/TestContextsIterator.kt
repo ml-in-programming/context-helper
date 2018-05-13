@@ -127,28 +127,31 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
         }.sum() / ids.size
         return object : AbstractTableModel() {
             override fun getRowCount(): Int = ids.size + 1
-            override fun getColumnCount(): Int = 4
+            override fun getColumnCount(): Int = 5
             override fun getColumnName(column: Int): String = when (column) {
                 0 -> "ContextId"
-                1 -> "RelevantId"
-                2 -> "QuestionIds"
-                3 -> "ReciprocalRank"
+                1 -> "QueryAsked"
+                2 -> "RelevantIds"
+                3 -> "ExtractedIds"
+                4 -> "ReciprocalRank"
                 else -> "?"
             }
+
             override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
                 if (rowIndex == ids.size) {
-                    return if (columnIndex == 3) "%.10f".format(mrr) else ""
+                    return if (columnIndex == columnCount - 1) "%.10f".format(mrr) else ""
                 }
                 val contextId = ids[rowIndex]
                 return when (columnIndex) {
                     0 -> contextId
-                    1 -> contextToRelevant[contextId]!!.joinToString(",")
-                    2 -> {
+                    1 -> contextToResults[contextId]!!.queryContent
+                    2 -> contextToRelevant[contextId]!!.joinToString(",")
+                    3 -> {
                         val results = contextToResults[contextId]!!
                         results.questions
                             .joinToString(",", "[", "]") { it.questionId.toString() }
                     }
-                    3 -> {
+                    4 -> {
                         val relevantIndex = contextToRelevantIndex[contextId]
                         if (relevantIndex == null) "0.0" else "1/${relevantIndex + 1}"
                     }
@@ -162,9 +165,10 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
         val table = JBTable(tableModel)
         table.autoResizeMode = JBTable.AUTO_RESIZE_ALL_COLUMNS
         table.columnModel.getColumn(0).preferredWidth = 128
-        table.columnModel.getColumn(1).preferredWidth = 256
-        table.columnModel.getColumn(2).preferredWidth = 384
+        table.columnModel.getColumn(1).preferredWidth = 384
+        table.columnModel.getColumn(2).preferredWidth = 256
         table.columnModel.getColumn(3).preferredWidth = 256
+        table.columnModel.getColumn(4).preferredWidth = 256
         table.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(event: MouseEvent) {
                 val row = table.rowAtPoint(event.point)
@@ -195,6 +199,10 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
                 out.println("Method: ${helperComponent.processorMethod.name}")
                 out.println("Contexts: ${tableModel.rowCount - 1}")
                 out.println()
+                out.println(
+                    (0 until tableModel.columnCount).joinToString(",") {
+                        tableModel.getColumnName(it)
+                    })
                 for (row in 0 until tableModel.rowCount) {
                     for (column in 0 until tableModel.columnCount) {
                         out.println(tableModel.getValueAt(row, column))

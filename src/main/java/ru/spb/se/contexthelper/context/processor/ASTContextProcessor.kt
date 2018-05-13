@@ -3,27 +3,17 @@ package ru.spb.se.contexthelper.context.processor
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiJavaCodeReferenceElement
+import ru.spb.se.contexthelper.context.Query
 import ru.spb.se.contexthelper.context.composeQueryAroundElement
 import ru.spb.se.contexthelper.context.getRelevantTypeName
 import ru.spb.se.contexthelper.context.trie.Type
 
 class ASTContextProcessor(initPsiElement: PsiElement) : TextQueryContextProcessor(initPsiElement) {
     override fun generateTextQuery(): String {
-        val references = mutableListOf<PsiJavaCodeReferenceElement>()
-        findCodeReferencesUp(psiElement, Int.MAX_VALUE, references)
-        val nearestReferences = references.sortedBy {
-            Math.abs(psiElement.textOffset - it.textOffset)
-        }.mapNotNull { reference ->
-            reference.resolve()?.let {
-                getRelevantTypeName(it)?.let {
-                    val type = Type(it)
-                    type.simpleName()
-                }
-            }
-        }.take(CONTEXT_KEYWORDS)
+        val nearCursorQuery = composeQueryAroundElement(psiElement)
+        val nearestReferences = getReferenceTypeNamesAround(nearCursorQuery, CONTEXT_KEYWORDS)
         val queryBuilder = mutableListOf<String>()
         val contextOptions = mutableListOf<String>()
-        val nearCursorQuery = composeQueryAroundElement(psiElement)
         if (nearCursorQuery.keywords.isEmpty()) {
             if (nearestReferences.isEmpty()) {
                 // Following the naive approach.
@@ -40,6 +30,30 @@ class ASTContextProcessor(initPsiElement: PsiElement) : TextQueryContextProcesso
         queryBuilder.add(contextOptions.joinToString("|", "(", ")") { "\"$it\"" })
         queryBuilder.add("java")
         return queryBuilder.joinToString(" ")
+    }
+
+    private fun getReferenceTypeNamesAround(
+        alreadyBuiltQuery: Query,
+        typeNamesCount: Int
+    ): List<String> {
+        val references = mutableListOf<PsiJavaCodeReferenceElement>()
+        findCodeReferencesUp(psiElement, Int.MAX_VALUE, references)
+        return references.sortedBy {
+            Math.abs(psiElement.textOffset - it.textOffset)
+        }.mapNotNull { reference ->
+            reference.resolve()?.let {
+                getRelevantTypeName(it)?.let {
+                    val referenceType = Type(it)
+                    val referenceTypeName = referenceType.simpleName()
+                    if (alreadyBuiltQuery.keywords.any { it.word == referenceTypeName }
+                        || referenceTypeName.length < 3) {
+                        null
+                    } else {
+                        referenceTypeName
+                    }
+                }
+            }
+        }.take(typeNamesCount)
     }
 
     private fun findCodeReferencesUp(

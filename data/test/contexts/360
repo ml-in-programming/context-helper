@@ -1,0 +1,43 @@
+e9ed2c7d-7eab-4cb7-8dea-e76a0504ab72
+e9ed2c7d-7eab-4cb7-8dea-e76a0504ab72-1524509630602
+1388
+package org.ml_methods_group.algorithm.entity;
+
+import com.intellij.analysis.AnalysisScope;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.sixrr.metrics.profile.MetricsProfile;
+import org.junit.Before;
+import org.junit.Test;
+import org.ml_methods_group.utils.MetricsProfilesUtil;
+
+import java.util.*;
+
+import static org.junit.Assert.*;
+
+public class RmmrEntitySearcherTest extends LightCodeInsightFixtureTestCase {
+    private EntitySearchResult searchResult;
+
+    @Override
+    protected String getTestDataPath() {
+        return "testdata/" + getTestName(true);
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        final VirtualFile customer = myFixture.copyFileToProject("Customer.java");
+        final VirtualFile movie = myFixture.copyFileToProject("Movie.java");
+        final VirtualFile rental = myFixture.copyFileToProject("Rental.java");
+
+        AnalysisScope analysisScope = new AnalysisScope(myFixture.getProject(), Arrays.asList(customer, movie, rental));
+        searchResult = RmmrEntitySearcher.analyze(analysisScope);
+        super.setUp();
+    }
+
+    public void testAnalyzeCustomer() throws Exception {
+        Map<String, Set<String>> expected = new HashMap<>();
+        expected.put("addRental", new HashSet<>({{"Customer"}}));
+    }
+}
+

@@ -1,0 +1,21 @@
+3eaf9c7f-ca7a-4b63-9eda-1d5902430038
+3eaf9c7f-ca7a-4b63-9eda-1d5902430038-1524392443050
+344
+package group144.
+
+import java.util.Comparator;
+import java.util.stream.Stream;
+
+public class Main {
+    public static void main(String[] args) {
+        Stream<String> stream = Stream.of("String1111" , "String555" , "String33");
+        stream.sorted(Comparator.comparing(String::length)).forEach(s -> System.out.println(s + ", "));
+        reduce
+    }
+}
+//            Album album1 = new Album(new Artist("artist1"), "album1", new Track("tr1, al1", 10), new Track("tr2, al1", 15));
+//            Album album2 = new Album(new Artist("artist2"), "album2", new Track("tr1, al2", 20), new Track("tr2, al2", 25));
+
+
+
+

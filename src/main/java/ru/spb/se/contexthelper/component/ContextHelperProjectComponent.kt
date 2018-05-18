@@ -17,6 +17,7 @@ import ru.spb.se.contexthelper.context.processor.*
 import ru.spb.se.contexthelper.lookup.*
 import ru.spb.se.contexthelper.reporting.LocalUsageCollector
 import ru.spb.se.contexthelper.reporting.StatsCollector
+import ru.spb.se.contexthelper.testing.DatasetEnum
 import ru.spb.se.contexthelper.ui.ContextHelperPanel
 import ru.spb.se.contexthelper.util.showErrorDialog
 import ru.spb.se.contexthelper.util.showInfoDialog
@@ -40,6 +41,9 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     private val questionResultsListeners: ArrayList<QuestionResultsListener> = arrayListOf()
 
     var processorMethod: ProcessorMethodEnum = ProcessorMethodEnum.values().first()
+        private set
+
+    var dataset: DatasetEnum = DatasetEnum.values().first()
         private set
 
     init {
@@ -73,6 +77,10 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
     fun changeProcessorMethodTo(processorMethod: ProcessorMethodEnum) {
         this.processorMethod = processorMethod
+    }
+
+    fun changeDatasetTo(dataset: DatasetEnum) {
+        this.dataset = dataset
     }
 
     override fun getComponentName(): String = "$PLUGIN_NAME.$COMPONENT_NAME"

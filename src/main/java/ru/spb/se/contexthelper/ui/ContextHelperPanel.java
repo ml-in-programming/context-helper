@@ -42,8 +42,11 @@ import org.jdesktop.swingx.prompt.PromptSupport;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.context.processor.ProcessorMethodEnum;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
+import ru.spb.se.contexthelper.testing.DatasetEnum;
 
-/** ContextHelper's side panel. */
+/**
+ * ContextHelper's side panel.
+ */
 public class ContextHelperPanel extends JPanel implements Runnable, StackExchangeTreeListener {
   private static final int SPLIT_DIVIDER_POSITION = 205;
 
@@ -74,7 +77,9 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     configureGui();
   }
 
-  /** Configures the panel's UI. */
+  /**
+   * Configures the panel's UI.
+   */
   private void configureGui() {
     PromptSupport.setPrompt("Enter your query", queryJTextField);
 
@@ -94,10 +99,9 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
           getClass().getResource("/style.css").toString());
       webView.addEventFilter(KeyEvent.KEY_RELEASED, (KeyEvent e) -> {
         if (e.getCode() == KeyCode.ADD || e.getCode() == KeyCode.EQUALS
-          || e.getCode() == KeyCode.PLUS) {
+            || e.getCode() == KeyCode.PLUS) {
           webView.setZoom(webView.getZoom() * 1.1);
-        }
-        else if (e.getCode() == KeyCode.SUBTRACT || e.getCode() == KeyCode.MINUS ){
+        } else if (e.getCode() == KeyCode.SUBTRACT || e.getCode() == KeyCode.MINUS) {
           webView.setZoom(webView.getZoom() / 1.1);
         }
       });
@@ -138,28 +142,45 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   }
 
   private HorizontalBox buildQualityBox() {
-    ProcessorMethodEnum[] processorMethods = ProcessorMethodEnum.values();
-    ComboBox<ProcessorMethodEnum> comboBox = new ComboBox<>(processorMethods);
     Font plainFont = getFont();
     Font boldFont = new Font(plainFont.getName(), Font.BOLD, (int) (plainFont.getSize() * 0.8));
-    comboBox.setSelectedIndex(0);
-    comboBox.setFont(boldFont);
-    comboBox.setRenderer(new ListCellRendererWrapper<ProcessorMethodEnum>() {
+
+    final ProcessorMethodEnum[] processorMethods = ProcessorMethodEnum.values();
+    ComboBox<ProcessorMethodEnum> methodComboBox = new ComboBox<>(processorMethods);
+    methodComboBox.setSelectedIndex(0);
+    methodComboBox.setFont(boldFont);
+    methodComboBox.setRenderer(new ListCellRendererWrapper<ProcessorMethodEnum>() {
       @Override
-      public void customize(JList list, ProcessorMethodEnum value, int index, boolean selected, boolean hasFocus) {
+      public void customize(JList list, ProcessorMethodEnum value, int index, boolean selected,
+          boolean hasFocus) {
         setText(value.name());
         setFont(plainFont);
       }
     });
-    comboBox.addActionListener(e -> {
-      ProcessorMethodEnum method = (ProcessorMethodEnum) comboBox.getSelectedItem();
+    methodComboBox.addActionListener(e -> {
+      ProcessorMethodEnum method = (ProcessorMethodEnum) methodComboBox.getSelectedItem();
       contextHelperProjectComponent.changeProcessorMethodTo(Objects.requireNonNull(method));
     });
 
-    final HorizontalBox qualityBox = new HorizontalBox();
-    qualityBox.add(comboBox);
-    final JButton measureButton = new JButton("Measure quality");
-    measureButton.addActionListener(action -> {
+    final DatasetEnum[] datasets = DatasetEnum.values();
+    ComboBox<DatasetEnum> datasetComboBox = new ComboBox<>(datasets);
+    datasetComboBox.setSelectedIndex(0);
+    datasetComboBox.setFont(boldFont);
+    datasetComboBox.setRenderer(new ListCellRendererWrapper<DatasetEnum>() {
+      @Override
+      public void customize(JList list, DatasetEnum value, int index, boolean selected,
+          boolean hasFocus) {
+        setText(value.name());
+        setFont(plainFont);
+      }
+    });
+    datasetComboBox.addActionListener(e -> {
+      DatasetEnum dataset = (DatasetEnum) datasetComboBox.getSelectedItem();
+      contextHelperProjectComponent.changeDatasetTo(Objects.requireNonNull(dataset));
+    });
+
+    final JButton evaluateButton = new JButton("Evaluate");
+    evaluateButton.addActionListener(action -> {
       Editor editor =
           FileEditorManager.getInstance(contextHelperProjectComponent.getProject())
               .getSelectedTextEditor();
@@ -171,11 +192,17 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
             AnActionEvent.createFromAnAction(testContextsAction, null, "", dataContext));
       }
     });
-    qualityBox.add(measureButton);
+
+    final HorizontalBox qualityBox = new HorizontalBox();
+    qualityBox.add(methodComboBox);
+    qualityBox.add(datasetComboBox);
+    qualityBox.add(evaluateButton);
     return qualityBox;
   }
 
-  /** Updates the underlying data model and JTree element. */
+  /**
+   * Updates the underlying data model and JTree element.
+   */
   public void updatePanelWithQueryResults(StackExchangeQuestionResults queryResults) {
     contextHelperProjectComponent.sendQuestionsMessage(
         queryResults.getQueryContent(),
@@ -222,15 +249,15 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     URL prettifyUrl = this.getClass().getResource("/prettify.js");
     Platform.runLater(() -> engine.loadContent(
         "<html>\n"
-        + "<head>\n"
-        + "<script type=\"text/javascript\" src=\"" + prettifyUrl.toString() + "\"></script>\n"
-        + "</head>\n"
-        + "<body>\n"
-        + highlightedHtml
+            + "<head>\n"
+            + "<script type=\"text/javascript\" src=\"" + prettifyUrl.toString() + "\"></script>\n"
+            + "</head>\n"
+            + "<body>\n"
+            + highlightedHtml
             .replace("<code>", "<pre class=\"prettyprint\">")
             .replace("</code>", "</pre>")
-        + "</body>\n"
-        + "</html>",
+            + "</body>\n"
+            + "</html>",
         "text/html"));
   }
 

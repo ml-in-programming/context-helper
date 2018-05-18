@@ -42,7 +42,7 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
     private var lastIdIndex: Int = 0
 
     init {
-        val contextsPath = Paths.get("$TESTDATA_PATH/contexts")
+        val contextsPath = Paths.get(getDataContextsPathname())
         ids =
             Files.list(contextsPath)
                 .map { Integer.parseInt(it.fileName.toString()) }
@@ -56,7 +56,7 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
             return
         }
         val everyCorrectPresent = ids.all {
-            Files.exists(Paths.get("$TESTDATA_PATH/relevant/$it"))
+            Files.exists(Paths.get("${getDataRelevantPathname()}/$it"))
         }
         if (!everyCorrectPresent) {
             showInfoDialog("Not every relevant answer for the context is present", project)
@@ -80,7 +80,7 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
             return
         }
         val document = editor.document
-        val file = File("$TESTDATA_PATH/contexts/${ids[lastIdIndex]}")
+        val file = File("${getDataContextsPathname()}/${ids[lastIdIndex]}")
         val lines = file.readLines()
         val offset = lines[2].toInt()
         val meaningfulLines = lines.drop(3)
@@ -107,7 +107,7 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
 
     private fun buildTableModel(): TableModel {
         val contextToRelevant = ids.map { contextId ->
-            val path = Paths.get("$TESTDATA_PATH/relevant/$contextId")
+            val path = Paths.get("${getDataRelevantPathname()}/$contextId")
             val relevant = Files.readAllLines(path).map { it.toLong() }.toList()
             Pair(contextId, relevant)
         }.toMap()
@@ -189,14 +189,17 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
 
     private fun logResultsToFile(tableModel: TableModel): String =
         try {
-            val logDir = Paths.get(TESTLOGS_PATH)
+            val logDir = Paths.get(JOURNALS_PATH)
             if (!Files.exists(logDir)) {
                 Files.createDirectory(logDir)
             }
-            val logName = SimpleDateFormat("'results-'yyyyMMddHHmm'.txt'").format(Date())
+            val textDate = SimpleDateFormat("yyyyMMddHHmm").format(Date())
+            val logName =
+                "${helperComponent.processorMethod.name}-${helperComponent.dataset.name}-$textDate.txt"
             val logFile = logDir.resolve(logName).toFile()
             logFile.printWriter().use { out ->
                 out.println("Method: ${helperComponent.processorMethod.name}")
+                out.println("Dataset: ${helperComponent.dataset.name}")
                 out.println("Contexts: ${tableModel.rowCount - 1}")
                 out.println()
                 out.println(
@@ -216,11 +219,17 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
             "?"
         }
 
+    private fun getDataContextsPathname() =
+        "$DATA_PATH/${helperComponent.dataset.dirname}/contexts"
+
+    private fun getDataRelevantPathname() =
+        "$DATA_PATH/${helperComponent.dataset.dirname}/relevant"
+
 
     companion object {
         private val LOG = Logger.getInstance(TestContextsIterator::class.java)
 
-        private const val TESTDATA_PATH = "/Users/niksaz/RnD/context-helper/testdata"
-        private const val TESTLOGS_PATH = "/Users/niksaz/RnD/context-helper/testlogs"
+        private const val DATA_PATH = "/Users/niksaz/RnD/context-helper/data"
+        private const val JOURNALS_PATH = "/Users/niksaz/RnD/context-helper/journals"
     }
 }

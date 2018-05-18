@@ -101,8 +101,8 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
 
     private fun showQualityMeasurements() {
         val tableModel = buildTableModel()
-        val logName = logResultsToFile(tableModel)
-        displayResultsInDialog(tableModel, logName)
+        val journalName = journalResultsToFile(tableModel)
+        displayResultsInDialog(tableModel, journalName)
     }
 
     private fun buildTableModel(): TableModel {
@@ -161,7 +161,7 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
         }
     }
 
-    private fun displayResultsInDialog(tableModel: TableModel, logName: String) {
+    private fun displayResultsInDialog(tableModel: TableModel, journalName: String) {
         val table = JBTable(tableModel)
         table.autoResizeMode = JBTable.AUTO_RESIZE_ALL_COLUMNS
         table.columnModel.getColumn(0).preferredWidth = 128
@@ -182,26 +182,25 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
         val wrapperDialog =
             WindowWrapperBuilder(WindowWrapper.Mode.MODAL, JBScrollPane(table))
                 .setProject(project)
-                .setTitle("logName is $logName")
+                .setTitle("journalName is $journalName")
                 .build()
         wrapperDialog.show()
     }
 
-    private fun logResultsToFile(tableModel: TableModel): String =
+    private fun journalResultsToFile(tableModel: TableModel): String =
         try {
-            val logDir = Paths.get(JOURNALS_PATH)
-            if (!Files.exists(logDir)) {
-                Files.createDirectory(logDir)
+            val journalDir = Paths.get(JOURNALS_PATH)
+            if (!Files.exists(journalDir)) {
+                Files.createDirectory(journalDir)
             }
             val textDate = SimpleDateFormat("yyyyMMddHHmm").format(Date())
-            val logName =
-                "${helperComponent.processorMethod.name}-${helperComponent.dataset.name}-$textDate.txt"
-            val logFile = logDir.resolve(logName).toFile()
-            logFile.printWriter().use { out ->
-                out.println("Method: ${helperComponent.processorMethod.name}")
-                out.println("Dataset: ${helperComponent.dataset.name}")
-                out.println("Contexts: ${tableModel.rowCount - 1}")
-                out.println()
+            val journalName =
+                "${helperComponent.processorMethod.name}-" +
+                "${helperComponent.dataset.name}-" +
+                "${helperComponent.lookupClientFactory.name}-" +
+                "$textDate.txt"
+            val journalFile = journalDir.resolve(journalName).toFile()
+            journalFile.printWriter().use { out ->
                 out.println(
                     (0 until tableModel.columnCount).joinToString(",") {
                         tableModel.getColumnName(it)
@@ -212,8 +211,8 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
                     }
                 }
             }
-            logFile.setReadOnly()
-            logName
+            journalFile.setReadOnly()
+            journalName
         } catch (e: Exception) {
             LOG.error(e)
             "?"

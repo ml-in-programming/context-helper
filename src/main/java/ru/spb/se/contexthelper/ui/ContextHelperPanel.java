@@ -41,6 +41,7 @@ import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.prompt.PromptSupport;
 import ru.spb.se.contexthelper.component.ContextHelperProjectComponent;
 import ru.spb.se.contexthelper.context.processor.ProcessorMethodEnum;
+import ru.spb.se.contexthelper.lookup.LookupClientFactory;
 import ru.spb.se.contexthelper.lookup.StackExchangeQuestionResults;
 import ru.spb.se.contexthelper.testing.DatasetEnum;
 
@@ -142,41 +143,25 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
   }
 
   private HorizontalBox buildQualityBox() {
-    Font plainFont = getFont();
-    Font boldFont = new Font(plainFont.getName(), Font.BOLD, (int) (plainFont.getSize() * 0.8));
-
     final ProcessorMethodEnum[] processorMethods = ProcessorMethodEnum.values();
-    ComboBox<ProcessorMethodEnum> methodComboBox = new ComboBox<>(processorMethods);
-    methodComboBox.setSelectedIndex(0);
-    methodComboBox.setFont(boldFont);
-    methodComboBox.setRenderer(new ListCellRendererWrapper<ProcessorMethodEnum>() {
-      @Override
-      public void customize(JList list, ProcessorMethodEnum value, int index, boolean selected,
-          boolean hasFocus) {
-        setText(value.name());
-        setFont(plainFont);
-      }
-    });
+    ComboBox<ProcessorMethodEnum> methodComboBox = buildComboBoxFor(processorMethods);
     methodComboBox.addActionListener(e -> {
       ProcessorMethodEnum method = (ProcessorMethodEnum) methodComboBox.getSelectedItem();
       contextHelperProjectComponent.changeProcessorMethodTo(Objects.requireNonNull(method));
     });
 
     final DatasetEnum[] datasets = DatasetEnum.values();
-    ComboBox<DatasetEnum> datasetComboBox = new ComboBox<>(datasets);
-    datasetComboBox.setSelectedIndex(0);
-    datasetComboBox.setFont(boldFont);
-    datasetComboBox.setRenderer(new ListCellRendererWrapper<DatasetEnum>() {
-      @Override
-      public void customize(JList list, DatasetEnum value, int index, boolean selected,
-          boolean hasFocus) {
-        setText(value.name());
-        setFont(plainFont);
-      }
-    });
+    ComboBox<DatasetEnum> datasetComboBox = buildComboBoxFor(datasets);
     datasetComboBox.addActionListener(e -> {
       DatasetEnum dataset = (DatasetEnum) datasetComboBox.getSelectedItem();
       contextHelperProjectComponent.changeDatasetTo(Objects.requireNonNull(dataset));
+    });
+
+    final LookupClientFactory[] lookupFactories = LookupClientFactory.values();
+    ComboBox<LookupClientFactory> lookupFactoryComboBox = buildComboBoxFor(lookupFactories);
+    lookupFactoryComboBox.addActionListener(e -> {
+      LookupClientFactory factory = (LookupClientFactory) lookupFactoryComboBox.getSelectedItem();
+      contextHelperProjectComponent.changeLookupFactoryTo(Objects.requireNonNull(factory));
     });
 
     final JButton evaluateButton = new JButton("Evaluate");
@@ -196,8 +181,27 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     final HorizontalBox qualityBox = new HorizontalBox();
     qualityBox.add(methodComboBox);
     qualityBox.add(datasetComboBox);
+    qualityBox.add(lookupFactoryComboBox);
     qualityBox.add(evaluateButton);
     return qualityBox;
+  }
+
+  private <E extends Enum<?>> ComboBox<E> buildComboBoxFor(E[] values) {
+    Font plainFont = getFont();
+    Font boldFont = new Font(plainFont.getName(), Font.BOLD, (int) (plainFont.getSize() * 0.8));
+
+    ComboBox<E> comboBox = new ComboBox<>(values);
+    comboBox.setSelectedIndex(0);
+    comboBox.setFont(boldFont);
+    comboBox.setRenderer(new ListCellRendererWrapper<E>() {
+      @Override
+      public void customize(JList list, E value, int index, boolean selected,
+          boolean hasFocus) {
+        setText(value.name());
+        setFont(plainFont);
+      }
+    });
+    return comboBox;
   }
 
   /**

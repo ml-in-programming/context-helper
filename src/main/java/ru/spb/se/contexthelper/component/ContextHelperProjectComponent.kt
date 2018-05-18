@@ -26,8 +26,6 @@ import kotlin.concurrent.thread
 
 /** Component which is called to initialize ContextHelper plugin for each [Project]. */
 class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
-    private val questionLookupClient: QuestionLookupClient = GoogleSearchStackoverflowCrawler()
-//        GoogleCustomSearchClient(GOOGLE_SEARCH_API_KEY)
     private val stackExchangeClient =
         StackExchangeClient(STACK_EXCHANGE_API_KEY, STACK_EXCHANGE_SITE)
     private val threadsRecommenderClient = ThreadsRecommenderClient()
@@ -44,6 +42,9 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         private set
 
     var dataset: DatasetEnum = DatasetEnum.values().first()
+        private set
+
+    var lookupClientFactory: LookupClientFactory = LookupClientFactory.values().first()
         private set
 
     init {
@@ -81,6 +82,10 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
     fun changeDatasetTo(dataset: DatasetEnum) {
         this.dataset = dataset
+    }
+
+    fun changeLookupFactoryTo(lookupClientFactory: LookupClientFactory) {
+        this.lookupClientFactory = lookupClientFactory
     }
 
     override fun getComponentName(): String = "$PLUGIN_NAME.$COMPONENT_NAME"
@@ -155,7 +160,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
             // May return to StackExchange search in the future.
             // StackExchangeQuestionResults queryResults =
             //     stackExchangeClient.requestRelevantQuestions(query);
-            questionLookupClient.lookupQuestionIds(query)
+            lookupClientFactory.createLookupClient().lookupQuestionIds(query)
         }
 
     private fun processBackendQuery(query: Query): Unit =
@@ -237,8 +242,6 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
         private const val STACK_EXCHANGE_API_KEY = "F)x9bhGombhjqpnXt)5Mwg(("
         private val STACK_EXCHANGE_SITE = StackExchangeSite.STACK_OVERFLOW
-
-        private const val GOOGLE_SEARCH_API_KEY = "AIzaSyBXQg39PaVjqONPEL4eubyA7S-pEuqVKOc"
 
         fun getFor(project: Project): ContextHelperProjectComponent =
             project.getComponent(ContextHelperProjectComponent::class.java)

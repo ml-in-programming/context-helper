@@ -87,7 +87,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     JPanel topPanel = new JPanel();
     topPanel.setLayout(new VerticalLayout());
     topPanel.add(progressBar);
-    topPanel.add(buildQualityBox());
+//    topPanel.add(buildQualityBox());
     topPanel.add(queryJTextField);
 
     setLayout(new BorderLayout());

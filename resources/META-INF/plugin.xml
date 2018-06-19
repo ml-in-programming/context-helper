@@ -2,13 +2,16 @@
 
   <id>ru.spb.se.contexthelper</id>
   <name>Context Helper</name>
-  <version>1.0</version>
-  <vendor email="nikitasazanovich@gmail.com">Nikita Sazanovich</vendor>
+  <version>2.4</version>
+  <vendor email="nikitasazanovich@gmail.com">Mikita Sazanovich</vendor>
 
-  <description>
-    Helps Java users to look up help based on the current context. Key combination is shift+alt+H.
-    Thanks for using it. Enjoy!
-  </description>
+  <description><![CDATA[
+    Helps Java users to look up help based on the current context. Put the cursor around the element
+    you want to get help about and ask for relevant StackOverflow discussions. Key combination for that
+    is shift+alt+H.
+    <br>
+    Enjoy!
+  ]]></description>
 
   <change-notes>
   </change-notes>
@@ -41,10 +44,10 @@
       <keyboard-shortcut first-keystroke="shift alt H" keymap="$default"/>
     </action>
 
-    <action id="TestContextsAction"
-            class="ru.spb.se.contexthelper.testing.TestContextsAction"
-            text="Runs the test for accessing the quality"
-            description="Runs the planned tests for accessing the method's quality"/>
+    <!--<action id="TestContextsAction"-->
+            <!--class="ru.spb.se.contexthelper.testing.TestContextsAction"-->
+            <!--text="Runs the test for accessing the quality"-->
+            <!--description="Runs the planned tests for accessing the method's quality"/>-->
   </actions>
 
 </idea-plugin>

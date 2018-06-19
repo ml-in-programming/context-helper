@@ -1,5 +1,6 @@
 package ru.spb.se.contexthelper.context.processor
 
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiJavaCodeReferenceElement
@@ -61,7 +62,10 @@ class ASTContextProcessor(initPsiElement: PsiElement) : TextQueryContextProcesso
         referencesToFind: Int,
         references: MutableList<PsiJavaCodeReferenceElement>
     ): Int {
-        assert(referencesToFind > 0)
+        if (referencesToFind <= 0) {
+            LOG.error("Reference is non-positive in findCodeReferencesUp()")
+            return referencesToFind
+        }
         var referencesLeftToFind = referencesToFind
         if (psiElement is PsiJavaCodeReferenceElement) {
             references.add(psiElement)
@@ -90,7 +94,10 @@ class ASTContextProcessor(initPsiElement: PsiElement) : TextQueryContextProcesso
         referencesToFind: Int,
         references: MutableList<PsiJavaCodeReferenceElement>
     ): Int {
-        assert(referencesToFind > 0)
+        if (referencesToFind <= 0) {
+            LOG.error("Reference is non-positive in findCodeReferencesDown()")
+            return referencesToFind
+        }
         var referencesLeftToFind = referencesToFind
         if (psiElement is PsiJavaCodeReferenceElement) {
             references.add(psiElement)
@@ -106,5 +113,7 @@ class ASTContextProcessor(initPsiElement: PsiElement) : TextQueryContextProcesso
 
     companion object {
         private const val CONTEXT_KEYWORDS = 4
+
+        private val LOG = Logger.getInstance(ASTContextProcessor::class.java)
     }
 }

@@ -131,7 +131,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
 
     JPanel bottomPanel = new JPanel();
     bottomPanel.setLayout(new BorderLayout());
-    bottomPanel.add(checkBox, BorderLayout.PAGE_START);
+//    bottomPanel.add(checkBox, BorderLayout.PAGE_START);
     bottomPanel.add(jfxPanel, BorderLayout.CENTER);
     queryJTextField.addActionListener(actionEvent -> {
       contextHelperProjectComponent.enterNewSession();

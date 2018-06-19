@@ -30,13 +30,15 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         StackExchangeClient(STACK_EXCHANGE_API_KEY, STACK_EXCHANGE_SITE)
     private val threadsRecommenderClient = ThreadsRecommenderClient()
 
-    private val statsCollector: StatsCollector = StatsCollector()
+    private var viewerPanel: ContextHelperPanel = ContextHelperPanel(this)
+    private val questionResultsListeners: ArrayList<QuestionResultsListener> = arrayListOf()
 
+    private val isContextCollectionAllowed = false
     private var sessionID: String = ""
     private val usageCollector: LocalUsageCollector = LocalUsageCollector(localSeverHostName)
 
-    private var viewerPanel: ContextHelperPanel = ContextHelperPanel(this)
-    private val questionResultsListeners: ArrayList<QuestionResultsListener> = arrayListOf()
+    private val isUsageCollectionAllowed = false
+    private val statsCollector: StatsCollector = StatsCollector()
 
     var processorMethod: ProcessorMethodEnum = ProcessorMethodEnum.values().first()
         private set
@@ -96,8 +98,10 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     }
 
     override fun projectClosed() {
-        statsCollector.flush()
-        statsCollector.ensureSent()
+        if (isUsageCollectionAllowed) {
+            statsCollector.flush()
+            statsCollector.ensureSent()
+        }
         if (isToolWindowRegistered()) {
             ToolWindowManager.getInstance(project).unregisterToolWindow(ID_TOOL_WINDOW)
         }
@@ -211,19 +215,27 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
     }
 
     fun sendContextsMessage(caretOffset: Int, documentText: String) {
-        usageCollector.sendContextsMessage(installationID, sessionID, caretOffset, documentText)
+        if (isContextCollectionAllowed) {
+            usageCollector.sendContextsMessage(installationID, sessionID, caretOffset, documentText)
+        }
     }
 
     fun sendQuestionsMessage(request: String, questionIds: List<Long>) {
-        usageCollector.sendQuestionsMessage(sessionID, request, questionIds)
+        if (isContextCollectionAllowed) {
+            usageCollector.sendQuestionsMessage(sessionID, request, questionIds)
+        }
     }
 
     fun sendClicksMessage(itemID: String) {
-        usageCollector.sendClicksMessage(sessionID, itemID)
+        if (isContextCollectionAllowed) {
+            usageCollector.sendClicksMessage(sessionID, itemID)
+        }
     }
 
     fun sendHelpfulMessage(itemID: String) {
-        usageCollector.sendHelpfulMessage(sessionID, itemID)
+        if (isContextCollectionAllowed) {
+            usageCollector.sendHelpfulMessage(sessionID, itemID)
+        }
     }
 
     companion object {

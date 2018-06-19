@@ -94,6 +94,7 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     add(topPanel, BorderLayout.PAGE_START);
 
     JFXPanel jfxPanel = new JFXPanel();
+    Platform.setImplicitExit(false);
     Platform.runLater(() -> {
       webView = new WebView();
       webView.getEngine().setUserStyleSheetLocation(
@@ -251,18 +252,19 @@ public class ContextHelperPanel extends JPanel implements Runnable, StackExchang
     String highlightedHtml = highlightHtml(bodyHtml);
     WebEngine engine = webView.getEngine();
     URL prettifyUrl = this.getClass().getResource("/prettify.js");
-    Platform.runLater(() -> engine.loadContent(
-        "<html>\n"
-            + "<head>\n"
-            + "<script type=\"text/javascript\" src=\"" + prettifyUrl.toString() + "\"></script>\n"
-            + "</head>\n"
-            + "<body>\n"
-            + highlightedHtml
-            .replace("<code>", "<pre class=\"prettyprint\">")
-            .replace("</code>", "</pre>")
-            + "</body>\n"
-            + "</html>",
-        "text/html"));
+    Platform.runLater(() -> {
+      String content = "<html>\n"
+          + "<head>\n"
+          + "<script type=\"text/javascript\" src=\"" + prettifyUrl.toString() + "\"></script>\n"
+          + "</head>\n"
+          + "<body>\n"
+          + highlightedHtml
+          .replace("<code>", "<pre class=\"prettyprint\">")
+          .replace("</code>", "</pre>")
+          + "</body>\n"
+          + "</html>";
+      engine.loadContent(content, "text/html");
+    });
   }
 
   private String highlightHtml(String bodyHtml) {

@@ -2,15 +2,16 @@
 
   <id>ru.spb.se.contexthelper</id>
   <name>Context Helper</name>
-  <version>2.4</version>
+  <version>1.0</version>
   <vendor email="nikitasazanovich@gmail.com">Mikita Sazanovich</vendor>
 
   <description><![CDATA[
-    Helps Java users to look up help based on the current context. Put the cursor around the element
+    <p>Helps Java users to look up help based on the current context. Put the cursor around the element
     you want to get help about and ask for relevant StackOverflow discussions. Key combination for that
-    is shift+alt+H.
-    <br>
-    Enjoy!
+    is shift+alt+H.</p>
+    <br/>
+    <p>GitHub repository: <a href="https://github.com/ml-in-programming/context-helper">GitHub Repository</a></p>
+    <p>This project is a part of JetBrains Research: <a href="https://research.jetbrains.org/groups/ml_methods/projects?project_id=33">Project Page</a></p>
   ]]></description>
 
   <change-notes>

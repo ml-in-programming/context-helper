@@ -63,7 +63,7 @@ class ASTContextProcessor(initPsiElement: PsiElement) : TextQueryContextProcesso
         references: MutableList<PsiJavaCodeReferenceElement>
     ): Int {
         if (referencesToFind <= 0) {
-            LOG.error("Reference is non-positive in findCodeReferencesUp()")
+            LOG.info("Reference is non-positive in findCodeReferencesUp()")
             return referencesToFind
         }
         var referencesLeftToFind = referencesToFind
@@ -95,7 +95,7 @@ class ASTContextProcessor(initPsiElement: PsiElement) : TextQueryContextProcesso
         references: MutableList<PsiJavaCodeReferenceElement>
     ): Int {
         if (referencesToFind <= 0) {
-            LOG.error("Reference is non-positive in findCodeReferencesDown()")
+            LOG.info("Reference is non-positive in findCodeReferencesDown()")
             return referencesToFind
         }
         var referencesLeftToFind = referencesToFind

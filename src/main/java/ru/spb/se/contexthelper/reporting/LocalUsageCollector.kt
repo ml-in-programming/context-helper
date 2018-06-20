@@ -48,7 +48,7 @@ class LocalUsageCollector(private val hostName: String) {
                     }
                 }
             } catch (e: Exception) {
-                LOG.error(e)
+                LOG.info(e)
             }
         }
     }

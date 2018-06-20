@@ -55,7 +55,7 @@ class GoogleSearchStackoverflowCrawler : QuestionLookupClient {
                 queryIndex += 1
             }
         } catch (e: Exception) {
-            LOG.error(e)
+            LOG.info(e)
         }
         return resultIds.toList()
     }

@@ -26,7 +26,7 @@ class ThreadsRecommenderClient {
                 printWriter.close()
             }
         } catch (e: Exception) {
-            LOG.error(e)
+            LOG.info(e)
         }
         return threadIds
     }

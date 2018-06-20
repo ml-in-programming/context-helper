@@ -201,7 +201,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 SwingUtilities.invokeLater {
                     showErrorDialog("Unable to process the query.", project)
                 }
-                LOG.error(e)
+                LOG.info(e)
             }
             notifyResultsListeners(queryResults)
             SwingUtilities.invokeLater {

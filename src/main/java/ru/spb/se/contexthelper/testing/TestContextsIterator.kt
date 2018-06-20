@@ -214,7 +214,7 @@ class TestContextsIterator(private val dataContext: DataContext) : QuestionResul
             journalFile.setReadOnly()
             journalName
         } catch (e: Exception) {
-            LOG.error(e)
+            LOG.info(e)
             "?"
         }
 

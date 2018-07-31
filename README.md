@@ -1,5 +1,5 @@
 # Context Helper
-An IntelliJ IDEA plugin for Java users to look up help based on the current context.
+A plugin for IntelliJ IDEA which helps Java developers to find StackOverflow discussions that are relevant to their source code context in IDE.
 
 We've developed an algorithm to generate query out of the context around the PSI Element. 
 The data for research is located in **./data**. The results of the different methods are in **./journals**.

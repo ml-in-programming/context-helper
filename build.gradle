@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '0.3.1'
+    id 'org.jetbrains.intellij' version '0.4.7'
 }
 
 apply plugin: 'org.jetbrains.intellij'
@@ -30,7 +30,7 @@ allprojects {
 }
 
 intellij {
-    version ideaVersion
+    version '2019.1'
     pluginName 'Context Helper'
     intellij.updateSinceUntilBuild false
 }

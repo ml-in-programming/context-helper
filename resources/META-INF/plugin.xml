@@ -27,6 +27,10 @@
       <!-- TODO(niksaz): Implement saving the plugin's state. -->
       <!--option name="workspace" value="true"/-->
     </component>
+    <component>
+      <implementation-class>ru.spb.se.contexthelper.component.CompilerListenerComponent</implementation-class>
+
+    </component>
   </project-components>
 
   <!--<extensions defaultExtensionNs="com.intellij">-->

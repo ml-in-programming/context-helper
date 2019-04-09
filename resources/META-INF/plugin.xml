@@ -21,6 +21,10 @@
 
   <depends>com.intellij.modules.java</depends>
 
+  <extensions defaultExtensionNs="com.intellij">
+    <consoleInputFilterProvider implementation="ru.spb.se.contexthelper.errors.RuntimeInputFilterProvider"/>
+  </extensions>
+
   <project-components>
     <component>
       <implementation-class>ru.spb.se.contexthelper.component.ContextHelperProjectComponent</implementation-class>
@@ -29,6 +33,10 @@
     </component>
     <component>
       <implementation-class>ru.spb.se.contexthelper.component.CompilerListenerComponent</implementation-class>
+
+    </component>
+    <component>
+      <implementation-class>ru.spb.se.contexthelper.component.RuntimeListenerComponent</implementation-class>
 
     </component>
   </project-components>

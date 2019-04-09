@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 object ErrorMessageParser{
     private fun parseLines(lines: Array<String>): String =
             when{
-                lines[0].equals("\n") -> ""
+                lines[0].compareTo("\n") == 0 -> ""
                 else -> lines[0].split("\n")[0].replace(":", "")
             }
 

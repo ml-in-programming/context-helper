@@ -23,6 +23,7 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <consoleInputFilterProvider implementation="ru.spb.se.contexthelper.errors.RuntimeInputFilterProvider"/>
+    <applicationService serviceImplementation="ru.spb.se.contexthelper.component.PersistentStateSettingsComponent" />
   </extensions>
 
   <project-components>

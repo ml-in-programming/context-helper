@@ -199,7 +199,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 }
             } catch (e: Exception) {
                 SwingUtilities.invokeLater {
-                    showErrorDialog("Unable to process the query.", project)
+                    showErrorDialog("Unable to process the query. Check your Internet connection and try again.", project)
                 }
                 LOG.info(e)
             }

@@ -3,6 +3,7 @@ package ru.spb.se.contexthelper
 import com.intellij.openapi.options.Configurable
 import ru.spb.se.contexthelper.component.PersistentStateSettingsComponent
 import com.intellij.openapi.components.ServiceManager
+import ru.spb.se.contexthelper.component.ContextHelperProjectComponent
 import javax.swing.JComponent
 
 class ContextHelperConfigurable : Configurable{
@@ -31,8 +32,8 @@ class ContextHelperConfigurable : Configurable{
     }
 
     override fun apply() {
-        val guiState = gui!!.settings;
-        persistentStateSettingsComponent!!.updateSettings(guiState);
+        val guiState = gui!!.settings
+        persistentStateSettingsComponent!!.updateSettings(guiState)
     }
 
     override fun reset() {

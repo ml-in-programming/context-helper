@@ -25,6 +25,9 @@ class PersistentStateSettingsComponent : PersistentStateComponent<PersistentStat
         myState = State(EnumMap(SettingKeys::class.java))
         myState!!.settings[SettingKeys.COMPILER_ERROR] = true
         myState!!.settings[SettingKeys.RUNTIME_ERROR] = true
+        myState!!.settings[SettingKeys.AST_ALGORITHM] = true
+        myState!!.settings[SettingKeys.TYPES_ALGORITHM] = false
+        myState!!.settings[SettingKeys.NAIVE_ALGORITHM] = false
     }
     fun isRuntimeErrorEnabled(): Boolean {
         return myState!!.settings[SettingKeys.RUNTIME_ERROR] ?: false
@@ -32,6 +35,14 @@ class PersistentStateSettingsComponent : PersistentStateComponent<PersistentStat
 
     fun isCompileErrorEnabled(): Boolean {
         return myState!!.settings[SettingKeys.COMPILER_ERROR] ?: false
+    }
+
+    fun getAlgorithmType(): Int{
+        if (myState!!.settings[SettingKeys.AST_ALGORITHM]!!) return 0
+        if (myState!!.settings[SettingKeys.TYPES_ALGORITHM]!!) return 1
+        if (myState!!.settings[SettingKeys.NAIVE_ALGORITHM]!!) return 2
+        // by default plugin uses AST_ALGORITHM
+        return 0
     }
 
     fun getSettings(): Map<SettingKeys, Boolean>? {
@@ -56,6 +67,9 @@ class PersistentStateSettingsComponent : PersistentStateComponent<PersistentStat
 
     enum class SettingKeys{
         COMPILER_ERROR,
-        RUNTIME_ERROR
+        RUNTIME_ERROR,
+        AST_ALGORITHM,
+        TYPES_ALGORITHM,
+        NAIVE_ALGORITHM
     }
 }

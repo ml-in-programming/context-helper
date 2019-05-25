@@ -10,8 +10,8 @@ import java.util.EnumMap
         storages = [Storage("ContextHelper-settings.xml")]
 )
 
-class PersistentStateSettingsComponent : PersistentStateComponent<PersistentStateSettingsComponent.Companion.State>{
-    companion object{data class State(val settings: EnumMap<SettingKeys, Boolean>)}
+class PersistentStateSettingsComponent : PersistentStateComponent<PersistentStateSettingsComponent.State>{
+    data class State(val settings: EnumMap<SettingKeys, Boolean>)
 
     private var myState: State? = null
 

@@ -24,6 +24,8 @@
   <extensions defaultExtensionNs="com.intellij">
     <consoleInputFilterProvider implementation="ru.spb.se.contexthelper.errors.RuntimeInputFilterProvider"/>
     <applicationService serviceImplementation="ru.spb.se.contexthelper.component.PersistentStateSettingsComponent" />
+    <applicationConfigurable displayName="Context Helper" id="preferences.ContextHelperConfigurable"
+                             instance="ru.spb.se.contexthelper.ContextHelperConfigurable" />
   </extensions>
 
   <project-components>

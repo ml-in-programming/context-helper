@@ -21,11 +21,26 @@
 
   <depends>com.intellij.modules.java</depends>
 
+  <extensions defaultExtensionNs="com.intellij">
+    <consoleInputFilterProvider implementation="ru.spb.se.contexthelper.errors.RuntimeInputFilterProvider"/>
+    <applicationService serviceImplementation="ru.spb.se.contexthelper.component.PersistentStateSettingsComponent" />
+    <applicationConfigurable displayName="Context Helper" id="preferences.ContextHelperConfigurable"
+                             instance="ru.spb.se.contexthelper.ContextHelperConfigurable" />
+  </extensions>
+
   <project-components>
     <component>
       <implementation-class>ru.spb.se.contexthelper.component.ContextHelperProjectComponent</implementation-class>
       <!-- TODO(niksaz): Implement saving the plugin's state. -->
       <!--option name="workspace" value="true"/-->
+    </component>
+    <component>
+      <implementation-class>ru.spb.se.contexthelper.component.CompilerListenerComponent</implementation-class>
+
+    </component>
+    <component>
+      <implementation-class>ru.spb.se.contexthelper.component.RuntimeListenerComponent</implementation-class>
+
     </component>
   </project-components>
 

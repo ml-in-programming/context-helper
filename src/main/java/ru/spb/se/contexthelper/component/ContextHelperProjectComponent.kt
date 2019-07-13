@@ -3,6 +3,7 @@ package ru.spb.se.contexthelper.component
 import com.google.code.stackexchange.schema.StackExchangeSite
 import com.intellij.openapi.application.PermanentInstallationID
 import com.intellij.openapi.components.ProjectComponent
+import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
@@ -58,12 +59,24 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 return true
             }
         })
+        updateProcessorMethodFromSettings()
     }
 
     fun addResultsListener(questionResultsListener: QuestionResultsListener) {
         synchronized(questionResultsListener) {
             questionResultsListeners.add(questionResultsListener)
         }
+    }
+
+    private fun updateProcessorMethodFromSettings(){
+        val currentAlgorithm = persistentStateSettingsComponent.getAlgorithmType()
+        changeProcessorMethodTo(when(currentAlgorithm){
+            0 -> ProcessorMethodEnum.AST_CONTEXT_PROCESSOR
+            1 -> ProcessorMethodEnum.TYPE_NODE_INDEX_CONTEXT_PROCESSOR
+            2 -> ProcessorMethodEnum.NAIVE_CONTEXT_PROCESSOR
+            // by default plugin uses abstract syntax tree algorithm
+            else -> ProcessorMethodEnum.AST_CONTEXT_PROCESSOR
+        })
     }
 
     private fun notifyResultsListeners(questionResults: StackExchangeQuestionResults) {
@@ -125,6 +138,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
 
     /** @throws NotEnoughContextException if the context is not rich enough for the help. */
     fun assistAround(psiElement: PsiElement) = try {
+        updateProcessorMethodFromSettings()
         val elementLanguage = psiElement.language
         if (elementLanguage.id != "JAVA") {
             processTextQuery("${psiElement.text} ${elementLanguage.displayName.toLowerCase()}")
@@ -199,7 +213,7 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
                 }
             } catch (e: Exception) {
                 SwingUtilities.invokeLater {
-                    showErrorDialog("Unable to process the query.", project)
+                    showErrorDialog("Unable to process the query. Check your Internet connection and try again.", project)
                 }
                 LOG.info(e)
             }
@@ -243,6 +257,8 @@ class ContextHelperProjectComponent(val project: Project) : ProjectComponent {
         const val ID_TOOL_WINDOW = "Context Helper"
 
         private val LOG = Logger.getInstance(ContextHelperProjectComponent::class.java)
+
+        private val persistentStateSettingsComponent = ServiceManager.getService(PersistentStateSettingsComponent::class.java)
 
         private const val localSeverHostName = "93.92.205.31"
 
